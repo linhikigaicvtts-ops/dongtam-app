@@ -497,8 +497,8 @@ input::placeholder{color:var(--t3)}
   </div>
   <input type="text" id="ssq" placeholder="Tìm mã sale..." oninput="renderSale()" style="margin-bottom:10px"/>
   <div class="filters" style="margin-bottom:8px">
-    <button class="fb on" id="sf2-ct1"        onclick="setSF2('ct1')">🗓️ Sale tháng</button>
-    <button class="fb"    id="sf2-ct2"        onclick="setSF2('ct2')">📦 Xả kho</button>
+    <button class="fb on" id="sf2-ct1"        onclick="setSF2('ct1')">🔥 CT1 - Sale tháng</button>
+    <button class="fb"    id="sf2-ct2"        onclick="setSF2('ct2')">📦 CT2 - Xả kho</button>
     <button class="fb"    id="sf2-porcelain"  onclick="setSF2('porcelain')">🏷️ Porcelain</button>
     <button class="fb"    id="sf2-ceramic"    onclick="setSF2('ceramic')">🏷️ Ceramic</button>
   </div>
@@ -1266,18 +1266,25 @@ function renderSale(){
     // CT2 (Xả kho): hiển thị 2 mức giá
     var priceHtml;
     if(p.loai_sale==='ct2'){
+      var ct150_2 = p.ct150nk||0;
       priceHtml='<div style="margin-top:4px">'
         +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">'
-        +'<span style="color:#C0232A;font-weight:600">🗑️ Vét kho</span>'
-        +'<span style="font-weight:700;color:#C0232A">'+fmt(saleP)+'</span></div>'
-        +(p.nhan_kv>0?'<div style="display:flex;justify-content:space-between;font-size:11px">'
-        +'<span style="color:var(--t2)">Không vét</span>'
-        +'<span style="color:var(--t1)">'+fmt(p.nhan_kv)+'</span></div>':'')
+        +'<span style="color:#E65100;font-weight:600">📦 Xả kho NK</span>'
+        +'<span style="font-weight:700;color:#E65100">'+fmt(p.ns||p.nhan)+'/m²</span></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">'
+        +'<span style="color:var(--t2)">Xả kho GH</span>'
+        +'<span style="color:var(--t1)">'+fmt(p.gs||p.giao)+'/m²</span></div>'
+        +(ct150_2>0?'<div style="display:flex;justify-content:space-between;font-size:11px">'
+        +'<span style="color:#1565C0;font-weight:600">CT150 NK</span>'
+        +'<span style="color:#1565C0">'+fmt(ct150_2)+'/m²</span></div>':'')
+        +'<p style="font-size:9px;color:#E65100;margin-top:2px">💡 Giá đã có VAT</p>'
         +'</div>';
     } else {
-      priceHtml=(base>0&&base!==saleP?'<p style="font-size:10px;color:var(--t2);text-decoration:line-through">'+fmt(base)+'</p>':'')
-        +'<p style="font-size:14px;font-weight:700;color:#C0232A;margin-bottom:2px">'+fmt(saleP)+'</p>'
-        +(p.den_ngay?'<p style="font-size:9px;color:var(--t3)">HSD: '+p.den_ngay+'</p>':'<p style="font-size:10px;color:#C0232A">🔥 sale/kho</p>');
+      var ct150 = p.ct150nk||0;
+      priceHtml=(base>0&&base!==saleP?'<p style="font-size:10px;color:var(--t2);text-decoration:line-through">'+fmt(base)+'/m²</p>':'')
+        +'<p style="font-size:14px;font-weight:700;color:#C0232A;margin-bottom:2px">'+fmt(saleP)+'/m²</p>'
+        +(ct150>0?'<p style="font-size:10px;color:#1565C0;font-weight:600">CT150: '+fmt(ct150)+'/m²</p>':'')
+        +(p.den_ngay?'<p style="font-size:9px;color:var(--t3)">HSD: '+p.den_ngay+'</p>':'<p style="font-size:10px;color:#C0232A">🔥 giá đã VAT</p>');
     }
     var badgeCT=(p.loai_sale==='ct1'?' <span style="font-size:9px;background:#E8F5E9;color:#2E7D32;padding:1px 5px;border-radius:4px">🗓️CT1</span>':'')
               +(p.loai_sale==='ct2'?' <span style="font-size:9px;background:#FFF3E0;color:#E65100;padding:1px 5px;border-radius:4px">📦CT2</span>':'')
@@ -1333,8 +1340,8 @@ function fetchCT(loai){
           le:  pg(r.le  || r['Giá lẻ (đ/m²)']  || r['Giá lẻ']),
           nhan:pg(r.nhan|| r['Giá ĐL Nhận kho'] || r['Giá nhận kho (đ/m²)']),
           giao:pg(r.giao|| r['Giá ĐL Đi giao']  || r['Giá giao hàng (đ/m²)']),
-          ns:  pg(r.ns  || r.nhan || r['Giá Sale Nhận kho'] || r['Giá ĐL Sale Nhận kho'] || r['Giá nhận kho (đ/m²)'] || 0),
-          gs:  pg(r.gs  || r['Giá Sale Đi giao']  || r['Giá giao hàng (đ/m²)'] || r['Giá vét kho giao (đ/m²)'] || 0),
+          ns:  pg(r.ns  || r.nhan || r['Giá Sale Nhận kho'] || r['Giá ĐL Sale Nhận kho'] || 0),
+          gs:  pg(r.gs  || r.giao || r['Giá Sale Đi giao'] || r['Giá ĐL Sale Đi giao'] || 0),
           // CT2 thêm giá không vét kho
           nhan_kv: pg(r['Giá không vét kho nhận (đ/m²)'] || 0),
           giao_kv: pg(r['Giá không vét kho giao (đ/m²)'] || 0),
@@ -1989,6 +1996,16 @@ var KC_THUNG_HOAC_VIEN = {
 
 // Bảng m²/thùng theo kích cỡ gạch Đồng Tâm (đo thực tế)
 var QUY_CACH = {
+  // Bổ sung kích cỡ từ Sheet TEST
+  '120x600|porcelain': {vien:10, m2:0.72,  day:'9',  kg:15},
+  '130x800|porcelain': {vien:6,  m2:0.624, day:'9',  kg:14},
+  '250x250|ceramic':   {vien:16, m2:1.00,  day:'8',  kg:8},
+  '250x400|ceramic':   {vien:10, m2:1.00,  day:'8',  kg:9},
+  '250x600|ceramic':   {vien:7,  m2:1.05,  day:'9',  kg:11},
+  '250x600|porcelain': {vien:7,  m2:1.05,  day:'9',  kg:11},
+  '294x294|porcelain': {vien:16, m2:1.38,  day:'9',  kg:14},
+  '300x450|ceramic':   {vien:10, m2:1.35,  day:'8',  kg:12},
+  '330x330|porcelain': {vien:9,  m2:0.98,  day:'9',  kg:12},
   // key: "kc|cat" → {vien, m2, day, kg}
   '100x200|ceramic':   {vien:25, m2:0.50,  day:'8',       kg:7.8},
   '150x300|ceramic':   {vien:11, m2:0.495, day:'9',       kg:9.3},
@@ -2190,12 +2207,19 @@ function calcDpQty(){
   if(dpUnit==='thung'){
     var m2 = Math.round(val * qc.m2 * 100)/100;
     var vien = Math.round(val * qc.vien);
-    var kgStr = qc.kg ? ' · '+Math.round(val*qc.kg*10)/10+'kg' : '';
-    convertEl.textContent = '≈ '+m2+' m² · '+vien+' viên'+kgStr;
+    var kgVal = qc.kg ? Math.round(val*qc.kg*10)/10 : 0;
+    convertEl.innerHTML = '≈ <b>'+m2+'</b> m²'
+      +(vien?' · <b>'+vien+'</b> viên':'')
+      +(kgVal?' · <b>'+kgVal+'</b> kg':'');
   } else {
     var thung = Math.round((val/qc.m2)*100)/100;
     var thungNguyen = Math.ceil(val/qc.m2);
-    convertEl.textContent = '≈ '+thung+' thùng (làm tròn lên: '+thungNguyen+' thùng)';
+    var vienM2 = Math.round(val * qc.vien / qc.m2 * 100)/100;
+    var vienTotal = Math.round(val / qc.m2 * qc.vien);
+    var kgTotal = qc.kg ? Math.round(val/qc.m2*qc.kg*10)/10 : 0;
+    convertEl.innerHTML = '≈ <b>'+thung+'</b> thùng (làm tròn: <b>'+thungNguyen+'</b> thùng)'
+      +'<br>≈ <b>'+vienTotal+'</b> viên'
+      +(kgTotal?' · <b>'+kgTotal+'</b> kg':'');
   }
 }
 
@@ -2432,7 +2456,7 @@ function setDonQty(ma,val){
 
   item.qty=val;
   updateDonBadge();
-  calcAndShowTotals();
+  renderDon();       // Re-render để cập nhật thùng/viên/kg
 }
 function removeDon(ma){donItems=donItems.filter(function(x){return x.ma!==ma;});updateDonBadge();renderDon();}
 function guiDonHang(){
