@@ -390,7 +390,7 @@ input::placeholder{color:var(--t3)}
     <span style="font-size:9px;font-weight:600;color:var(--t2);margin-top:4px;font-family:var(--f)">Đơn</span>
   </button>
   <button class="bn" id="bn-keo" onclick="swTab('keo')"><span class="bn-icon">🧱</span><span>Keo</span></button>
-  <button class="bn" id="bn-ca-nhan" onclick="swTab('ca-nhan')"><span class="bn-icon">👤</span><span>Cá nhân</span></button>
+  <button class="bn" id="bn-sale" onclick="swTab('sale')"><span class="bn-icon">🔥</span><span>Sale</span></button>
 </nav>
 
 <!-- TAB 1: Tra mã -->
@@ -921,6 +921,11 @@ function swTab(t){
   ['tra','sale','ngoi','keo','kinh','don'].forEach(function(x){
     var el=document.getElementById('tab-'+x);
     if(el) el.classList.toggle('on',x===t);
+  });
+  // Toggle bottom nav buttons
+  ['tra','sale','ngoi','keo','don'].forEach(function(x){
+    var b=document.getElementById('bn-'+x);
+    if(b) b.classList.toggle('on',x===t);
   });
   document.querySelectorAll('.tb').forEach(function(b,i){
     b.classList.toggle('on',['tra','sale','ngoi','keo','kinh','don'][i]===t);
