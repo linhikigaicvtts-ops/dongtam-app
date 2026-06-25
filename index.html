@@ -1246,98 +1246,89 @@ function renderSale(){
     var curIdx = 0;
 
     var card = document.createElement('div');
-    card.className='sale-card';
+    card.style.cssText='background:var(--bg1);border-bottom:1px solid var(--bd);'
+      +'display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer';
 
-    // === PHẦN ẢNH ===
-    var imgWrap = document.createElement('div');
-    imgWrap.className='sale-img-wrap';
-
-    function buildImgArea(){
-      imgWrap.innerHTML='';
-      if(imgs.length>0){
-        var img=document.createElement('img');
-        img.src=imgs[curIdx];
-        img.onerror=function(){ this.parentNode.innerHTML='<div class="sale-img-placeholder">🔲</div>'; };
-        imgWrap.appendChild(img);
-
-        // Dots nếu nhiều ảnh
-        if(imgs.length>1){
-          var dots=document.createElement('div'); dots.className='sale-img-dots';
-          imgs.forEach(function(_,i){
-            var d=document.createElement('span'); d.className='sale-img-dot'+(i===curIdx?' on':'');
-            dots.appendChild(d);
-          });
-          imgWrap.appendChild(dots);
-
-          // Nút prev/next
-          var prev=document.createElement('button'); prev.className='sale-img-nav sale-img-prev'; prev.textContent='‹';
-          prev.onclick=function(e){ e.stopPropagation(); curIdx=(curIdx-1+imgs.length)%imgs.length; buildImgArea(); };
-          var next=document.createElement('button'); next.className='sale-img-nav sale-img-next'; next.textContent='›';
-          next.onclick=function(e){ e.stopPropagation(); curIdx=(curIdx+1)%imgs.length; buildImgArea(); };
-          imgWrap.appendChild(prev); imgWrap.appendChild(next);
-        }
-      } else {
-        imgWrap.innerHTML='<div class="sale-img-placeholder">🔲</div>';
-      }
-    }
-    buildImgArea();
-    card.appendChild(imgWrap);
-
-    // === PHẦN THÔNG TIN ===
-    var info=document.createElement('div'); info.className='sale-card-info';
-    // CT2 (Xả kho): hiển thị 2 mức giá
-    var priceHtml;
-    if(p.loai_sale==='ct2'){
-      var ct150_2 = p.ct150nk||0;
-      priceHtml='<div style="margin-top:4px">'
-        +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">'
-        +'<span style="color:#E65100;font-weight:600">📦 Xả kho NK</span>'
-        +'<span style="font-weight:700;color:#E65100">'+fmt(p.ns||p.nhan)+'/m²</span></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">'
-        +'<span style="color:var(--t2)">Xả kho GH</span>'
-        +'<span style="color:var(--t1)">'+fmt(p.gs||p.giao)+'/m²</span></div>'
-        +(ct150_2>0?'<div style="display:flex;justify-content:space-between;font-size:11px">'
-        +'<span style="color:#1565C0;font-weight:600">CT150 NK</span>'
-        +'<span style="color:#1565C0">'+fmt(ct150_2)+'/m²</span></div>':'')
-        +'<p style="font-size:9px;color:#E65100;margin-top:2px">💡 Giá đã có VAT</p>'
-        +'</div>';
+    // === ẢNH NHỎ VUÔNG ===
+    var imgThumb = document.createElement('div');
+    imgThumb.style.cssText='width:52px;height:52px;flex-shrink:0;border-radius:8px;'
+      +'overflow:hidden;background:var(--bg2);display:flex;align-items:center;justify-content:center';
+    if(imgs.length>0){
+      var img=document.createElement('img');
+      img.src=imgs[0];
+      img.style.cssText='width:100%;height:100%;object-fit:cover';
+      img.onerror=function(){ imgThumb.innerHTML='<span style="font-size:22px">🔲</span>'; };
+      imgThumb.appendChild(img);
     } else {
-      var ct150 = p.ct150nk||0;
-      priceHtml=(base>0&&base!==saleP?'<p style="font-size:10px;color:var(--t2);text-decoration:line-through">'+fmt(base)+'/m²</p>':'')
-        +'<p style="font-size:14px;font-weight:700;color:#C0232A;margin-bottom:2px">'+fmt(saleP)+'/m²</p>'
-        +(ct150>0?'<p style="font-size:10px;color:#1565C0;font-weight:600">CT150: '+fmt(ct150)+'/m²</p>':'')
-        +(p.den_ngay?'<p style="font-size:9px;color:var(--t3)">HSD: '+p.den_ngay+'</p>':'<p style="font-size:10px;color:#C0232A">🔥 giá đã VAT</p>');
+      imgThumb.innerHTML='<span style="font-size:22px">🔲</span>';
     }
-    var badgeCT=(p.loai_sale==='ct1'?' <span style="font-size:9px;background:#E8F5E9;color:#2E7D32;padding:1px 5px;border-radius:4px">🗓️CT1</span>':'')
-              +(p.loai_sale==='ct2'?' <span style="font-size:9px;background:#FFF3E0;color:#E65100;padding:1px 5px;border-radius:4px">📦CT2</span>':'')
-              +(p.gio==='★'?' <span style="font-size:9px;background:#FFF3CD;color:#856404;padding:1px 5px;border-radius:4px">★ CL</span>':'');
-    info.innerHTML='<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px">'
-      +'<div><p style="font-size:12px;font-weight:700;margin-bottom:1px">'+p.ma+'</p>'
-      +'<p style="font-size:10px;color:var(--t2)">'+p.kc+badgeCT+'</p></div>'
-      +(save>0?'<span class="sale-badge">-'+save+'%</span>':'')+'</div>'
-      +priceHtml;
-    card.appendChild(info);
+    card.appendChild(imgThumb);
 
-    // === ROW NÚT: Zalo + Thêm vào đơn ===
-    var btnRow=document.createElement('div');
-    btnRow.style.cssText='display:flex;gap:0;border-top:1px solid rgba(0,0,0,0.06)';
-    // Nút Zalo nhỏ
+    // === THÔNG TIN GIỮA ===
+    var mid=document.createElement('div');
+    mid.style.cssText='flex:1;min-width:0';
+    // Badge CT
+    var isCT1=p.loai_sale==='ct1';
+    var ctBg=isCT1?'#E8F5E9':'#FFF3E0';
+    var ctColor=isCT1?'#2E7D32':'#E65100';
+    var ctLabel=isCT1?'🔥 CT1':'📦 CT2';
+    var clBadge=p.gio==='★'?' <span style="font-size:9px;background:#FFF3CD;color:#856404;'
+      +'padding:1px 5px;border-radius:4px;font-weight:600">★ CL</span>':'';
+    // Giá
+    var nkVal=p.ns||p.nhan||0;
+    var ghVal=p.gs||p.giao||0;
+    var ct150=p.ct150nk||0;
+    mid.innerHTML=
+      // Dòng 1: Mã + badge CT
+      '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--t1)">'
+        +p.ma+'</span>'
+      +'<span style="font-size:9px;background:'+ctBg+';color:'+ctColor
+        +';padding:1px 6px;border-radius:4px;font-weight:700">'+ctLabel+'</span>'
+      +clBadge
+      +(save>0?'<span style="font-size:9px;background:#C0232A;color:#fff;'
+        +'padding:1px 5px;border-radius:4px;font-weight:700;margin-left:auto">-'+save+'%</span>':'')
+      +'</div>'
+      // Dòng 2: kích cỡ
+      +'<div style="font-size:10px;color:var(--t2);margin-bottom:4px">'+p.kc+'</div>'
+      // Dòng 3: giá NK + GH
+      +'<div style="display:flex;gap:10px;align-items:baseline">'
+      +'<div>'
+        +'<div style="font-size:9px;color:var(--t2)">Nhận kho</div>'
+        +'<div style="font-size:13px;font-weight:800;color:#C0232A">'+(nkVal>0?nkVal.toLocaleString('vi-VN')+'đ':'–')+'</div>'
+      +'</div>'
+      +(ghVal>0?'<div style="width:1px;background:var(--bd);align-self:stretch"></div>'
+        +'<div>'
+          +'<div style="font-size:9px;color:var(--t2)">Giao hàng</div>'
+          +'<div style="font-size:12px;font-weight:600;color:var(--t2)">'+(ghVal>0?ghVal.toLocaleString('vi-VN')+'đ':'–')+'</div>'
+        +'</div>':'')
+      +(ct150>0?'<div style="width:1px;background:var(--bd);align-self:stretch"></div>'
+        +'<div>'
+          +'<div style="font-size:9px;color:#1565C0">CT150</div>'
+          +'<div style="font-size:12px;font-weight:700;color:#1565C0">'+ct150.toLocaleString('vi-VN')+'đ</div>'
+        +'</div>':'')
+      +'</div>';
+    card.appendChild(mid);
+
+    // === NÚT PHẢI: Zalo + Thêm ===
+    var btnCol=document.createElement('div');
+    btnCol.style.cssText='display:flex;flex-direction:column;gap:5px;flex-shrink:0';
+    // Nút Zalo
     var btnZ=document.createElement('button');
-    btnZ.style.cssText='flex:0 0 44px;padding:10px 0;border:none;background:#0068FF;color:#fff;'
-      +'font-size:16px;cursor:pointer;font-family:var(--f);border-radius:0;'
-      +'display:flex;align-items:center;justify-content:center;'
-      +'border-right:1px solid rgba(255,255,255,0.2)';
-    btnZ.title='Gửi Zalo';
+    btnZ.style.cssText='width:44px;height:32px;border:none;border-radius:8px;'
+      +'background:#0068FF;color:#fff;font-size:14px;cursor:pointer;'
+      +'display:flex;align-items:center;justify-content:center;font-family:var(--f)';
     btnZ.innerHTML='💬';
+    btnZ.title='Gửi Zalo';
     (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); shareZaloSale(pp); }; })(p);
-    btnRow.appendChild(btnZ);
-    // Nút Thêm vào đơn
+    btnCol.appendChild(btnZ);
+    // Nút Thêm
     var btn=document.createElement('button');
-    btn.style.cssText='flex:1;padding:10px;border:none;background:var(--red);color:#fff;'
-      +'font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f);border-radius:0';
-    btn.textContent='+ Thêm';
+    btn.style.cssText='width:44px;height:32px;border:none;border-radius:8px;'
+      +'background:var(--red);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btn.textContent='+Thêm';
     (function(pp){ btn.onclick=function(e){ e.stopPropagation(); addToDon(pp.ma); showToast('✓ Đã thêm '+pp.ma); }; })(p);
-    btnRow.appendChild(btn);
+    btnCol.appendChild(btn);
     card.appendChild(btnRow);
 
     // Click card → mở detail
@@ -2863,7 +2854,7 @@ function xuatPDF(){
 
 function xuatExcel(){
   if(donItems.length===0){alert('Chưa có sản phẩm!');return;}
-  var ten   = document.getElementById('don-ten').value.trim()||'Quy khach';
+  var ten   = document.getElementById('don-ten').value.trim()||'Quý khách';
   var cty   = document.getElementById('don-cty').value.trim()||'';
   var sdt   = document.getElementById('don-sdt').value.trim()||'';
   var dc    = document.getElementById('don-dc').value.trim()||'';
@@ -2873,177 +2864,187 @@ function xuatExcel(){
   var sess  = checkSession();
   var nguoi = sess?sess.name:'Lê Chí Linh';
 
-  // ── Tính toán dữ liệu ──────────────────────────────────
   var tLe=0,tNhan=0,tGiao=0;
-  var rowsData = donItems.map(function(item,i){
-    var le   = item.le||0;
-    var nhan = item.ns>0?item.ns:(item.nhan||0);
-    var giao = item.gs>0?item.gs:(item.giao||0);
-    var thLe  = Math.round(le*item.qty);
-    var thNhan= Math.round(nhan*item.qty);
-    var thGiao= Math.round(giao*item.qty);
+  var rowsData=donItems.map(function(item,i){
+    var le=item.le||0, nhan=item.ns>0?item.ns:(item.nhan||0), giao=item.gs>0?item.gs:(item.giao||0);
+    var thLe=Math.round(le*item.qty), thNhan=Math.round(nhan*item.qty), thGiao=Math.round(giao*item.qty);
     tLe+=thLe; tNhan+=thNhan; tGiao+=thGiao;
-
-    var t=tinhThung(item);
-    var thungStr='';
-    if(t){
-      if(t.chiBanThung) thungStr=t.thungNguyen+' thùng';
-      else { var tn=Math.round(t.thung*100)/100; thungStr=(tn%1===0?tn:tn.toFixed(2))+' thùng'; }
-    }
+    var t=tinhThung(item), thungStr='';
+    if(t){ var tn=Math.round(t.thung*100)/100; thungStr=(t.chiBanThung?t.thungNguyen:(tn%1===0?tn:tn.toFixed(2)))+' thùng'; }
     var v=tinhSoVien(item);
-    var vienStr=v&&v.soVien?v.soVien+' viên':'';
-    var kgStr=v&&v.kg?v.kg+' kg':'';
     var loaiLabel=item.loai==='ngoi'?'Ngói':item.loai==='keo'?'Keo':item.loai==='kinh'?'Kính':'Gạch';
-    return {
-      stt:i+1, loai:loaiLabel, ma:item.ma, ten:item.ten||item.ma,
-      kc:item.kc||'–', unit:item.unit||'m²', qty:item.qty,
-      thung:thungStr, vien:vienStr, kg:kgStr,
-      le:le, thLe:thLe, nhan:nhan, thNhan:thNhan, giao:giao, thGiao:thGiao
-    };
+    var loaiColor=item.loai==='ngoi'?'#2E7D32':item.loai==='keo'?'#6A1B9A':item.loai==='kinh'?'#0D47A1':'#E65100';
+    var loaiBg=item.loai==='ngoi'?'#E8F5E9':item.loai==='keo'?'#F3E5F5':item.loai==='kinh'?'#E3F2FD':'#FFF3E0';
+    return {i:i+1,loai:loaiLabel,loaiColor:loaiColor,loaiBg:loaiBg,
+      ma:item.ma,kc:item.kc||'–',unit:item.unit||'m²',qty:item.qty,
+      thung:thungStr,vien:v&&v.soVien?v.soVien+' viên':'',kg:v&&v.kg?v.kg+' kg':'',
+      le:le,thLe:thLe,nhan:nhan,thNhan:thNhan,giao:giao,thGiao:thGiao};
   });
 
   var lnNhan=tLe-tNhan, lnGiao=tLe-tGiao;
   var pN=tLe>0?Math.round(lnNhan/tLe*100)+'%':'–';
   var pG=tLe>0?Math.round(lnGiao/tLe*100)+'%':'–';
-  var fileName='BaoGia_DongTam_'+(ten.replace(/\s/g,'_'))+'_'+ngay.replace(/\//g,'-')+'.xls';
 
-  // ── Build HTML giống PDF để mở bằng Excel ──────────────
-  var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
-    +'xmlns:x="urn:schemas-microsoft-com:office:excel" '
-    +'xmlns="http://www.w3.org/TR/REC-html40"><head>'
-    +'<meta charset="UTF-8"/>'
-    +'<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>'
-    +'<x:ExcelWorksheet><x:Name>Báo giá</x:Name>'
-    +'<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>'
-    +'</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->'
-    +'<style>'
-    +'body{font-family:Arial,sans-serif;font-size:11pt}'
-    +'.hdr{background:#C0232A;color:#fff;font-size:14pt;font-weight:bold;padding:10px}'
-    +'.hdr-sub{background:#C0232A;color:rgba(255,255,255,0.8);font-size:10pt;padding:4px 10px}'
-    +'.info-lbl{color:#C0232A;font-weight:bold;font-size:9pt}'
-    +'.info-val{font-size:10pt;font-weight:bold}'
-    +'.th{background:#C0232A;color:#fff;font-weight:bold;font-size:9pt;text-align:center;border:1px solid #a01920;padding:6px}'
-    +'.td{font-size:10pt;border:1px solid #e0e0e0;padding:5px;vertical-align:middle}'
+  // ── CSS ────────────────────────────────────────────────────
+  var css='<style>'
+    +'*{margin:0;padding:0;font-family:Arial,sans-serif}'
+    +'body{background:#fff}'
+    // Header đỏ
+    +'.h1{background:#C0232A;color:#fff;font-size:15pt;font-weight:bold;padding:12px 16px;mso-number-format:\'@\'}'
+    +'.h2{background:#C0232A;color:rgba(255,255,255,0.75);font-size:9.5pt;padding:4px 16px}'
+    +'.h-date{background:#C0232A;color:#fff;font-size:10pt;text-align:right;padding:12px 16px;white-space:nowrap}'
+    // Info section
+    +'.sec-lbl{color:#C0232A;font-size:8.5pt;font-weight:bold;letter-spacing:1px;padding:10px 14px 4px}'
+    +'.inf-lbl{color:#888;font-size:9pt;padding:3px 14px}'
+    +'.inf-val{font-size:10pt;font-weight:bold;color:#1a1a1a;padding:3px 6px}'
+    +'.divider{background:#f0f0f0;font-size:1pt;padding:1px}'
+    // Table header
+    +'.th{background:#C0232A;color:#fff;font-size:9pt;font-weight:bold;'
+    +'text-align:center;padding:7px 6px;border:1px solid #a01920;white-space:nowrap}'
+    // Table data
+    +'.td{font-size:9.5pt;border:1px solid #e8e8e8;padding:6px 7px;vertical-align:middle}'
     +'.td-c{text-align:center}'
     +'.td-r{text-align:right}'
-    +'.td-ma{font-weight:bold;color:#1a1a1a}'
+    +'.td-ma{font-weight:bold}'
     +'.td-money{font-weight:bold;color:#C0232A;text-align:right}'
+    +'.td-nk{font-weight:bold;color:#1B5E20;text-align:right}'
     +'.td-thung{color:#0D47A1;font-weight:bold;text-align:center}'
-    +'.td-loai-gach{background:#FFF3E0;color:#E65100;font-size:9pt;text-align:center}'
-    +'.td-loai-ngoi{background:#E8F5E9;color:#2E7D32;font-size:9pt;text-align:center}'
-    +'.td-loai-keo{background:#F3E5F5;color:#6A1B9A;font-size:9pt;text-align:center}'
-    +'.td-loai-kinh{background:#E3F2FD;color:#0D47A1;font-size:9pt;text-align:center}'
-    +'.tr-even{background:#fafafa}'
-    +'.total-row{background:#FDECEA;font-weight:bold}'
-    +'.total-lbl{color:#C0232A;font-weight:bold;font-size:11pt}'
-    +'.total-val{color:#C0232A;font-weight:bold;font-size:13pt;text-align:right}'
-    +'.ln-row{background:#E8F5E9}'
-    +'.ln-val{color:#1B5E20;font-weight:bold;text-align:right}'
-    +'</style></head><body>'
+    +'.even{background:#FAFAFA}'
+    // Total
+    +'.tot-wrap{background:#FDECEA;border-left:4px solid #C0232A;padding:10px 16px}'
+    +'.tot-lbl{color:#C0232A;font-size:9pt;font-weight:bold}'
+    +'.tot-val{color:#C0232A;font-size:13pt;font-weight:bold;text-align:right}'
+    +'.tot-nk-lbl{color:#1B5E20;font-size:9pt;font-weight:bold;text-align:right;padding:0 8px}'
+    +'.tot-nk-val{color:#1B5E20;font-size:12pt;font-weight:bold;text-align:right}'
+    +'.ln-wrap{background:#E8F5E9;padding:7px 16px;font-size:9.5pt;color:#1B5E20;font-weight:bold}'
+    // Footer
+    +'.ft-note{color:#777;font-size:8.5pt;padding:10px 16px}'
+    +'.ft-tel{color:#C0232A;font-size:10pt;font-weight:bold;text-align:right;padding:10px 16px}'
+    +'.ft-div{background:#f0f0f0;font-size:1pt;padding:0.5px}'
+    +'</style>';
 
-    // HEADER
-    +'<table width="100%" cellspacing="0" cellpadding="0">'
-    +'<tr><td class="hdr" colspan="2">🏪 ĐỒNG TÂM GROUP – BÁO GIÁ</td>'
-    +'<td style="background:#C0232A;color:#fff;text-align:right;padding:10px;font-size:10pt">'
-    +'Ngày lập: <b>'+ngay+'</b></td></tr>'
-    +'<tr><td class="hdr-sub" colspan="3">Gạch – Ngói – Keo xây dựng · Khu vực 23</td></tr>'
-    +'</table>'
+  // ── HTML ───────────────────────────────────────────────────
+  var h='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
+    +'xmlns:x="urn:schemas-microsoft-com:office:excel" '
+    +'xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta charset="UTF-8"/>'+css
+    +'<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>'
+    +'<x:ExcelWorksheet><x:Name>Báo giá</x:Name>'
+    +'<x:WorksheetOptions><x:DisplayGridlines/>'
+    +'<x:FitToPage/><x:FitWidth>1</x:FitWidth></x:WorksheetOptions>'
+    +'</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->'
+    +'</head><body>';
 
-    // INFO KHÁCH + NGƯỜI BÁO GIÁ
-    +'<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:12px;border:1px solid #eee">'
+  // ROW 1: Header
+  h+='<table width="100%" cellspacing="0" cellpadding="0" border="0">'
     +'<tr>'
-    // Cột trái: thông tin khách
-    +'<td width="50%" style="padding:12px 16px;border-right:1px solid #eee;vertical-align:top">'
-    +'<div class="info-lbl">KÍNH GỬI</div>'
-    +'<table style="margin-top:8px" cellspacing="0" cellpadding="3">'
-    +'<tr><td style="color:#888;font-size:9pt;width:70px">Khách</td>'
-    +'<td class="info-val">'+ten+'</td></tr>'
-    +(cty?'<tr><td style="color:#888;font-size:9pt">Công ty</td><td class="info-val">'+cty+'</td></tr>':'')
-    +(sdt?'<tr><td style="color:#888;font-size:9pt">SĐT</td><td class="info-val">'+sdt+'</td></tr>':'')
-    +(dc?'<tr><td style="color:#888;font-size:9pt">Địa chỉ</td><td class="info-val">'+dc+'</td></tr>':'')
-    +'<tr><td style="color:#888;font-size:9pt">Hình thức</td><td class="info-val">'+gh+'</td></tr>'
-    +'</table></td>'
-    // Cột phải: người báo giá
-    +'<td width="50%" style="padding:12px 16px;vertical-align:top">'
-    +'<div class="info-lbl">NGƯỜI BÁO GIÁ</div>'
-    +'<table style="margin-top:8px" cellspacing="0" cellpadding="3">'
-    +'<tr><td style="color:#888;font-size:9pt;width:70px">Họ tên</td>'
-    +'<td class="info-val">'+nguoi+'</td></tr>'
-    +'<tr><td style="color:#888;font-size:9pt">SĐT</td><td class="info-val">0819 548 908</td></tr>'
-    +'<tr><td style="color:#888;font-size:9pt">Khu vực</td><td class="info-val">Đồng Tâm – KV23</td></tr>'
-    +'</table></td>'
-    +'</tr></table>'
+    +'<td colspan="2" class="h1">🏪 ĐỒNG TÂM GROUP – BÁO GIÁ</td>'
+    +'<td class="h-date">Ngày lập:&nbsp;<b>'+ngay+'</b></td>'
+    +'</tr>'
+    +'<tr><td colspan="3" class="h2">Gạch – Ngói – Keo xây dựng &middot; Khu vực 23</td></tr>'
+    +'</table>';
 
-    // BẢNG CHI TIẾT
-    +'<div style="color:#C0232A;font-weight:bold;font-size:10pt;margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px">Chi tiết sản phẩm</div>'
-    +'<table width="100%" cellspacing="0" cellpadding="0">'
+  // ROW 2: Info khách + người báo giá
+  h+='<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #eee;margin-top:10px">'
+    +'<tr>'
+    +'<td width="50%" style="border-right:1px solid #eee;vertical-align:top">'
+    +'<div class="sec-lbl">KÍNH GỬI</div>'
+    +'<table cellspacing="0" cellpadding="0" width="100%">'
+    +'<tr><td class="inf-lbl" width="80">Khách</td><td class="inf-val">'+ten+'</td></tr>'
+    +(cty?'<tr><td class="inf-lbl">Công ty</td><td class="inf-val">'+cty+'</td></tr>':'')
+    +(sdt?'<tr><td class="inf-lbl">SĐT</td><td class="inf-val">'+sdt+'</td></tr>':'')
+    +(dc?'<tr><td class="inf-lbl">Địa chỉ</td><td class="inf-val">'+dc+'</td></tr>':'')
+    +'<tr><td class="inf-lbl">Hình thức</td><td class="inf-val">'+gh+'</td></tr>'
+    +'</table></td>'
+    +'<td width="50%" style="vertical-align:top">'
+    +'<div class="sec-lbl">NGƯỜI BÁO GIÁ</div>'
+    +'<table cellspacing="0" cellpadding="0" width="100%">'
+    +'<tr><td class="inf-lbl" width="80">Họ tên</td><td class="inf-val">'+nguoi+'</td></tr>'
+    +'<tr><td class="inf-lbl">SĐT</td><td class="inf-val">0819 548 908</td></tr>'
+    +'<tr><td class="inf-lbl">Khu vực</td><td class="inf-val">Đồng Tâm – KV23</td></tr>'
+    +'</table></td>'
+    +'</tr></table>';
+
+  // ROW 3: Tiêu đề bảng
+  h+='<div style="color:#C0232A;font-weight:bold;font-size:10pt;'
+    +'margin:14px 0 6px;text-transform:uppercase;letter-spacing:1px">Chi tiết sản phẩm</div>';
+
+  // ROW 4: Bảng sản phẩm
+  h+='<table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">'
     +'<thead><tr>'
-    +'<th class="th" width="4%">#</th>'
-    +'<th class="th" width="6%">Loại</th>'
-    +'<th class="th" width="14%">Mã sản phẩm</th>'
-    +'<th class="th" width="8%">Kích cỡ</th>'
-    +'<th class="th" width="10%">Số lượng</th>'
+    +'<th class="th" width="3%">#</th>'
+    +'<th class="th" width="5%">Loại</th>'
+    +'<th class="th" width="13%">Mã sản phẩm</th>'
+    +'<th class="th" width="7%">Kích cỡ</th>'
+    +'<th class="th" width="8%">Số lượng</th>'
     +'<th class="th" width="9%">Số thùng</th>'
-    +'<th class="th" width="8%">Số viên</th>'
-    +'<th class="th" width="7%">Kg</th>'
-    +'<th class="th" width="10%">Đơn giá lẻ (đ)</th>'
-    +'<th class="th" width="12%">T.Tiền lẻ (đ)</th>'
-    +'<th class="th" width="12%">Giá ĐL NK (đ)</th>'
-    +'<th class="th" width="0%">T.Tiền NK (đ)</th>'
+    +'<th class="th" width="7%">Số viên</th>'
+    +'<th class="th" width="6%">Kg</th>'
+    +'<th class="th" width="10%">Đơn giá lẻ</th>'
+    +'<th class="th" width="11%">T.Tiền lẻ</th>'
+    +'<th class="th" width="10%">Giá ĐL NK</th>'
+    +'<th class="th" width="11%">T.Tiền NK</th>'
     +'</tr></thead><tbody>';
 
-  rowsData.forEach(function(r,i){
-    var tdClass='td'+(i%2===1?' tr-even':'');
-    var loaiClass='td-loai-'+(r.loai==='Gạch'?'gach':r.loai==='Ngói'?'ngoi':r.loai==='Keo'?'keo':'kinh');
-    html+='<tr>'
-      +'<td class="'+tdClass+' td-c">'+r.stt+'</td>'
-      +'<td class="'+loaiClass+'">'+r.loai+'</td>'
-      +'<td class="'+tdClass+' td-ma">'+r.ma+'</td>'
-      +'<td class="'+tdClass+' td-c">'+r.kc+'</td>'
-      +'<td class="'+tdClass+' td-c">'+r.qty+' '+r.unit+'</td>'
-      +'<td class="'+tdClass+' td-thung">'+r.thung+'</td>'
-      +'<td class="'+tdClass+' td-c" style="color:#555">'+r.vien+'</td>'
-      +'<td class="'+tdClass+' td-c" style="color:#555">'+r.kg+'</td>'
-      +'<td class="'+tdClass+' td-r">'+(r.le>0?r.le.toLocaleString('vi-VN'):'Liên hệ')+'</td>'
-      +'<td class="'+tdClass+' td-money">'+(r.thLe>0?r.thLe.toLocaleString('vi-VN'):'–')+'</td>'
-      +'<td class="'+tdClass+' td-r" style="color:#1B5E20;font-weight:600">'+(r.nhan>0?r.nhan.toLocaleString('vi-VN'):'–')+'</td>'
-      +'<td class="'+tdClass+' td-money" style="color:#1B5E20">'+(r.thNhan>0?r.thNhan.toLocaleString('vi-VN'):'–')+'</td>'
+  rowsData.forEach(function(r){
+    var bg=r.i%2===0?' class="even"':'';
+    h+='<tr>'
+      +'<td class="td td-c"'+bg+'>'+r.i+'</td>'
+      +'<td class="td td-c" style="background:'+r.loaiBg+';color:'+r.loaiColor+';font-weight:bold;font-size:9pt">'+r.loai+'</td>'
+      +'<td class="td td-ma"'+bg+'>'+r.ma+'</td>'
+      +'<td class="td td-c"'+bg+'>'+r.kc+'</td>'
+      +'<td class="td td-c"'+bg+'>'+r.qty+' '+r.unit+'</td>'
+      +'<td class="td td-thung"'+bg+'>'+r.thung+'</td>'
+      +'<td class="td td-c" style="color:#555"'+bg+'>'+r.vien+'</td>'
+      +'<td class="td td-c" style="color:#555"'+bg+'>'+r.kg+'</td>'
+      +'<td class="td td-r"'+bg+'>'+(r.le>0?r.le.toLocaleString('vi-VN'):'Liên hệ')+'</td>'
+      +'<td class="td td-money"'+bg+'>'+(r.thLe>0?r.thLe.toLocaleString('vi-VN'):'–')+'</td>'
+      +'<td class="td td-nk"'+bg+'>'+(r.nhan>0?r.nhan.toLocaleString('vi-VN'):'–')+'</td>'
+      +'<td class="td td-nk" style="font-size:10pt"'+bg+'>'+(r.thNhan>0?r.thNhan.toLocaleString('vi-VN'):'–')+'</td>'
       +'</tr>';
   });
+  h+='</tbody></table>';
 
-  html+='</tbody></table>'
-
-    // TỔNG
-    +'<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:12px">'
-    +'<tr class="total-row">'
-    +'<td colspan="9" class="total-lbl" style="padding:10px 16px">TỔNG GIÁ TRỊ BÁO GIÁ</td>'
-    +'<td class="total-val" style="padding:10px 16px">'+tLe.toLocaleString('vi-VN')+' đ</td>'
-    +'<td style="padding:10px 8px;font-weight:bold;color:#1B5E20">TỔNG NHẬN KHO</td>'
-    +'<td class="ln-val" style="padding:10px 16px">'+tNhan.toLocaleString('vi-VN')+' đ</td>'
+  // ROW 5: Tổng
+  h+='<table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:10px">'
+    +'<tr>'
+    +'<td colspan="9" class="tot-wrap">'
+    +'<span class="tot-lbl">TỔNG GIÁ TRỊ BÁO GIÁ</span>'
+    +'</td>'
+    +'<td class="tot-val" style="background:#FDECEA;padding:10px 14px;border-left:1px solid #f5c6c8">'+tLe.toLocaleString('vi-VN')+' đ</td>'
+    +'<td class="tot-nk-lbl" style="background:#E8F5E9;padding:10px 8px">TỔNG NHẬN KHO</td>'
+    +'<td class="tot-nk-val" style="background:#E8F5E9;padding:10px 14px">'+tNhan.toLocaleString('vi-VN')+' đ</td>'
     +'</tr>'
-    +'<tr class="ln-row">'
-    +'<td colspan="9" style="padding:8px 16px;font-size:10pt;color:#1B5E20;font-weight:bold">'
-    +'💰 Lợi nhuận nhận kho: +'+lnNhan.toLocaleString('vi-VN')+'đ ('+pN+')'
-    +'&nbsp;&nbsp;|&nbsp;&nbsp;Lợi nhuận giao hàng: +'+lnGiao.toLocaleString('vi-VN')+'đ ('+pG+')</td>'
-    +'<td colspan="3"></td></tr>'
-    +'</table>'
+    +'<tr>'
+    +'<td colspan="12" class="ln-wrap">'
+    +'💰 Lợi nhuận nhận kho: <b>+'+lnNhan.toLocaleString('vi-VN')+'đ ('+pN+')</b>'
+    +'&nbsp;&nbsp;|&nbsp;&nbsp;'
+    +'Lợi nhuận giao hàng: <b>+'+lnGiao.toLocaleString('vi-VN')+'đ ('+pG+')</b>'
+    +'</td>'
+    +'</tr>'
+    +'</table>';
 
-    // GHI CHÚ
-    +(note?'<div style="margin-top:10px;background:#FFFDE7;padding:10px 16px;border-left:3px solid #FFC107;font-size:10pt">📝 <b>Ghi chú:</b> '+note+'</div>':'')
+  // ROW 6: Ghi chú
+  if(note){
+    h+='<div style="margin-top:8px;background:#FFFDE7;padding:9px 14px;'
+      +'border-left:3px solid #FFC107;font-size:9.5pt">📝 <b>Ghi chú:</b> '+note+'</div>';
+  }
 
-    // FOOTER
-    +'<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:16px;border-top:1px solid #eee">'
-    +'<tr><td style="padding:12px 16px;color:#aaa;font-size:9pt">'
-    +'Cảm ơn quý khách đã quan tâm sản phẩm Đồng Tâm<br>Mọi thắc mắc xin liên hệ nhân viên tư vấn'
-    +'</td><td style="text-align:right;padding:12px 16px;color:#C0232A;font-weight:bold">☎ 0819 548 908</td></tr>'
-    +'</table>'
-    +'</body></html>';
+  // ROW 7: Footer
+  h+='<div class="ft-div" style="margin-top:14px"></div>'
+    +'<table width="100%" cellspacing="0" cellpadding="0" border="0">'
+    +'<tr>'
+    +'<td class="ft-note">Cảm ơn quý khách đã quan tâm sản phẩm Đồng Tâm<br>'
+    +'Mọi thắc mắc xin liên hệ nhân viên tư vấn</td>'
+    +'<td class="ft-tel">&#9742; 0819 548 908</td>'
+    +'</tr></table>';
 
-  // Download .xls (Excel mở được, có format)
-  var blob=new Blob(['\uFEFF'+html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  h+='</body></html>';
+
+  var blob=new Blob(['\uFEFF'+h],{type:'application/vnd.ms-excel;charset=utf-8'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=fileName;
+  a.download='BaoGia_DongTam_'+(ten.replace(/\s/g,'_'))+'_'+ngay.replace(/\//g,'-')+'.xls';
   a.click();
 }
 
