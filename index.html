@@ -297,7 +297,7 @@ input::placeholder{color:var(--t3)}
 .sale-card-price{font-size:14px;font-weight:800;color:var(--red)}
 .sale-card-old{font-size:11px;color:var(--t3);text-decoration:line-through}
 .sale-badge{font-size:10px;padding:2px 6px;border-radius:5px;background:var(--red);color:#fff;font-weight:700;float:right}
-.sale-card-add{width:100%;padding:10px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f)}
+.sale-card-add{width:100%;padding:10px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f);border-radius:0}
 .sale-card-add:active{opacity:.85}
 
 /* ===== GIỎ HÀNG ===== */
@@ -1318,11 +1318,27 @@ function renderSale(){
       +priceHtml;
     card.appendChild(info);
 
-    // === NÚT THÊM VÀO ĐƠN ===
-    var btn=document.createElement('button'); btn.className='sale-card-add';
+    // === ROW NÚT: Zalo + Thêm vào đơn ===
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:0;border-top:1px solid rgba(0,0,0,0.06)';
+    // Nút Zalo nhỏ
+    var btnZ=document.createElement('button');
+    btnZ.style.cssText='flex:0 0 44px;padding:10px 0;border:none;background:#0068FF;color:#fff;'
+      +'font-size:16px;cursor:pointer;font-family:var(--f);border-radius:0;'
+      +'display:flex;align-items:center;justify-content:center;'
+      +'border-right:1px solid rgba(255,255,255,0.2)';
+    btnZ.title='Gửi Zalo';
+    btnZ.innerHTML='💬';
+    (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); shareZaloSale(pp); }; })(p);
+    btnRow.appendChild(btnZ);
+    // Nút Thêm vào đơn
+    var btn=document.createElement('button');
+    btn.style.cssText='flex:1;padding:10px;border:none;background:var(--red);color:#fff;'
+      +'font-weight:700;font-size:13px;cursor:pointer;font-family:var(--f);border-radius:0';
     btn.textContent='+ Thêm';
-    btn.onclick=function(e){ e.stopPropagation(); addToDon(p.ma); showToast('✓ Đã thêm '+p.ma); };
-    card.appendChild(btn);
+    (function(pp){ btn.onclick=function(e){ e.stopPropagation(); addToDon(pp.ma); showToast('✓ Đã thêm '+pp.ma); }; })(p);
+    btnRow.appendChild(btn);
+    card.appendChild(btnRow);
 
     // Click card → mở detail
     card.addEventListener('click',function(){ swTab('tra'); setTimeout(function(){ showDP(p.ma); },80); });
@@ -1664,6 +1680,29 @@ function loadImg(ma){
     wrap.style.display='none';
     btn.textContent='📷 Thêm ảnh Drive';
   }
+}
+
+function shareZaloSale(p){
+  // Zalo nhanh từ sale card: copy text giá sale
+  var lines=[];
+  lines.push('🏪 GẠCH ĐỒNG TÂM KV23');
+  lines.push('━━━━━━━━━━━━━━');
+  lines.push('📦 Mã: '+p.ma);
+  if(p.kc) lines.push('📐 Kích cỡ: '+p.kc);
+  var loaiSale=p.loai_sale==='ct2'?'📦 Xả kho':'🔥 Sale tháng';
+  lines.push(loaiSale+' – Giá đã VAT');
+  var nk=p.ns||p.nhan||0, gh=p.gs||p.giao||0;
+  if(nk>0) lines.push('→ Nhận kho: '+nk.toLocaleString('vi-VN')+'đ/m²');
+  if(gh>0) lines.push('→ Giao hàng: '+gh.toLocaleString('vi-VN')+'đ/m²');
+  // Lấy giá lẻ từ DATA nếu có
+  var gData=DATA.find(function(x){return x.ma===p.ma;});
+  if(gData&&gData.le>0) lines.push('Giá lẻ tham khảo: '+gData.le.toLocaleString('vi-VN')+'đ/m²');
+  lines.push('━━━━━━━━━━━━━━');
+  lines.push('☎ Liên hệ: 0819 548 908');
+  var msg=lines.join('\n');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(function(){ showToast('✅ Đã copy! Paste vào Zalo'); }).catch(function(){ fallbackCopy(msg); });
+  } else { fallbackCopy(msg); }
 }
 
 function shareZalo(){
