@@ -280,7 +280,7 @@ input::placeholder{color:var(--t3)}
 .pr-save{background:#F0FFF4;border-radius:8px;padding:8px 12px;font-size:12px;color:#1B6634;font-weight:600;text-align:center;margin-bottom:10px}
 
 /* ===== SALE TAB GRID ===== */
-.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}
+.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}
 .sale-card{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
 .sale-card:active{border-color:var(--red)}
 .sale-img-wrap{aspect-ratio:1;background:var(--bg2);overflow:hidden;position:relative}
@@ -489,36 +489,56 @@ input::placeholder{color:var(--t3)}
 
 <!-- TAB 2: Sale -->
 <div id="tab-sale" class="tc">
-  <!-- Filter CT1/CT2 + kích thước -->
-  <div style="padding:10px 14px 6px;background:var(--bg1);border-bottom:1px solid var(--bd)">
-    <div style="display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none">
-      <button class="fb on" id="sf2-ct1"       onclick="setSF2('ct1')" style="flex-shrink:0">🔥 CT1 · Sale tháng</button>
-      <button class="fb"    id="sf2-ct2"       onclick="setSF2('ct2')" style="flex-shrink:0">📦 CT2 · Xả kho</button>
-      <button class="fb"    id="sf2-porcelain" onclick="setSF2('porcelain')" style="flex-shrink:0">Porcelain</button>
-      <button class="fb"    id="sf2-ceramic"   onclick="setSF2('ceramic')" style="flex-shrink:0">Ceramic</button>
+
+  <!-- Tìm kiếm + CT1/CT2 -->
+  <div style="padding:8px 12px 6px;background:var(--bg1);border-bottom:1px solid var(--bd)">
+    <div style="position:relative;margin-bottom:7px">
+      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t3)">🔍</span>
+      <input type="text" id="ssq" placeholder="Tìm mã sale..." oninput="renderSale()"
+        style="width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--bd);
+        border-radius:20px;font-size:13px;background:var(--bg2);outline:none"/>
     </div>
-    <!-- Filter kích thước -->
-    <div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px" id="sale-size-filters">
-      <button class="fb on" id="ssz-all"    onclick="setSaleSize('all')" style="flex-shrink:0;font-size:11px;padding:4px 9px">Tất cả</button>
-      <button class="fb"    id="ssz-60x120" onclick="setSaleSize('600x1200')" style="flex-shrink:0;font-size:11px;padding:4px 9px">60x120</button>
-      <button class="fb"    id="ssz-100x100" onclick="setSaleSize('1000x1000')" style="flex-shrink:0;font-size:11px;padding:4px 9px">100x100</button>
-      <button class="fb"    id="ssz-80x80"  onclick="setSaleSize('800x800')" style="flex-shrink:0;font-size:11px;padding:4px 9px">80x80</button>
-      <button class="fb"    id="ssz-60x60"  onclick="setSaleSize('600x600')" style="flex-shrink:0;font-size:11px;padding:4px 9px">60x60</button>
-      <button class="fb"    id="ssz-40x80"  onclick="setSaleSize('400x800')" style="flex-shrink:0;font-size:11px;padding:4px 9px">40x80</button>
-      <button class="fb"    id="ssz-30x60"  onclick="setSaleSize('300x600')" style="flex-shrink:0;font-size:11px;padding:4px 9px">30x60</button>
-      <button class="fb"    id="ssz-40x40"  onclick="setSaleSize('400x400')" style="flex-shrink:0;font-size:11px;padding:4px 9px">40x40</button>
-      <button class="fb"    id="ssz-30x30"  onclick="setSaleSize('300x300')" style="flex-shrink:0;font-size:11px;padding:4px 9px">30x30</button>
-      <button class="fb"    id="ssz-20x80"  onclick="setSaleSize('200x800')" style="flex-shrink:0;font-size:11px;padding:4px 9px">20x80</button>
-      <button class="fb"    id="ssz-20x120" onclick="setSaleSize('200x1200')" style="flex-shrink:0;font-size:11px;padding:4px 9px">20x120</button>
-      <button class="fb"    id="ssz-20x20"  onclick="setSaleSize('200x200')" style="flex-shrink:0;font-size:11px;padding:4px 9px">20x20</button>
-      <button class="fb"    id="ssz-15x30"  onclick="setSaleSize('150x300')" style="flex-shrink:0;font-size:11px;padding:4px 9px">15x30</button>
-      <button class="fb"    id="ssz-10x20"  onclick="setSaleSize('100x200')" style="flex-shrink:0;font-size:11px;padding:4px 9px">10x20</button>
+    <div style="display:flex;gap:6px">
+      <button class="fb on" id="sf2-ct1" onclick="setSF2('ct1')"
+        style="flex:1;font-size:12px;padding:6px 0;
+        background:#C0232A;color:#fff;border-color:#C0232A;text-align:center">🔥 CT1 · Sale tháng</button>
+      <button class="fb" id="sf2-ct2" onclick="setSF2('ct2')"
+        style="flex:1;font-size:12px;padding:6px 0;text-align:center">📦 CT2 · Xả kho</button>
     </div>
-    <input type="text" id="ssq" placeholder="🔍 Tìm mã sale..." oninput="renderSale()"
-      style="width:100%;margin-top:8px;padding:8px 12px;border:1px solid var(--bd);border-radius:8px;font-size:13px;background:var(--bg2)"/>
   </div>
-  <p id="scount" style="font-size:11px;color:var(--t2);padding:6px 14px;border-bottom:1px solid var(--bd)"></p>
-  <div id="slist" class="sale-grid"></div>
+
+  <!-- Count -->
+  <div style="font-size:11px;color:var(--t2);padding:4px 12px;
+    background:var(--bg2);border-bottom:1px solid var(--bd)" id="scount"></div>
+
+  <!-- Layout: Sidebar kích thước dọc trái + Lưới 2 cột phải -->
+  <div style="display:flex">
+
+    <!-- Sidebar kích thước dọc -->
+    <div style="width:58px;flex-shrink:0;background:var(--bg1);
+      border-right:1px solid var(--bd)">
+      <div class="sz-item on"  id="ssz-all"     onclick="setSaleSize('all')">Tất cả</div>
+      <div class="sz-item"     id="ssz-60x120"  onclick="setSaleSize('600x1200')">60×120</div>
+      <div class="sz-item"     id="ssz-100x100" onclick="setSaleSize('1000x1000')">100×100</div>
+      <div class="sz-item"     id="ssz-80x80"   onclick="setSaleSize('800x800')">80×80</div>
+      <div class="sz-item"     id="ssz-60x60"   onclick="setSaleSize('600x600')">60×60</div>
+      <div class="sz-item"     id="ssz-40x80"   onclick="setSaleSize('400x800')">40×80</div>
+      <div class="sz-item"     id="ssz-30x60"   onclick="setSaleSize('300x600')">30×60</div>
+      <div class="sz-item"     id="ssz-40x40"   onclick="setSaleSize('400x400')">40×40</div>
+      <div class="sz-item"     id="ssz-30x30"   onclick="setSaleSize('300x300')">30×30</div>
+      <div class="sz-item"     id="ssz-20x80"   onclick="setSaleSize('200x800')">20×80</div>
+      <div class="sz-item"     id="ssz-20x120"  onclick="setSaleSize('200x1200')">20×120</div>
+      <div class="sz-item"     id="ssz-20x20"   onclick="setSaleSize('200x200')">20×20</div>
+      <div class="sz-item"     id="ssz-15x30"   onclick="setSaleSize('150x300')">15×30</div>
+      <div class="sz-item"     id="ssz-10x20"   onclick="setSaleSize('100x200')">10×20</div>
+    </div>
+
+    <!-- Lưới 2 cột ảnh vuông -->
+    <div style="flex:1;min-width:0">
+      <div id="slist" class="sale-grid"></div>
+    </div>
+
+  </div>
 </div>
 
 <!-- TAB 3: Ngói -->
@@ -1246,89 +1266,74 @@ function renderSale(){
     var curIdx = 0;
 
     var card = document.createElement('div');
-    card.style.cssText='background:var(--bg1);border-bottom:1px solid var(--bd);'
-      +'display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer';
+    card.className='sale-card';
 
-    // === ẢNH NHỎ VUÔNG ===
-    var imgThumb = document.createElement('div');
-    imgThumb.style.cssText='width:52px;height:52px;flex-shrink:0;border-radius:8px;'
-      +'overflow:hidden;background:var(--bg2);display:flex;align-items:center;justify-content:center';
+    // === ẢNH VUÔNG ===
+    var imgWrap = document.createElement('div');
+    imgWrap.className='sale-img-wrap';
     if(imgs.length>0){
       var img=document.createElement('img');
       img.src=imgs[0];
-      img.style.cssText='width:100%;height:100%;object-fit:cover';
-      img.onerror=function(){ imgThumb.innerHTML='<span style="font-size:22px">🔲</span>'; };
-      imgThumb.appendChild(img);
+      img.onerror=function(){ imgWrap.innerHTML='<div class="sale-img-placeholder">🔲</div>'; };
+      imgWrap.appendChild(img);
+      if(imgs.length>1){
+        var dots=document.createElement('div'); dots.className='sale-img-dots';
+        imgs.forEach(function(_,i){
+          var d=document.createElement('span'); d.className='sale-img-dot'+(i===0?' on':'');
+          dots.appendChild(d);
+        });
+        imgWrap.appendChild(dots);
+      }
     } else {
-      imgThumb.innerHTML='<span style="font-size:22px">🔲</span>';
+      imgWrap.innerHTML='<div class="sale-img-placeholder">🔲</div>';
     }
-    card.appendChild(imgThumb);
+    // Badge % giảm
+    if(save>0){
+      var badgePct=document.createElement('span');
+      badgePct.className='sale-badge';
+      badgePct.textContent='-'+save+'%';
+      imgWrap.appendChild(badgePct);
+    }
+    card.appendChild(imgWrap);
 
-    // === THÔNG TIN GIỮA ===
-    var mid=document.createElement('div');
-    mid.style.cssText='flex:1;min-width:0';
-    // Badge CT
+    // === INFO ===
+    var info=document.createElement('div'); info.className='sale-card-info';
     var isCT1=p.loai_sale==='ct1';
     var ctBg=isCT1?'#E8F5E9':'#FFF3E0';
     var ctColor=isCT1?'#2E7D32':'#E65100';
     var ctLabel=isCT1?'🔥 CT1':'📦 CT2';
-    var clBadge=p.gio==='★'?' <span style="font-size:9px;background:#FFF3CD;color:#856404;'
-      +'padding:1px 5px;border-radius:4px;font-weight:600">★ CL</span>':'';
-    // Giá
     var nkVal=p.ns||p.nhan||0;
     var ghVal=p.gs||p.giao||0;
     var ct150=p.ct150nk||0;
-    mid.innerHTML=
-      // Dòng 1: Mã + badge CT
-      '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
-      +'<span style="font-size:13px;font-weight:700;color:var(--t1)">'
-        +p.ma+'</span>'
-      +'<span style="font-size:9px;background:'+ctBg+';color:'+ctColor
-        +';padding:1px 6px;border-radius:4px;font-weight:700">'+ctLabel+'</span>'
-      +clBadge
-      +(save>0?'<span style="font-size:9px;background:#C0232A;color:#fff;'
-        +'padding:1px 5px;border-radius:4px;font-weight:700;margin-left:auto">-'+save+'%</span>':'')
+    var clBadge=p.gio==='★'?' <span style="font-size:9px;background:#FFF3CD;color:#856404;padding:1px 4px;border-radius:3px;font-weight:700">★</span>':'';
+    info.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:2px">'
+      +'<p style="font-size:11px;font-weight:700;color:var(--t1);line-height:1.3">'+p.ma+'</p>'
+      +'<span style="font-size:9px;background:'+ctBg+';color:'+ctColor+';padding:1px 5px;border-radius:4px;font-weight:700;flex-shrink:0;margin-left:3px">'+ctLabel+'</span>'
       +'</div>'
-      // Dòng 2: kích cỡ
-      +'<div style="font-size:10px;color:var(--t2);margin-bottom:4px">'+p.kc+'</div>'
-      // Dòng 3: giá NK + GH
-      +'<div style="display:flex;gap:10px;align-items:baseline">'
-      +'<div>'
-        +'<div style="font-size:9px;color:var(--t2)">Nhận kho</div>'
-        +'<div style="font-size:13px;font-weight:800;color:#C0232A">'+(nkVal>0?nkVal.toLocaleString('vi-VN')+'đ':'–')+'</div>'
-      +'</div>'
-      +(ghVal>0?'<div style="width:1px;background:var(--bd);align-self:stretch"></div>'
-        +'<div>'
-          +'<div style="font-size:9px;color:var(--t2)">Giao hàng</div>'
-          +'<div style="font-size:12px;font-weight:600;color:var(--t2)">'+(ghVal>0?ghVal.toLocaleString('vi-VN')+'đ':'–')+'</div>'
-        +'</div>':'')
-      +(ct150>0?'<div style="width:1px;background:var(--bd);align-self:stretch"></div>'
-        +'<div>'
-          +'<div style="font-size:9px;color:#1565C0">CT150</div>'
-          +'<div style="font-size:12px;font-weight:700;color:#1565C0">'+ct150.toLocaleString('vi-VN')+'đ</div>'
-        +'</div>':'')
-      +'</div>';
-    card.appendChild(mid);
+      +'<p style="font-size:10px;color:var(--t2);margin-bottom:4px">'+p.kc+clBadge+'</p>'
+      // Giá NK nổi bật
+      +'<p style="font-size:13px;font-weight:800;color:#C0232A;margin-bottom:1px">'+(nkVal>0?nkVal.toLocaleString('vi-VN')+'đ':'–')+'</p>'
+      +(ghVal>0&&ghVal!==nkVal?'<p style="font-size:10px;color:var(--t2)">GH: '+ghVal.toLocaleString('vi-VN')+'đ</p>':'')
+      +(ct150>0?'<p style="font-size:10px;color:#1565C0;font-weight:600">CT150: '+ct150.toLocaleString('vi-VN')+'đ</p>':'')
+      +'<p style="font-size:9px;color:#888">💡 Giá đã VAT</p>';
+    card.appendChild(info);
 
-    // === NÚT PHẢI: Zalo + Thêm ===
-    var btnCol=document.createElement('div');
-    btnCol.style.cssText='display:flex;flex-direction:column;gap:5px;flex-shrink:0';
-    // Nút Zalo
+    // === NÚT: Zalo + Thêm ===
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;border-top:1px solid var(--bd);margin-top:auto';
     var btnZ=document.createElement('button');
-    btnZ.style.cssText='width:44px;height:32px;border:none;border-radius:8px;'
-      +'background:#0068FF;color:#fff;font-size:14px;cursor:pointer;'
-      +'display:flex;align-items:center;justify-content:center;font-family:var(--f)';
+    btnZ.style.cssText='flex:0 0 38px;padding:8px 0;border:none;border-right:1px solid var(--bd);'
+      +'background:#0068FF;color:#fff;font-size:14px;cursor:pointer;font-family:var(--f)';
     btnZ.innerHTML='💬';
-    btnZ.title='Gửi Zalo';
     (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); shareZaloSale(pp); }; })(p);
-    btnCol.appendChild(btnZ);
-    // Nút Thêm
+    btnRow.appendChild(btnZ);
     var btn=document.createElement('button');
-    btn.style.cssText='width:44px;height:32px;border:none;border-radius:8px;'
-      +'background:var(--red);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
-    btn.textContent='+Thêm';
+    btn.style.cssText='flex:1;padding:8px;border:none;background:var(--red);'
+      +'color:#fff;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--f)';
+    btn.textContent='+ Thêm';
     (function(pp){ btn.onclick=function(e){ e.stopPropagation(); addToDon(pp.ma); showToast('✓ Đã thêm '+pp.ma); }; })(p);
-    btnCol.appendChild(btn);
+    btnRow.appendChild(btn);
     card.appendChild(btnRow);
 
     // Click card → mở detail
@@ -1342,6 +1347,7 @@ var curSaleSize='all';
 
 function setSaleSize(sz){
   curSaleSize=sz;
+  // Toggle sz-item (dọc sidebar)
   document.querySelectorAll('[id^="ssz-"]').forEach(function(b){ b.classList.remove('on'); });
   var ids={'all':'ssz-all','600x1200':'ssz-60x120','1000x1000':'ssz-100x100',
     '800x800':'ssz-80x80','600x600':'ssz-60x60','400x800':'ssz-40x80',
@@ -1355,12 +1361,13 @@ function setSaleSize(sz){
 
 function setSF2(v){
   window._sf2=v;
-  ['ct1','ct2','porcelain','ceramic'].forEach(function(x){
-    var b=document.getElementById('sf2-'+x);
-    if(b) b.className='fb'+(v===x||((v==='porcelain'||v==='ceramic')&&x==='ct1')?' on':'');
-  });
-  document.getElementById('sf2-ct1').className='fb'+((v==='ct1'||v==='porcelain'||v==='ceramic')?' on':'');
-  document.getElementById('sf2-ct2').className='fb'+(v==='ct2'?' on':'');
+  var b1=document.getElementById('sf2-ct1');
+  var b2=document.getElementById('sf2-ct2');
+  if(b1) b1.style.cssText=(v==='ct1')
+    ?'flex-shrink:0;font-size:12px;padding:5px 12px;background:#C0232A;color:#fff;border-color:#C0232A'
+    :'flex-shrink:0;font-size:12px;padding:5px 12px';
+  if(b1) b1.className='fb'+(v==='ct1'?' on':'');
+  if(b2) b2.className='fb'+(v==='ct2'?' on':'');
   renderSale();
 }
 
