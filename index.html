@@ -904,7 +904,7 @@ function fetchTonKho(){
         if(window._curDpMa) updateTonKhoBadge(window._curDpMa);
         var tkTab=document.getElementById('tab-tonkho');
         if(tkTab&&tkTab.classList.contains('on')) renderTonKho();
-        console.log('TK:',res.count,'mã');
+        console.log('TK:',res.count,'mã'); console.log('Sample:',JSON.stringify(Object.values(res.data).slice(0,2)));
       }
     }catch(e){ console.log('TK err:',e); }
     var s=document.getElementById('_tk_s'); if(s) s.remove();
@@ -959,7 +959,11 @@ function renderTonKho(){
   countEl.textContent=list.length+' sản phẩm';
 
   if(!tonKhoLoaded){
-    el.innerHTML='<div style="text-align:center;padding:40px;color:#888">⏳ Đang tải tồn kho...</div>';
+    el.innerHTML='<div style="text-align:center;padding:40px;color:#888">'
+      +'⏳ Đang tải tồn kho...<br>'
+      +'<small style="font-size:10px;color:#aaa">Nếu chờ lâu: Apps Script chưa deploy action=getTonKho</small>'
+      +'<br><button onclick="fetchTonKho()" style="margin-top:10px;padding:8px 20px;background:#C0232A;color:#fff;border:none;border-radius:8px;cursor:pointer">🔄 Thử lại</button>'
+      +'</div>';
     return;
   }
   if(!list.length){
