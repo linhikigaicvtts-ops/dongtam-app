@@ -1054,6 +1054,23 @@ function renderKinhInGach(){
 }
 
 
+function mergeCTintoDATA(){
+  var ex={};
+  DATA.forEach(function(p){ ex[p.ma]=true; });
+  CT1_DATA.forEach(function(c){
+    if(ex[c.ma]) return;
+    DATA.push({ma:c.ma,kc:c.kc,cat:c.cat,gio:'',le:c.le||0,nhan:0,giao:0,
+      ns:c.nk||0,gs:c.gh||0,ct150nk:c.ct150nk||0,ct150gh:c.ct150gh||0,_fromCT:'CT1'});
+    ex[c.ma]=true;
+  });
+  CT2_DATA.forEach(function(c){
+    if(ex[c.ma]) return;
+    DATA.push({ma:c.ma,kc:c.kc,cat:c.cat,gio:'',le:c.le||0,nhan:0,giao:0,
+      ns:c.nk||0,gs:c.gh||0,ct150nk:c.ct150nk||0,ct150gh:c.ct150gh||0,_fromCT:'CT2'});
+    ex[c.ma]=true;
+  });
+}
+
 function render(){
   var q=document.getElementById('sq').value.trim().toUpperCase();
   // Nếu filter gạch kính → hiển thị trong tab Gạch cùng với nút thêm vào đơn
@@ -1314,7 +1331,7 @@ function renderSale(){
     var btnZ=document.createElement('button');
     btnZ.style.cssText='flex:0 0 42px;padding:9px 0;border:none;border-right:1px solid rgba(255,255,255,.2);background:#0068FF;color:#fff;font-size:15px;cursor:pointer;font-family:var(--f)';
     btnZ.innerHTML='💬';
-    (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); if(typeof shareZaloSale==='function') shareZaloSale(pp); }; })(p);
+    (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); shareZaloSale(pp); }; })(p);
     btnRow.appendChild(btnZ);
     var btn=document.createElement('button');
     btn.style.cssText='flex:1;padding:9px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--f)';
@@ -1661,66 +1678,47 @@ function loadImg(ma){
   }
 }
 
-function shareZaloSale(p){
-  var nk=p.nk||p.ns||0, gh=p.gh||p.gs||0;
-  var msg=['🏪 GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━',
-    '📦 Mã: '+p.ma,'📐 Kích cỡ: '+(p.kc||''),
-    p.loai_sale==='ct1'?'🔥 Sale tháng – Giá đã VAT':'📦 Xả kho – Giá đã VAT',
-    nk>0?'→ Nhận kho: '+nk.toLocaleString('vi-VN')+'đ/m²':'',
-    gh>0?'→ Giao hàng: '+gh.toLocaleString('vi-VN')+'đ/m²':'',
-    '━━━━━━━━━━━━','☎ 0819 548 908'].filter(Boolean).join('\n');
+function shareZalo(){
+  var p=DATA.find(function(x){return x.ma===curDpMa;});
+  if(!p) return;
+  var isSale=(p.ns>0||p.gs>0||p._fromCT==='CT1'||p._fromCT==='CT2');
+  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
+  var lines=['🏪 GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
+    '📦 Mã: '+p.ma, '📐 Kích cỡ: '+p.kc];
+  if(isSale) lines.push(p._fromCT==='CT2'?'📦 Xả kho CT2':'🔥 Sale tháng 07');
+  lines.push('━━━━━━━━━━━━━━');
+  if(!isSale){
+    if(p.le>0)      lines.push('💰 Giá lẻ:                                        '+f(p.le));
+    if(p.nhan>0)    lines.push('🏪 Giá ĐL nhận kho:                         '+f(p.nhan));
+    if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
+    if(p.giao>0)    lines.push('🚚 Giá ĐL giao hàng:                         '+f(p.giao));
+  } else {
+    if(p.le>0)      lines.push('💰 Giá lẻ:                                             '+f(p.le));
+    if(p.ns>0)      lines.push('🔥 Giá Sale ĐL nhận kho:                    '+f(p.ns));
+    if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
+    if(p.gs>0)      lines.push('🚚 Giá Sale ĐL giao hàng:                   '+f(p.gs));
+  }
+  var msg=lines.join('\n');
   navigator.clipboard&&navigator.clipboard.writeText
     ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
     :fallbackCopy(msg);
 }
-function shareZalo(){
-  // Tìm sản phẩm — có thể là gạch, ngói, keo, kính
-  var p = DATA.find(function(x){return x.ma===curP_ma;})
-       || NGOI.find(function(x){return x.ma===curP_ma;})
-       || KEO.find(function(x){return x.ma===curP_ma;})
-       || KINH.find(function(x){return x.ma===curP_ma;});
-  if(!p) return;
 
-  var unit   = p.unit||'m²';
-  var le     = p.le   ||0;
-  var nhan   = p.nhan ||0;
-  var giao   = p.giao ||0;
-  var ns     = p.ns   ||0;
-  var loai   = p.loai || (p.cat==='ngoi'?'ngoi': p.cat==='kinh'?'kinh': p.ma.startsWith('BCR')||p.ma.startsWith('KEO')?'keo':'gach');
-  var isGach = loai!=='ngoi'&&loai!=='keo'&&loai!=='kinh';
-  var isNgoi = loai==='ngoi';
-  var header = isNgoi?'🏠 NGÓI ĐỒNG TÂM':loai==='keo'?'🧱 KEO ĐỒNG TÂM':loai==='kinh'?'💎 GẠCH KÍNH ĐỒNG TÂM':'🏪 GẠCH ĐỒNG TÂM';
-
-  var lines = [];
-  lines.push(header);
-  lines.push('━━━━━━━━━━━━━━');
-  lines.push('📦 Mã: '+p.ma);
-  if(p.kc&&p.kc!=='–') lines.push('📐 Kích cỡ: '+p.kc);
-
-  // Giá lẻ
-  if(le>0) lines.push('Giá lẻ: '+le.toLocaleString('vi-VN')+'đ/'+unit);
-
-  // Giá nhận kho
-  if(nhan>0){
-    if(isGach){
-      var ck = ns>0 ? ns : Math.round(nhan*0.95);
-      lines.push('Giá nhận tại kho: '+nhan.toLocaleString('vi-VN')+'đ/'+unit
-        +' Chương trình tháng 06 và tháng 7 còn '+ck.toLocaleString('vi-VN')+'đ/'+unit+' 🔥');
-    } else if(isNgoi){
-      var ckN = ns>0 ? ns : Math.round(nhan*0.90);
-      lines.push('Giá nhận tại kho: '+nhan.toLocaleString('vi-VN')+'đ/'+unit
-        +' Chương trình tháng 06 và tháng 7 còn '+ckN.toLocaleString('vi-VN')+'đ/'+unit+' 🔥');
-    } else {
-      lines.push('Giá nhận tại kho: '+nhan.toLocaleString('vi-VN')+'đ/'+unit);
-    }
-  }
-
-  // Giá giao hàng
-  if(giao>0) lines.push('Giao tận nơi: '+giao.toLocaleString('vi-VN')+'đ/'+unit);
-
-  lines.push('━━━━━━━━━━━━━━');
-
-  showZaloChat(lines.join('\n'));
+function shareZaloSale(p){
+  var isCT2=p.loai_sale==='ct2';
+  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
+  var lines=['🏪 GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
+    '📦 Mã: '+p.ma, '📐 Kích cỡ: '+(p.kc||''),
+    isCT2?'📦 Xả kho CT2':'🔥 Sale tháng 07',
+    '━━━━━━━━━━━━━━'];
+  if(p.le>0)      lines.push('💰 Giá lẻ:                                             '+f(p.le));
+  if(p.nk>0)      lines.push('🔥 Giá Sale ĐL nhận kho:                    '+f(p.nk));
+  if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
+  if(p.gh>0)      lines.push('🚚 Giá Sale ĐL giao hàng:                   '+f(p.gh));
+  var msg=lines.join('\n');
+  navigator.clipboard&&navigator.clipboard.writeText
+    ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
+    :fallbackCopy(msg);
 }
 
 function copyText(text){
@@ -1985,6 +1983,7 @@ function showApp(name){
   renderSale();
   // Sau đó tải giá mới từ Sheet (chạy nền)
   fetchGiaFromSheet();
+  setTimeout(function(){ mergeCTintoDATA(); render(); }, 100);
 }
 
 function doLogout(){
