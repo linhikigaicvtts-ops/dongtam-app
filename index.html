@@ -700,6 +700,11 @@ input::placeholder{color:var(--t3)}
           🚚 Giao tận nơi
         </button>
       </div>
+      <!-- Tổng khối lượng (để tính thuê xe) -->
+      <div id="row-total-kg" style="display:none;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:var(--t2)">⚖️ Tổng khối lượng (thuê xe)</span>
+        <span id="don-total-kg" style="font-size:14px;font-weight:700;color:#6A1B9A"></span>
+      </div>
       <!-- Tổng tiền -->
       <div style="display:flex;justify-content:space-between;margin-bottom:6px">
         <span style="font-size:13px;color:var(--t2)">Tổng giá lẻ (báo khách)</span>
@@ -2367,6 +2372,8 @@ function showApp(name){
   fetchKhachHangFromSheet();
   // Tải tồn kho chi tiết theo kho + số lô (chạy nền)
   fetchTonKhoChiTiet();
+  // Tải trọng lượng chính xác theo mã SAP (chạy nền)
+  fetchTrongLuong();
 }
 
 function doLogout(){
@@ -2542,11 +2549,15 @@ function tinhSoVien(item){
   if(item.loai==='keo'||item.loai==='kinh'||item.loai==='ngoi') return null;
   var qc = getQuyCach(item.kc, item.cat);
   var qty = parseFloat(item.qty)||0;
+  // kg/viên chính xác theo mã SAP (lấy từ Sheet) — ưu tiên hơn số kg
+  // chung theo nhóm kích cỡ trong QUY_CACH (vốn chỉ là số ước lượng gộp)
+  var kgPerVien = kgPerVienCuaMa(item.ma);
   if(qc && qc.m2 > 0){
     var soThung = qty / qc.m2;
     var soVien = Math.round(soThung * qc.vien);
-    var kg = qc.kg ? Math.round(soThung * qc.kg * 10)/10 : null;
-    return {soVien:soVien, vienPerThung:qc.vien, kg:kg, m2PerThung:qc.m2};
+    var kg = kgPerVien>0 ? Math.round(soVien*kgPerVien*10)/10
+           : (qc.kg ? Math.round(soThung * qc.kg * 10)/10 : null);
+    return {soVien:soVien, vienPerThung:qc.vien, kg:kg, kgChinhXac:kgPerVien>0, m2PerThung:qc.m2};
   }
   var kc=item.kc||'';
   var m=kc.match(/(\d+)[xX](\d+)/);
@@ -2555,7 +2566,8 @@ function tinhSoVien(item){
   if(!w||!h) return null;
   var vienPerM2=1/(w*h);
   var soVien=Math.round(qty*vienPerM2);
-  return {soVien:soVien, vienPerM2:Math.round(vienPerM2*10)/10, kg:null};
+  var kgFallback = kgPerVien>0 ? Math.round(soVien*kgPerVien*10)/10 : null;
+  return {soVien:soVien, vienPerM2:Math.round(vienPerM2*10)/10, kg:kgFallback, kgChinhXac:kgPerVien>0};
 }
 
 function laTronQtyTheoQuyDinh(item){
@@ -2995,6 +3007,34 @@ function fetchTonKhoChiTiet(){
   s.onerror=function(){ s.remove(); };
   document.head.appendChild(s);
 }
+
+// ===== TRỌNG LƯỢNG CHÍNH XÁC THEO MÃ SAP (kg/viên, lấy từ Sheet) =====
+var trongLuongMap={};
+function fetchTrongLuong(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var cbName='_onTrongLuong';
+  window[cbName]=function(res){
+    if(res && res.status==='ok' && res.data) trongLuongMap=res.data;
+    var s=document.getElementById('_tl_script');
+    if(s) s.remove();
+  };
+  var old=document.getElementById('_tl_script');
+  if(old) old.remove();
+  var s=document.createElement('script');
+  s.id='_tl_script';
+  s.src=APPS_URL+'?action=getTrongLuong&callback='+cbName;
+  s.onerror=function(){ s.remove(); };
+  document.head.appendChild(s);
+}
+// kg/viên chính xác theo mã (khớp linh hoạt hoa/thường, dư ký tự) — null nếu chưa có trong Sheet
+function kgPerVienCuaMa(ma){
+  var t=trongLuongMap[ma];
+  if(!t){
+    var k=Object.keys(trongLuongMap).find(function(key){return normMa(key)===normMa(ma);});
+    t=k?trongLuongMap[k]:null;
+  }
+  return t&&t.kg_tong>0?t.kg_tong:null;
+}
 // Badge gọn hiện trên thẻ sản phẩm — 3 chấm màu theo tốc độ giao, không cần bấm vào
 function timTonKho(ma){
   var tk=tonKhoChiTiet[normMa(ma)]||tonKhoChiTiet[ma];
@@ -3130,10 +3170,12 @@ function renderLichSuDon(list){
 }
 
 function calcAndShowTotals(){
-  var totalLe=0,totalNhan=0,totalGiao=0;
+  var totalLe=0,totalNhan=0,totalGiao=0,totalKg=0,coKgChinhXac=false;
   donItems.forEach(function(item){
     var nhanVal, giaoVal;
     var qty_=parseFloat(item.qty)||0;
+    var v=tinhSoVien(item);
+    if(v&&v.kg){ totalKg+=v.kg; if(v.kgChinhXac) coKgChinhXac=true; }
     if(item.loai==='kinh'){
       // Gạch kính: 3 mức theo số thùng
       if(qty_>=50){ nhanVal=item.nhan3||item.nhan; giaoVal=item.giao3||item.giao; }
@@ -3152,6 +3194,15 @@ function calcAndShowTotals(){
     totalNhan+=(nhanVal||0)*(parseFloat(item.qty)||0);
     totalGiao+=(giaoVal||0)*(parseFloat(item.qty)||0);
   });
+  var rowKg=document.getElementById('row-total-kg');
+  if(rowKg){
+    if(totalKg>0){
+      rowKg.style.display='flex';
+      document.getElementById('don-total-kg').textContent=Math.round(totalKg).toLocaleString('vi-VN')+' kg'+(coKgChinhXac?'':' (ước tính)');
+    } else {
+      rowKg.style.display='none';
+    }
+  }
   document.getElementById('don-total-le').textContent=totalLe>0?totalLe.toLocaleString('vi-VN')+'đ':'–';
   // Hiển thị 2 dòng giá ĐL theo hình thức giao
   var rowNhan=document.getElementById('row-total-nhan');
@@ -3203,6 +3254,11 @@ function xuatPDF(){
   var note = document.getElementById('don-note').value.trim();
   var ngay = new Date().toLocaleDateString('vi-VN');
   var totalLe = donItems.reduce(function(s,x){return s+(x.le||0)*(parseFloat(x.qty)||0);},0);
+  var totalKgPdf=0, coKgChinhXacPdf=false;
+  donItems.forEach(function(x){
+    var v=tinhSoVien(x);
+    if(v&&v.kg){ totalKgPdf+=v.kg; if(v.kgChinhXac) coKgChinhXacPdf=true; }
+  });
 
   var rows = donItems.map(function(item,i){
     var leVAT = item.le||0;
@@ -3227,6 +3283,7 @@ function xuatPDF(){
         var v=tinhSoVien(item);
         var qtyStr=item.qty+' '+(item.unit||'m²');
         if(v&&v.soVien) qtyStr+=' (≈'+v.soVien+' viên)';
+        if(v&&v.kg) qtyStr+='<br><span class="sub" style="color:#6A1B9A">⚖️ '+v.kg.toLocaleString('vi-VN')+' kg'+(v.kgChinhXac?'':' (ước tính)')+'</span>';
         return '<td class="tc">'+qtyStr+'</td>';
       })()
       +'<td class="tc" style="color:#0D47A1;font-weight:600">'+thungStr+'</td>'
@@ -3357,6 +3414,7 @@ function xuatPDF(){
     +'</div>'
     +'<div class="total-val">'+(totalLe>0?totalLe.toLocaleString('vi-VN')+' đ':'Liên hệ báo giá')+'</div>'
     +'</div>'
+    +(totalKgPdf>0?'<div class="total-note" style="margin-top:6px;color:#6A1B9A;font-weight:600">⚖️ Tổng khối lượng: '+Math.round(totalKgPdf).toLocaleString('vi-VN')+' kg'+(coKgChinhXacPdf?'':' (ước tính)')+' — quý khách tham khảo để thuê xe vận chuyển</div>':'')
     +'</div>'
 
     /* GHI CHÚ */
