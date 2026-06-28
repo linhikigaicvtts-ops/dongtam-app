@@ -1809,6 +1809,11 @@ function shareZalo(){
   var saleNK  = p.ns      || (ctData?ctData.nk:0)      || 0;
   var saleGH  = p.gs      || (ctData?ctData.gh:0)      || 0;
   var ct150nk = p.ct150nk || (ctData?ctData.ct150nk:0) || 0;
+  // Nếu vẫn chưa có CT150 → tự tính 95% giá NK
+  if(!ct150nk){
+    var baseForCT150 = isSale ? saleNK : nk;
+    if(baseForCT150 > 0) ct150nk = Math.round(baseForCT150 * 0.95);
+  }
 
   var lines = ['GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
     '📦 Mã: '+p.ma,
