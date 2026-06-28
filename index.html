@@ -592,9 +592,14 @@ input::placeholder{color:var(--t3)}
         <span id="nd-tien-giao" style="font-weight:700;color:#0D47A1"></span>
       </div>
     </div>
-    <button onclick="themNgoiVaoDon()" style="width:100%;margin-top:8px;padding:11px;border:none;border-radius:var(--r8);background:#C0232A;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">
-      🛒 Thêm vào đơn đặt hàng
-    </button>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="themNgoiVaoDon()" style="flex:1;padding:11px;border:none;border-radius:var(--r8);background:#C0232A;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">
+        🛒 Thêm vào đơn
+      </button>
+      <button onclick="shareZaloNgoi(curNgoiMa)" style="padding:11px 14px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">
+        Zalo ↗
+      </button>
+    </div>
   </div>
   <div class="sec-hdr">A. NGÓI LỢP</div>
   <div id="ngoi-list-A"></div>
@@ -1076,21 +1081,32 @@ function renderKinhInGach(){
 
     html+='</div>';
 
-    // === PHẦN 3: Nút thêm vào đơn - FULL WIDTH ở dưới cùng ===
-    html+='<button class="kinh-add-btn" style="'
-      +'display:block;width:100%;padding:12px;border:none;border-radius:10px;'
+    // === PHẦN 3: Nút thêm vào đơn + Zalo ở dưới cùng ===
+    html+='<div style="display:flex;gap:8px">'
+      +'<button class="kinh-add-btn" style="'
+      +'flex:1;padding:12px;border:none;border-radius:10px;'
       +'background:'+(inDon?'#1B7A3E':'#C0232A')+';'
       +'color:#fff;font-size:14px;font-weight:700;'
       +'cursor:pointer;font-family:var(--f);'
       +'text-align:center;box-sizing:border-box">'
       +(inDon?'✓  Đã thêm vào đơn':'🛒  + Thêm vào đơn')
-      +'</button>';
+      +'</button>'
+      +'<button class="kinh-zalo-btn" style="'
+      +'padding:12px 16px;border:none;border-radius:10px;'
+      +'background:#0068FF;color:#fff;font-size:14px;font-weight:700;'
+      +'cursor:pointer;font-family:var(--f);box-sizing:border-box">'
+      +'Zalo ↗'
+      +'</button>'
+      +'</div>';
 
     div.innerHTML=html;
 
     (function(ma){
       div.querySelector('.kinh-add-btn').addEventListener('click',function(){
         addToDonKinh(ma);
+      });
+      div.querySelector('.kinh-zalo-btn').addEventListener('click',function(){
+        shareZaloKinh(ma);
       });
     })(p.ma);
     el.appendChild(div);
@@ -1608,12 +1624,20 @@ function renderKinh(){
       +'<p style="color:var(--t2);font-size:10px">→ giao: '+(p.giao3||0).toLocaleString('vi-VN')+'</p>'
       +'</div>'
       +'</div></div>';
-    // Nút thêm vào đơn
+    // Nút thêm vào đơn + Zalo
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:6px;margin-top:8px';
     var btn=document.createElement('button');
     btn.textContent='🛒 + Thêm vào đơn';
-    btn.style.cssText='width:100%;margin-top:8px;padding:8px;border:none;border-radius:var(--r8);background:#0D47A1;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btn.style.cssText='flex:1;padding:8px;border:none;border-radius:var(--r8);background:#0D47A1;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btn.onclick=function(ma){ return function(){ addToDonKinh(ma); }; }(p.ma);
-    div.appendChild(btn);
+    var btnZ=document.createElement('button');
+    btnZ.textContent='Zalo ↗';
+    btnZ.style.cssText='padding:8px 12px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnZ.onclick=function(ma){ return function(){ shareZaloKinh(ma); }; }(p.ma);
+    btnRow.appendChild(btn);
+    btnRow.appendChild(btnZ);
+    div.appendChild(btnRow);
     el.appendChild(div);
   });
 }
@@ -1655,11 +1679,19 @@ function renderKeo(){
       +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Giao hàng &lt;50 bao</span><span style="font-size:13px;font-weight:700;color:#7B1FA2">'+p.giao.toLocaleString('vi-VN')+'đ</span></div>'
       +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Nhận kho ≥50 bao</span><span style="font-size:13px;font-weight:700;color:#388E3C">'+p.nhan2.toLocaleString('vi-VN')+'đ</span></div>'
       +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Giao hàng ≥50 bao</span><span style="font-size:13px;font-weight:700;color:#388E3C">'+p.giao2.toLocaleString('vi-VN')+'đ</span></div>';
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:6px;margin-top:8px';
     var btnK=document.createElement('button');
     btnK.textContent='🛒 + Thêm vào đơn';
-    btnK.style.cssText='width:100%;margin-top:8px;padding:7px;border:none;border-radius:var(--r8);background:#7B1FA2;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnK.style.cssText='flex:1;padding:7px;border:none;border-radius:var(--r8);background:#7B1FA2;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btnK.onclick=function(ma){return function(){addToDonKeo(ma);};}(p.ma);
-    div.appendChild(btnK);
+    var btnZ=document.createElement('button');
+    btnZ.textContent='Zalo ↗';
+    btnZ.style.cssText='padding:7px 12px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnZ.onclick=function(ma){return function(){shareZaloKeo(ma);};}(p.ma);
+    btnRow.appendChild(btnK);
+    btnRow.appendChild(btnZ);
+    div.appendChild(btnRow);
     el.appendChild(div);
   });
 }
@@ -1906,6 +1938,75 @@ function shareZaloSale(p){
   navigator.clipboard&&navigator.clipboard.writeText
     ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
     :fallbackCopy(msg);
+}
+
+function copyZaloMsg(msg){
+  navigator.clipboard&&navigator.clipboard.writeText
+    ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
+    :fallbackCopy(msg);
+}
+
+function shareZaloNgoi(ma){
+  var p=NGOI.find(function(x){return x.ma===ma;}); if(!p) return;
+  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/viên':'–'; };
+  var lines=['🏠 NGÓI ĐỒNG TÂM'];
+  lines.push('📌 Mã: '+p.ma);
+  lines.push('📐 Quy cách: '+p.kc+' · '+p.dong_goi);
+  lines.push('━━━━━━━━━━━━━━');
+  if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
+  lines.push('2. Đại lý dưới 1.500 viên:');
+  lines.push('   Nhận tại kho: '+f(p.nhan));
+  lines.push('   Đi giao: '+f(p.giao));
+  lines.push('');
+  lines.push('3. Đại lý từ 1.500 viên 🔥:');
+  lines.push('   Nhận tại kho: '+f(p.nhan2));
+  lines.push('━━━━━━━━━━━━━━');
+  lines.push('📞 Liên hệ báo giá chi tiết');
+  copyZaloMsg(lines.join('\n'));
+}
+
+function shareZaloKeo(ma){
+  var p=KEO.find(function(x){return x.ma===ma;}); if(!p) return;
+  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/bao':'–'; };
+  var lines=['🧱 KEO ĐỒNG TÂM'];
+  lines.push('📌 Mã: '+p.ten);
+  lines.push('📐 Quy cách: '+(p.qc||''));
+  lines.push('━━━━━━━━━━━━━━');
+  if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
+  lines.push('2. Đại lý dưới 50 bao:');
+  lines.push('   Nhận tại kho: '+f(p.nhan));
+  lines.push('   Đi giao: '+f(p.giao));
+  lines.push('');
+  lines.push('3. Đại lý từ 50 bao 🔥 (giá tốt hơn):');
+  lines.push('   Nhận tại kho: '+f(p.nhan2));
+  lines.push('   Đi giao: '+f(p.giao2));
+  lines.push('━━━━━━━━━━━━━━');
+  lines.push('📞 Liên hệ báo giá chi tiết');
+  copyZaloMsg(lines.join('\n'));
+}
+
+function shareZaloKinh(ma){
+  var p=KINH.find(function(x){return x.ma===ma;}); if(!p) return;
+  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/thùng':'–'; };
+  var lines=['💎 GẠCH KÍNH ĐỒNG TÂM'];
+  lines.push('📌 Mã: '+p.ten);
+  lines.push('📐 Kích cỡ: '+p.kc+'cm · '+p.dong_goi);
+  lines.push('━━━━━━━━━━━━━━');
+  if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
+  lines.push('2. Đại lý ≤ 20 thùng:');
+  lines.push('   Nhận tại kho: '+f(p.nhan));
+  lines.push('   Đi giao: '+f(p.giao));
+  lines.push('');
+  lines.push('3. Đại lý 21–49 thùng:');
+  lines.push('   Nhận tại kho: '+f(p.nhan2));
+  lines.push('   Đi giao: '+f(p.giao2));
+  lines.push('');
+  lines.push('4. Đại lý ≥ 50 thùng 🔥 (giá tốt nhất):');
+  lines.push('   Nhận tại kho: '+f(p.nhan3));
+  lines.push('   Đi giao: '+f(p.giao3));
+  lines.push('━━━━━━━━━━━━━━');
+  lines.push('📞 Liên hệ báo giá chi tiết');
+  copyZaloMsg(lines.join('\n'));
 }
 
 function copyText(text){
