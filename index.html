@@ -461,6 +461,16 @@ input::placeholder{color:var(--t3)}
         <span id="dp-qty-unit-label" style="font-size:12px;color:var(--t2);min-width:30px">m²</span>
       </div>
       <p id="dp-qty-convert" style="font-size:11px;color:#0D47A1;margin-top:6px;text-align:center"></p>
+      <div style="border-top:1px dashed var(--bd2);margin-top:9px;padding-top:9px">
+        <p style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px">📐 Tính theo diện tích phòng</p>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input id="dp-room-dai" type="number" min="0" step="0.1" placeholder="Dài (m)" style="flex:1;text-align:center;font-size:13px;padding:7px;border:1px solid var(--bd2);border-radius:8px;background:var(--bg1);font-family:var(--f)"/>
+          <span style="font-size:12px;color:var(--t2)">×</span>
+          <input id="dp-room-rong" type="number" min="0" step="0.1" placeholder="Rộng (m)" style="flex:1;text-align:center;font-size:13px;padding:7px;border:1px solid var(--bd2);border-radius:8px;background:var(--bg1);font-family:var(--f)"/>
+          <button onclick="tinhTheoDienTichPhong()" style="padding:7px 12px;border:none;border-radius:8px;background:#0D47A1;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)">Tính</button>
+        </div>
+        <p id="dp-room-result" style="font-size:11px;color:#0D47A1;margin-top:6px;text-align:center"></p>
+      </div>
     </div>
     <!-- Ảnh sản phẩm -->
     <div id="dp-img-section" style="margin-top:10px">
@@ -2383,6 +2393,10 @@ function showApp(name){
   // Hiện tên user trên header
   var canh = document.getElementById('ca-nhan-ten');
   if(canh) canh.textContent = name;
+  // Khôi phục giỏ hàng đã lưu (tránh mất khi refresh/đóng tab giữa lúc tư vấn khách)
+  loadDonItemsFromStorage();
+  updateDonBadge();
+  renderDon();
   // Init app
   render();
   // Tải ảnh từ Google Sheet (chạy nền)
@@ -2667,6 +2681,37 @@ function calcDpQty(){
   }
 }
 
+// Tính số thùng cần mua từ kích thước phòng (dài x rộng) — hữu ích khi tư
+// vấn khách lát nguyên 1 phòng, tự điền luôn vào ô số lượng để thêm vào đơn.
+function tinhTheoDienTichPhong(){
+  var p = DATA.find(function(x){return x.ma===curP_ma;});
+  if(!p) return;
+  var dai=parseFloat(document.getElementById('dp-room-dai').value)||0;
+  var rong=parseFloat(document.getElementById('dp-room-rong').value)||0;
+  var resultEl=document.getElementById('dp-room-result');
+  if(dai<=0||rong<=0){ resultEl.textContent='Vui lòng nhập đủ chiều dài và chiều rộng!'; resultEl.style.color='#C0232A'; return; }
+
+  var m2=Math.round(dai*rong*100)/100;
+  var qc=getQuyCach(p.kc,p.cat);
+  resultEl.style.color='#0D47A1';
+  if(qc && qc.m2>0){
+    var thungN=Math.ceil(m2/qc.m2);
+    var m2Thuc=Math.round(thungN*qc.m2*100)/100;
+    var haoHut=Math.round((m2Thuc-m2)*100)/100;
+    resultEl.innerHTML='Diện tích phòng: <b>'+m2+'</b> m² → cần mua <b>'+thungN+'</b> thùng (≈ '+m2Thuc+' m²'
+      +(haoHut>0?', dư '+haoHut+' m² để cắt/bù hao hụt':'')+')';
+    // Tự điền vào ô số lượng theo thùng để thêm vào đơn cho đúng số thùng nguyên
+    setDpUnit('thung');
+    document.getElementById('dp-qty-input').value=thungN;
+    calcDpQty();
+  } else {
+    resultEl.innerHTML='Diện tích phòng: <b>'+m2+'</b> m²';
+    setDpUnit('m2');
+    document.getElementById('dp-qty-input').value=m2;
+    calcDpQty();
+  }
+}
+
 function addToDonWithQty(){
   var p = DATA.find(function(x){return x.ma===curP_ma;});
   if(!p) return;
@@ -2749,6 +2794,22 @@ function updateDonBadge(){
   var badge=document.getElementById('don-badge');
   var total=donItems.reduce(function(s,x){return s+x.qty;},0);
   if(badge){badge.textContent=total;badge.style.display=total>0?'inline':'none';}
+  saveDonItemsToStorage();
+}
+
+// Lưu giỏ hàng vào localStorage để không mất khi refresh/đóng tab giữa lúc tư vấn khách
+var DON_STORAGE_KEY='dt_don_items';
+function saveDonItemsToStorage(){
+  try{ localStorage.setItem(DON_STORAGE_KEY, JSON.stringify(donItems)); }catch(e){}
+}
+function loadDonItemsFromStorage(){
+  try{
+    var raw=localStorage.getItem(DON_STORAGE_KEY);
+    if(raw){
+      var arr=JSON.parse(raw);
+      if(Array.isArray(arr)) donItems=arr;
+    }
+  }catch(e){}
 }
 
 function renderDon(){
