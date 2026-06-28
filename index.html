@@ -652,13 +652,18 @@ input::placeholder{color:var(--t3)}
   <div id="don-content" style="display:none">
     <!-- Info khách -->
     <div style="background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r12);padding:14px;margin-bottom:10px">
-      <p style="font-size:13px;font-weight:600;margin-bottom:10px">📋 Thông tin đơn hàng</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <p style="font-size:13px;font-weight:600;margin:0">📋 Thông tin đơn hàng</p>
+        <button type="button" onclick="moLichSuDon()" style="font-size:11px;font-weight:600;color:#C0232A;background:none;border:1px solid #C0232A;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn</button>
+      </div>
       <div style="display:flex;flex-direction:column;gap:7px">
-        <input type="text" id="don-ten" placeholder="Tên khách hàng / đại lý *" style="font-size:13px"/>
+        <input type="text" id="don-ten" list="kh-list-ten" placeholder="Tên khách hàng / đại lý *" style="font-size:13px" oninput="onChonKhachHang()"/>
         <input type="text" id="don-cty" placeholder="Tên công ty (nếu có)" style="font-size:13px"/>
-        <input type="tel"  id="don-sdt" placeholder="Số điện thoại *" style="font-size:13px"/>
+        <input type="tel"  id="don-sdt" list="kh-list-sdt" placeholder="Số điện thoại *" style="font-size:13px" oninput="onChonKhachHang()"/>
         <input type="text" id="don-dc"  placeholder="Địa chỉ công trình / giao hàng" style="font-size:13px"/>
         <textarea id="don-note" placeholder="Ghi chú thêm..." style="font-size:13px;min-height:60px;resize:vertical;border:1px solid var(--bd2);border-radius:var(--r8);padding:9px 12px;font-family:var(--f);background:var(--bg1)"></textarea>
+        <datalist id="kh-list-ten"></datalist>
+        <datalist id="kh-list-sdt"></datalist>
       </div>
     </div>
 
@@ -2049,18 +2054,12 @@ function saveSession(user){
   var obj = {
     user: user.u,
     name: user.name,
+    role: user.role || 'nv',
     exp: Date.now() + SESSION_HOURS * 3600 * 1000
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(obj));
 }
-
-// Tài khoản dự phòng (khi Apps Script chưa deploy action login)
-var LOCAL_USERS = [
-  {u:'linh',      p:'Linh@2024',  name:'Lê Chí Linh',  role:'admin'},
-  {u:'nhanvien1', p:'NV1@2024',   name:'Nhân viên 1',   role:'nv'},
-  {u:'nhanvien2', p:'NV2@2024',   name:'Nhân viên 2',   role:'nv'},
-];
 
 function doLogin(){
   var u = (document.getElementById('inp-user').value||'').trim().toLowerCase();
@@ -2075,22 +2074,8 @@ function doLogin(){
     return;
   }
 
-  // Kiểm tra LOCAL_USERS trước
-  var found = null;
-  for(var i=0;i<LOCAL_USERS.length;i++){
-    if(LOCAL_USERS[i].u === u && LOCAL_USERS[i].p === pw){
-      found = LOCAL_USERS[i];
-      break;
-    }
-  }
-
-  if(found){
-    saveSession({u:u, name:found.name, role:found.role});
-    showApp(found.name);
-    return;
-  }
-
-  // Thử Apps Script
+  // Xác thực luôn qua Apps Script (tab "Users", password lưu hash) —
+  // không còn danh sách tài khoản/mật khẩu plaintext trong code frontend.
   btn.textContent = '⏳ Đang kiểm tra...';
   btn.disabled = true;
 
@@ -2144,6 +2129,8 @@ function showApp(name){
   // Sau đó tải giá mới từ Sheet (chạy nền)
   fetchGiaFromSheet();
   setTimeout(function(){ mergeCTintoDATA(); render(); }, 100);
+  // Tải danh sách khách hàng cũ để gợi ý tự động (chạy nền)
+  fetchKhachHangFromSheet();
 }
 
 function doLogout(){
@@ -2644,6 +2631,7 @@ function setDonQty(ma,val){
 }
 function removeDon(ma){donItems=donItems.filter(function(x){return x.ma!==ma;});updateDonBadge();renderDon();}
 function guiDonHang(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbzA3UV86ClaGXtttl3Fvb2e_MYaUSUOqjPqquLjySrL-_MDIeIIUxV82UydwyXLuc2brQ/exec';
   if(donItems.length===0){alert('Chưa có sản phẩm trong đơn!');return;}
   var ten=document.getElementById('don-ten').value.trim();
   var sdt=document.getElementById('don-sdt').value.trim();
@@ -2659,6 +2647,7 @@ function guiDonHang(){
   var nguoiLap=sess?sess.name:'Sales Tool';
 
   var orderData={
+    id:'DH'+Date.now(),
     ten:ten,
     sdt:sdt,
     diachi:document.getElementById('don-dc').value.trim(),
@@ -2684,29 +2673,133 @@ function guiDonHang(){
   };
 
   var encoded=encodeURIComponent(JSON.stringify(orderData));
-  var url='https://script.google.com/macros/s/AKfycbzA3UV86ClaGXtttl3Fvb2e_MYaUSUOqjPqquLjySrL-_MDIeIIUxV82UydwyXLuc2brQ/exec?data='+encoded;
-
-  // Gọi Apps Script qua fetch (no-cors để tránh CORS error)
-  fetch(url, {method:'GET', mode:'no-cors'})
-    .then(function(){
-      document.getElementById('gui-don-status').style.display='none';
+  var cbName='_cb_luuDon_'+Date.now();
+  var s=document.createElement('script');
+  var done=false;
+  function ketThucGuiDon(thanhCong){
+    if(done) return; done=true;
+    if(s.parentNode) s.parentNode.removeChild(s);
+    delete window[cbName];
+    document.getElementById('gui-don-status').style.display='none';
+    if(thanhCong){
       document.getElementById('gui-don-ok').style.display='block';
       document.getElementById('btn-gui-don').style.display='none';
-    })
-    .catch(function(){
-      // no-cors không báo lỗi thật — vẫn hiện OK vì request đã gửi
-      document.getElementById('gui-don-status').style.display='none';
-      document.getElementById('gui-don-ok').style.display='block';
-      document.getElementById('btn-gui-don').style.display='none';
-    });
-
-  // Timeout fallback 8 giây
-  setTimeout(function(){
-    if(document.getElementById('gui-don-status').style.display!=='none'){
-      document.getElementById('gui-don-status').style.display='none';
-      document.getElementById('gui-don-ok').style.display='block';
+      fetchKhachHangFromSheet(); // nạp lại danh sách khách (vừa thêm khách mới)
+    } else {
+      document.getElementById('btn-gui-don').style.display='block';
+      alert('❌ Gửi đơn không thành công, vui lòng thử lại! (Kiểm tra mạng / Apps Script URL)');
     }
-  },8000);
+  }
+  window[cbName]=function(res){
+    ketThucGuiDon(res && res.status==='ok');
+  };
+  var t=setTimeout(function(){ ketThucGuiDon(false); },15000);
+  // Gọi Apps Script qua JSONP để biết chắc đơn đã lưu thành công, thay vì
+  // no-cors (không đọc được response → trước đây luôn báo "thành công" dù
+  // request có thể đã lỗi action).
+  var url=APPS_URL+'?action=luuDon&data='+encoded+'&callback='+encodeURIComponent(cbName);
+  s.src=url;
+  s.onerror=function(){ clearTimeout(t); ketThucGuiDon(false); };
+  document.head.appendChild(s);
+}
+
+// ===== MINI-CRM: KHÁCH HÀNG (autocomplete) =====
+var khachHangList=[];
+function fetchKhachHangFromSheet(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbzA3UV86ClaGXtttl3Fvb2e_MYaUSUOqjPqquLjySrL-_MDIeIIUxV82UydwyXLuc2brQ/exec';
+  var cbName='_onKhachHang';
+  window[cbName]=function(res){
+    if(res && res.status==='ok' && res.data){
+      khachHangList=res.data;
+      var lTen=document.getElementById('kh-list-ten');
+      var lSdt=document.getElementById('kh-list-sdt');
+      if(lTen) lTen.innerHTML=khachHangList.map(function(k){return '<option value="'+(k.ten||'').replace(/"/g,'')+'">';}).join('');
+      if(lSdt) lSdt.innerHTML=khachHangList.map(function(k){return '<option value="'+(k.sdt||'').replace(/"/g,'')+'">';}).join('');
+    }
+    var s=document.getElementById('_kh_script');
+    if(s) s.remove();
+  };
+  var old=document.getElementById('_kh_script');
+  if(old) old.remove();
+  var s=document.createElement('script');
+  s.id='_kh_script';
+  s.src=APPS_URL+'?action=getKhachHang&callback='+cbName;
+  s.onerror=function(){ s.remove(); };
+  document.head.appendChild(s);
+}
+// Khi nhân viên chọn 1 khách có sẵn (tên hoặc SĐT khớp) → tự điền các ô còn lại
+function onChonKhachHang(){
+  var ten=document.getElementById('don-ten').value.trim();
+  var sdt=document.getElementById('don-sdt').value.trim();
+  var found=khachHangList.find(function(k){return k.sdt===sdt || (ten && k.ten===ten);});
+  if(found){
+    if(!ten && found.ten) document.getElementById('don-ten').value=found.ten;
+    if(!sdt && found.sdt) document.getElementById('don-sdt').value=found.sdt;
+    var dc=document.getElementById('don-dc');
+    if(dc && !dc.value.trim() && found.diachi) dc.value=found.diachi;
+  }
+}
+
+// ===== LỊCH SỬ ĐƠN HÀNG =====
+function moLichSuDon(){
+  var sess=checkSession();
+  if(!sess){alert('Vui lòng đăng nhập lại!');return;}
+  var APPS_URL='https://script.google.com/macros/s/AKfycbzA3UV86ClaGXtttl3Fvb2e_MYaUSUOqjPqquLjySrL-_MDIeIIUxV82UydwyXLuc2brQ/exec';
+
+  var modal=document.createElement('div');
+  modal.id='modal-lich-su-don';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:480px;width:100%;max-height:80vh;overflow:auto;padding:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<p style="font-size:15px;font-weight:700;margin:0">🕘 Lịch sử đơn hàng</p>'
+    +'<button onclick="document.getElementById(\'modal-lich-su-don\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
+    +'</div>'
+    +'<div id="lich-su-don-body" style="font-size:13px;color:#888;text-align:center;padding:20px 0">⏳ Đang tải...</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+
+  var cbName='_cb_donHang_'+Date.now();
+  var s=document.createElement('script');
+  var t=setTimeout(function(){ renderLichSuDonError(); },12000);
+  window[cbName]=function(res){
+    clearTimeout(t);
+    if(s.parentNode) s.parentNode.removeChild(s);
+    delete window[cbName];
+    if(res && res.status==='ok'){ renderLichSuDon(res.data||[]); }
+    else { renderLichSuDonError(); }
+  };
+  s.src=APPS_URL+'?action=getDonHang&username='+encodeURIComponent(sess.user||'')
+    +'&role='+encodeURIComponent(sess.role||'nv')+'&callback='+cbName;
+  s.onerror=function(){ clearTimeout(t); renderLichSuDonError(); };
+  document.head.appendChild(s);
+}
+function renderLichSuDonError(){
+  var body=document.getElementById('lich-su-don-body');
+  if(body) body.innerHTML='<p style="color:#C0232A">❌ Không tải được lịch sử đơn. Thử lại sau.</p>';
+}
+function renderLichSuDon(list){
+  var body=document.getElementById('lich-su-don-body');
+  if(!body) return;
+  if(!list.length){
+    body.innerHTML='<p>Chưa có đơn hàng nào.</p>';
+    return;
+  }
+  body.innerHTML=list.map(function(don){
+    var tong=(don.items||[]).reduce(function(s,it){return s+(parseFloat(it.thanh)||0);},0);
+    var rows=(don.items||[]).map(function(it){
+      return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px dashed #eee">'
+        +'<span>'+(it.ma||'')+' · '+(it.kc||'')+' · '+(it.sl||0)+(it.dv||'')+'</span>'
+        +'<span>'+(parseFloat(it.thanh)||0).toLocaleString('vi-VN')+'đ</span></div>';
+    }).join('');
+    return '<div style="border:1px solid var(--bd,#eee);border-radius:10px;padding:10px;margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px">'
+      +'<span>'+(don.ngay||'')+'</span><span>'+(don.nguoiLap||'')+'</span></div>'
+      +'<p style="font-size:13px;font-weight:700;margin:0 0 6px">'+(don.khach||'')+' · '+(don.sdt||'')+'</p>'
+      +rows
+      +'<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-top:6px;color:#C0232A">'
+      +'<span>Tổng</span><span>'+tong.toLocaleString('vi-VN')+'đ</span></div>'
+      +'</div>';
+  }).join('');
 }
 
 function calcAndShowTotals(){
