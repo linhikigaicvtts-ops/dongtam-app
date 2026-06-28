@@ -546,8 +546,20 @@ input::placeholder{color:var(--t3)}
 <div id="tab-ngoi" class="tc">
   <p style="font-size:13px;color:var(--t2);margin-bottom:10px">Ngói tráng men Đồng Tâm · Giá <b>đồng/viên</b> · Hiệu lực đến 31/03/2027</p>
   <div id="ngoi-detail" style="display:none;background:var(--bg1);border:2px solid #C0232A;border-radius:var(--r12);padding:14px;margin-bottom:12px">
-    <div id="nd-img-wrap" style="display:none;margin-bottom:10px;border-radius:var(--r8);overflow:hidden;aspect-ratio:1;background:var(--bg2)">
-      <img id="nd-img" style="width:100%;height:100%;object-fit:cover" onerror="this.closest('#nd-img-wrap').style.display='none'"/>
+    <div id="nd-img-wrap" style="display:none;margin-bottom:10px;border-radius:var(--r8);overflow:hidden;aspect-ratio:1;background:var(--bg2);position:relative">
+      <img id="nd-img" style="width:100%;height:100%;object-fit:cover;display:block"/>
+      <button id="nd-img-prev" onclick="slideNdImg(-1)"
+        style="display:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);
+        width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);
+        color:#fff;font-size:16px;cursor:pointer;line-height:1">‹</button>
+      <button id="nd-img-next" onclick="slideNdImg(1)"
+        style="display:none;position:absolute;right:4px;top:50%;transform:translateY(-50%);
+        width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);
+        color:#fff;font-size:16px;cursor:pointer;line-height:1">›</button>
+      <div id="nd-img-dots" style="position:absolute;bottom:5px;left:0;right:0;
+        display:flex;justify-content:center;gap:4px"></div>
+      <span id="nd-img-counter" style="display:none;position:absolute;top:6px;right:8px;
+        background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px"></span>
     </div>
     <div style="display:flex;justify-content:space-between;margin-bottom:10px">
       <div>
@@ -1526,10 +1538,7 @@ function renderNgoi(){
 function showNgoi(ma){
   curNgoiMa=ma;
   var p=NGOI.find(function(x){return x.ma===ma;}); if(!p) return;
-  var ndImgUrl=timAnh(p.ma);
-  var ndImgWrap=document.getElementById('nd-img-wrap');
-  if(ndImgUrl){ document.getElementById('nd-img').src=ndImgUrl; ndImgWrap.style.display='block'; }
-  else { ndImgWrap.style.display='none'; }
+  loadNdImg(p.ma);
   document.getElementById('nd-ten').textContent=p.ten;
   document.getElementById('nd-kc').textContent=p.kc+' · '+p.dong_goi;
   document.getElementById('nd-le').textContent=p.le.toLocaleString('vi-VN')+'đ/viên';
@@ -1844,6 +1853,61 @@ function slideImg(dir){
   if(!curImgList.length) return;
   curImgIdx = (curImgIdx + dir + curImgList.length) % curImgList.length;
   renderDpImg();
+}
+
+// ===== Lướt nhiều ảnh cho popup chi tiết Ngói (giống cơ chế của Gạch) =====
+var ndImgIdx = 0;
+var ndImgList = [];
+function loadNdImg(ma){
+  var wrap = document.getElementById('nd-img-wrap');
+  ndImgList = timAnhMulti(ma);
+  ndImgIdx = 0;
+  if(ndImgList.length > 0){
+    wrap.style.display = 'block';
+    renderNdImg();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+function renderNdImg(){
+  var img     = document.getElementById('nd-img');
+  var prev    = document.getElementById('nd-img-prev');
+  var next    = document.getElementById('nd-img-next');
+  var dots    = document.getElementById('nd-img-dots');
+  var counter = document.getElementById('nd-img-counter');
+  if(!ndImgList.length) return;
+
+  var url = convertImgUrl(ndImgList[ndImgIdx]);
+  img.src = url;
+  img.style.display = 'block';
+  img.onerror = function(){
+    if(this.src !== ndImgList[ndImgIdx]){
+      this.src = ndImgList[ndImgIdx];
+    } else {
+      this.style.display='none';
+    }
+  };
+
+  var multi = ndImgList.length > 1;
+  prev.style.display    = multi ? 'block' : 'none';
+  next.style.display    = multi ? 'block' : 'none';
+  counter.style.display = multi ? 'block' : 'none';
+  counter.textContent   = (ndImgIdx+1)+'/'+ndImgList.length;
+
+  dots.innerHTML = '';
+  if(multi){
+    ndImgList.forEach(function(_,i){
+      var d = document.createElement('span');
+      d.style.cssText = 'width:'+(i===ndImgIdx?'14':'6')+'px;height:6px;border-radius:3px;'
+        +'background:'+(i===ndImgIdx?'#fff':'rgba(255,255,255,.5)')+';transition:.2s';
+      dots.appendChild(d);
+    });
+  }
+}
+function slideNdImg(dir){
+  if(!ndImgList.length) return;
+  ndImgIdx = (ndImgIdx + dir + ndImgList.length) % ndImgList.length;
+  renderNdImg();
 }
 
 function shareZalo(){
