@@ -487,6 +487,7 @@ input::placeholder{color:var(--t3)}
         <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
         <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:600;font-family:var(--f)">🛒 + Đơn</button>
       </div>
+      <button onclick="moTonKho(curP_ma)" style="width:100%;margin-top:6px;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
     </div>
   </div>
   <div id="pagination" class="pag" style="padding:8px 12px;border-bottom:1px solid #eee;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;align-items:center"></div>
@@ -606,6 +607,7 @@ input::placeholder{color:var(--t3)}
         Zalo ↗
       </button>
     </div>
+    <button onclick="moTonKho(curNgoiMa)" style="width:100%;margin-top:6px;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
   </div>
   <div class="sec-hdr">A. NGÓI LỢP</div>
   <div id="ngoi-list-A"></div>
@@ -1109,11 +1111,17 @@ function renderKinhInGach(){
       +'cursor:pointer;font-family:var(--f);box-sizing:border-box">'
       +'Zalo ↗'
       +'</button>'
-      +'</div>';
+      +'</div>'
+      +'<button class="kinh-tk-btn" style="'
+      +'display:block;width:100%;margin-top:6px;padding:8px;border-radius:10px;'
+      +'border:1.5px solid #C0232A;background:none;color:#C0232A;font-size:12px;'
+      +'font-weight:700;cursor:pointer;font-family:var(--f);box-sizing:border-box">'
+      +'📦 Xem tồn kho theo kho/lô'
+      +'</button>';
 
     div.innerHTML=html;
 
-    (function(ma){
+    (function(ma,ten){
       div.querySelector('.kinh-add-btn').addEventListener('click',function(){
         addToDonKinh(ma);
       });
@@ -1123,7 +1131,10 @@ function renderKinhInGach(){
       div.querySelector('.kinh-zalo-btn').addEventListener('click',function(){
         shareZaloKinh(ma);
       });
-    })(p.ma);
+      div.querySelector('.kinh-tk-btn').addEventListener('click',function(){
+        moTonKho(ma,ten);
+      });
+    })(p.ma,p.ten);
     el.appendChild(div);
   });
 }
@@ -1654,6 +1665,11 @@ function renderKinh(){
     btnRow.appendChild(btnImg);
     btnRow.appendChild(btnZ);
     div.appendChild(btnRow);
+    var btnTK=document.createElement('button');
+    btnTK.textContent='📦 Xem tồn kho theo kho/lô';
+    btnTK.style.cssText='width:100%;margin-top:6px;padding:7px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnTK.onclick=function(ma,ten){ return function(){ moTonKho(ma,ten); }; }(p.ma,p.ten);
+    div.appendChild(btnTK);
     el.appendChild(div);
   });
 }
@@ -1714,6 +1730,11 @@ function renderKeo(){
     btnRow.appendChild(btnImg);
     btnRow.appendChild(btnZ);
     div.appendChild(btnRow);
+    var btnTK=document.createElement('button');
+    btnTK.textContent='📦 Xem tồn kho theo kho/lô';
+    btnTK.style.cssText='width:100%;margin-top:6px;padding:7px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnTK.onclick=function(ma,ten){return function(){moTonKho(ma,ten);};}(p.ma,p.ten);
+    div.appendChild(btnTK);
     el.appendChild(div);
   });
 }
@@ -2344,6 +2365,8 @@ function showApp(name){
   setTimeout(function(){ mergeCTintoDATA(); render(); }, 100);
   // Tải danh sách khách hàng cũ để gợi ý tự động (chạy nền)
   fetchKhachHangFromSheet();
+  // Tải tồn kho chi tiết theo kho + số lô (chạy nền)
+  fetchTonKhoChiTiet();
 }
 
 function doLogout(){
@@ -2951,6 +2974,82 @@ function onChonKhachHang(){
     var dc=document.getElementById('don-dc');
     if(dc && !dc.value.trim() && found.diachi) dc.value=found.diachi;
   }
+}
+
+// ===== TỒN KHO CHI TIẾT THEO KHO + SỐ LÔ =====
+var tonKhoChiTiet={};
+var TEN_TIER={nhanh:'🟢 Có hàng ngay',mai:'🟡 Hôm nay chuyển – mai có hàng',cho15:'🔴 Chờ 15 ngày'};
+function fetchTonKhoChiTiet(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var cbName='_onTonKhoChiTiet';
+  window[cbName]=function(res){
+    if(res && res.status==='ok' && res.data) tonKhoChiTiet=res.data;
+    var s=document.getElementById('_tkct_script');
+    if(s) s.remove();
+  };
+  var old=document.getElementById('_tkct_script');
+  if(old) old.remove();
+  var s=document.createElement('script');
+  s.id='_tkct_script';
+  s.src=APPS_URL+'?action=getTonKhoChiTiet&callback='+cbName;
+  s.onerror=function(){ s.remove(); };
+  document.head.appendChild(s);
+}
+// Badge gọn hiện trên thẻ sản phẩm — 3 chấm màu theo tốc độ giao, không cần bấm vào
+function tonKhoBadgeHtml(ma){
+  var tk=tonKhoChiTiet[normMa(ma)]||tonKhoChiTiet[ma];
+  if(!tk){
+    var k=Object.keys(tonKhoChiTiet).find(function(key){return normMa(key)===normMa(ma);});
+    tk=k?tonKhoChiTiet[k]:null;
+  }
+  if(!tk || tk.tong<=0) return '';
+  var parts=[];
+  if(tk.tier.nhanh>0) parts.push('🟢'+Math.round(tk.tier.nhanh).toLocaleString('vi-VN'));
+  if(tk.tier.mai>0)   parts.push('🟡'+Math.round(tk.tier.mai).toLocaleString('vi-VN'));
+  if(tk.tier.cho15>0) parts.push('🔴'+Math.round(tk.tier.cho15).toLocaleString('vi-VN'));
+  return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+parts.join(' · ')+'</span>';
+}
+function moTonKho(ma, tenSP){
+  var tk=tonKhoChiTiet[normMa(ma)]||tonKhoChiTiet[ma];
+  if(!tk){
+    var k=Object.keys(tonKhoChiTiet).find(function(key){return normMa(key)===normMa(ma);});
+    tk=k?tonKhoChiTiet[k]:null;
+  }
+  var modal=document.createElement('div');
+  modal.id='modal-ton-kho';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  var body;
+  if(!tk || tk.tong<=0){
+    body='<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">Hết hàng / chưa có dữ liệu tồn kho cho mã này.</p>';
+  } else {
+    body='<div style="background:#FDECEA;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center">'
+      +'<p style="font-size:12px;color:#888;margin-bottom:2px">Tổng khả dụng toàn quốc</p>'
+      +'<p style="font-size:18px;font-weight:800;color:#C0232A;margin:0">'+Math.round(tk.tong).toLocaleString('vi-VN')+'</p></div>';
+    ['nhanh','mai','cho15'].forEach(function(tier){
+      var khoList=tk.kho.filter(function(k){return k.tier===tier;});
+      if(!khoList.length) return;
+      body+='<p style="font-size:12px;font-weight:700;margin:10px 0 6px">'+TEN_TIER[tier]+'</p>';
+      khoList.forEach(function(k){
+        body+='<div style="border:1px solid var(--bd,#eee);border-radius:8px;padding:8px 10px;margin-bottom:6px">'
+          +'<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:4px">'
+          +'<span>'+k.ten+'</span><span>'+Math.round(k.tong).toLocaleString('vi-VN')+'</span></div>'
+          +k.lo.map(function(l){
+            return '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t2);padding:2px 0">'
+              +'<span>Lô '+(l.so_lo||'–')+(l.mau?' · màu '+l.mau:'')+'</span><span>'+Math.round(l.sl).toLocaleString('vi-VN')+'</span></div>';
+          }).join('')
+          +'</div>';
+      });
+    });
+  }
+  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    +'<p style="font-size:15px;font-weight:700;margin:0">📦 Tồn kho — '+(tenSP||ma)+'</p>'
+    +'<button onclick="document.getElementById(\'modal-ton-kho\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
+    +'</div>'
+    +'<p style="font-size:11px;color:#888;margin-bottom:10px">Mỗi lô là 1 lần sản xuất — nên lấy hết trong 1 lô để tránh lệch màu khi thi công cùng 1 công trình.</p>'
+    +body
+    +'</div>';
+  document.body.appendChild(modal);
 }
 
 // ===== LỊCH SỬ ĐƠN HÀNG =====
