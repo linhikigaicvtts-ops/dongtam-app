@@ -2062,6 +2062,7 @@ function saveSession(user){
 }
 
 function doLogin(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var u = (document.getElementById('inp-user').value||'').trim().toLowerCase();
   var pw = (document.getElementById('inp-pass').value||'');
   var errEl = document.getElementById('login-err');
