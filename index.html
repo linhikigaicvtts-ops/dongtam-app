@@ -759,7 +759,7 @@ var imgStore=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs')
 var imgStoreMulti=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs_multi')||'{}'); }catch(e){ return {}; } })();
 // Mã sản phẩm đôi khi lệch hoa/thường hoặc dư khoảng trắng giữa tab "Ảnh sản phẩm"
 // và các tab giá (Kính/Ngói/Keo) -> chuẩn hóa để so khớp không bị bỏ lỡ ảnh.
-function normMa(s){ return String(s||'').trim().toUpperCase().replace(/\s+/g,''); }
+function normMa(s){ return String(s||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,''); }
 function timAnh(ma){
   if(imgStore[ma]) return imgStore[ma];
   var nm=normMa(ma);
