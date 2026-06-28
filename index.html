@@ -1146,20 +1146,30 @@ function renderKinhInGach(){
 
 
 function mergeCTintoDATA(){
-  var ex={};
-  DATA.forEach(function(p){ ex[p.ma]=true; });
-  CT1_DATA.forEach(function(c){
-    if(ex[c.ma]) return;
-    DATA.push({ma:c.ma,kc:c.kc,cat:c.cat,gio:'',le:c.le||0,nhan:0,giao:0,
-      ns:c.nk||0,gs:c.gh||0,ct150nk:c.ct150nk||0,ct150gh:c.ct150gh||0,_fromCT:'CT1'});
-    ex[c.ma]=true;
-  });
-  CT2_DATA.forEach(function(c){
-    if(ex[c.ma]) return;
-    DATA.push({ma:c.ma,kc:c.kc,cat:c.cat,gio:'',le:c.le||0,nhan:0,giao:0,
-      ns:c.nk||0,gs:c.gh||0,ct150nk:c.ct150nk||0,ct150gh:c.ct150gh||0,_fromCT:'CT2'});
-    ex[c.ma]=true;
-  });
+  // Mã đã có sẵn trong DATA (catalog gạch thường) nhưng tháng này CŨNG đang
+  // Sale/Xả kho → vẫn phải gắn cờ _fromCT + giá sale lên đúng record đó,
+  // không được bỏ qua. Trước đây code chỉ thêm mã MỚI, bỏ qua mã đã tồn
+  // tại, khiến các mã vừa có trong catalog vừa đang sale bị mất cờ sale khi
+  // xem ở tab Gạch (badge "GIÁ SALE" và nội dung Zalo hiện sai giá thường).
+  var idx={};
+  DATA.forEach(function(p,i){ idx[p.ma]=i; });
+  function apCT(c, label){
+    var i = idx[c.ma];
+    if(i!==undefined){
+      var p = DATA[i];
+      if(!p._fromCT) p._fromCT = label;
+      if(c.nk>0) p.ns = c.nk;
+      if(c.gh>0) p.gs = c.gh;
+      if(c.ct150nk>0) p.ct150nk = c.ct150nk;
+      if(c.ct150gh>0) p.ct150gh = c.ct150gh;
+    } else {
+      DATA.push({ma:c.ma,kc:c.kc,cat:c.cat,gio:'',le:c.le||0,nhan:0,giao:0,
+        ns:c.nk||0,gs:c.gh||0,ct150nk:c.ct150nk||0,ct150gh:c.ct150gh||0,_fromCT:label});
+      idx[c.ma]=DATA.length-1;
+    }
+  }
+  CT1_DATA.forEach(function(c){ apCT(c,'CT1'); });
+  CT2_DATA.forEach(function(c){ apCT(c,'CT2'); });
 }
 
 function render(){
