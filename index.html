@@ -260,6 +260,7 @@ input::placeholder{color:var(--t3)}
   display:none;margin:8px 10px;
   background:var(--bg1);border:1.5px solid var(--red);
   border-radius:var(--r);overflow:hidden;
+  max-height:calc(100vh - 140px);overflow-y:auto;
 }
 .dp-head{
   background:var(--red);color:#fff;
@@ -1718,6 +1719,19 @@ function loadImg(ma){
   }
 }
 
+function convertImgUrl(url){
+  if(!url) return '';
+  // Google Drive: /file/d/ID → googleusercontent
+  var m1 = url.match(/\/d\/([a-zA-Z0-9_-]{20,})/);
+  if(m1) return 'https://lh3.googleusercontent.com/d/'+m1[1];
+  // Google Photos: photos.app.goo.gl → không thể embed trực tiếp
+  // Thử dùng thumbnail API
+  if(url.indexOf('photos.app.goo.gl') >= 0 || url.indexOf('photo.google.com') >= 0){
+    return url; // Giữ nguyên, sẽ fallback
+  }
+  return url;
+}
+
 function renderDpImg(){
   var img     = document.getElementById('dp-img');
   var prev    = document.getElementById('dp-img-prev');
@@ -1727,8 +1741,28 @@ function renderDpImg(){
 
   if(!curImgList.length) return;
 
-  img.src = curImgList[curImgIdx];
-  img.onerror = function(){ this.src=''; };
+  var url = convertImgUrl(curImgList[curImgIdx]);
+  img.src = url;
+  img.onerror = function(){
+    // Nếu load lỗi - thử URL gốc
+    if(this.src !== curImgList[curImgIdx]){
+      this.src = curImgList[curImgIdx];
+    } else {
+      // Hiện placeholder
+      this.style.display='none';
+      var ph = document.getElementById('dp-img-placeholder');
+      if(!ph){
+        ph = document.createElement('div');
+        ph.id = 'dp-img-placeholder';
+        ph.style.cssText='padding:30px;text-align:center;color:#888;font-size:12px';
+        ph.innerHTML='⚠️ Không load được ảnh<br><small>Dùng link Drive thay vì Photos</small>';
+        this.parentNode.appendChild(ph);
+      }
+    }
+  };
+  img.style.display='block';
+  var ph=document.getElementById('dp-img-placeholder');
+  if(ph) ph.remove();
 
   var multi = curImgList.length > 1;
   prev.style.display    = multi ? 'block' : 'none';
@@ -1784,14 +1818,20 @@ function shareZalo(){
     lines.push(isCT2?'📦 Xả kho CT2':'🔥 Sale tháng 07');
     lines.push('━━━━━━━━━━━━━━');
     if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
+    if(le>0)      lines.push('');
     if(saleNK>0)  lines.push('🔥 Giá Sale ĐL nhận kho: '+f(saleNK));
+    if(saleNK>0)  lines.push('');
     if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
+    if(ct150nk>0) lines.push('');
     if(saleGH>0)  lines.push('🚚 Giá Sale ĐL giao hàng: '+f(saleGH));
   } else {
     lines.push('━━━━━━━━━━━━━━');
     if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
+    if(le>0)      lines.push('');
     if(nk>0)      lines.push('🏪 Giá đại lý nhận kho: '+f(nk));
+    if(nk>0)      lines.push('');
     if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
+    if(ct150nk>0) lines.push('');
     if(gh>0)      lines.push('🚚 Giá đại lý giao hàng: '+f(gh));
   }
 
