@@ -1441,9 +1441,15 @@ function renderSale(){
 
     var btnRow=document.createElement('div');
     btnRow.style.cssText='display:flex;border-top:1px solid var(--bd)';
+    var btnImg=document.createElement('button');
+    btnImg.style.cssText='flex:0 0 42px;padding:9px 0;border:none;border-right:1px solid rgba(255,255,255,.2);background:#388E3C;color:#fff;font-size:14px;cursor:pointer;font-family:var(--f)';
+    btnImg.innerHTML='📤';
+    btnImg.title='Chia sẻ nhiều ảnh sản phẩm';
+    (function(pp){ btnImg.onclick=function(e){ e.stopPropagation(); chiaSeAnhSanPham(pp.ma); }; })(p);
+    btnRow.appendChild(btnImg);
     var btnZ=document.createElement('button');
-    btnZ.style.cssText='flex:0 0 42px;padding:9px 0;border:none;border-right:1px solid rgba(255,255,255,.2);background:#0068FF;color:#fff;font-size:15px;cursor:pointer;font-family:var(--f)';
-    btnZ.innerHTML='💬';
+    btnZ.style.cssText='flex:0 0 60px;padding:9px 0;border:none;border-right:1px solid rgba(255,255,255,.2);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnZ.textContent='Zalo ↗';
     (function(pp){ btnZ.onclick=function(e){ e.stopPropagation(); shareZaloSale(pp); }; })(p);
     btnRow.appendChild(btnZ);
     var btn=document.createElement('button');
