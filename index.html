@@ -546,6 +546,9 @@ input::placeholder{color:var(--t3)}
 <div id="tab-ngoi" class="tc">
   <p style="font-size:13px;color:var(--t2);margin-bottom:10px">Ngói tráng men Đồng Tâm · Giá <b>đồng/viên</b> · Hiệu lực đến 31/03/2027</p>
   <div id="ngoi-detail" style="display:none;background:var(--bg1);border:2px solid #C0232A;border-radius:var(--r12);padding:14px;margin-bottom:12px">
+    <div id="nd-img-wrap" style="display:none;margin-bottom:10px;border-radius:var(--r8);overflow:hidden;aspect-ratio:1;background:var(--bg2)">
+      <img id="nd-img" style="width:100%;height:100%;object-fit:cover" onerror="this.closest('#nd-img-wrap').style.display='none'"/>
+    </div>
     <div style="display:flex;justify-content:space-between;margin-bottom:10px">
       <div>
         <p id="nd-ten" style="font-size:14px;font-weight:600;margin-bottom:2px"></p>
@@ -754,6 +757,23 @@ var donItems=[];
 var curGiaoHang='nhan';
 var imgStore=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs')||'{}'); }catch(e){ return {}; } })();
 var imgStoreMulti=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs_multi')||'{}'); }catch(e){ return {}; } })();
+// Mã sản phẩm đôi khi lệch hoa/thường hoặc dư khoảng trắng giữa tab "Ảnh sản phẩm"
+// và các tab giá (Kính/Ngói/Keo) -> chuẩn hóa để so khớp không bị bỏ lỡ ảnh.
+function normMa(s){ return String(s||'').trim().toUpperCase().replace(/\s+/g,''); }
+function timAnh(ma){
+  if(imgStore[ma]) return imgStore[ma];
+  var nm=normMa(ma);
+  var k=Object.keys(imgStore).find(function(key){ return normMa(key)===nm; });
+  return k?imgStore[k]:null;
+}
+function timAnhMulti(ma){
+  if(imgStoreMulti[ma] && imgStoreMulti[ma].length) return imgStoreMulti[ma];
+  var nm=normMa(ma);
+  var k=Object.keys(imgStoreMulti).find(function(key){ return normMa(key)===nm; });
+  if(k && imgStoreMulti[k] && imgStoreMulti[k].length) return imgStoreMulti[k];
+  var single=timAnh(ma);
+  return single?[single]:[];
+}
 
 // Fetch bảng giá từ Google Sheet (JSONP)
 // Gọi khi app mở — cập nhật DATA từ Sheet, không cần sửa code
@@ -1290,8 +1310,8 @@ function renderSale(){
     var base  = p.nhan||p.giao;
     var save  = base&&saleP ? Math.round((base-saleP)/base*100) : 0;
 
-    // Lấy danh sách ảnh
-    var imgs = imgStoreMulti[p.ma] || (imgStore[p.ma]?[imgStore[p.ma]]:[]);
+    // Lấy danh sách ảnh (khớp linh hoạt hoa/thường, dư khoảng trắng)
+    var imgs = timAnhMulti(p.ma);
     var curIdx = 0;
 
     var card = document.createElement('div');
@@ -1464,7 +1484,7 @@ var ngoi_A=['TITAN001','ALPHA001'];
 function getImgHtml(ma, size, emoji) {
   size = size||56;
   emoji = emoji||'🔲';
-  var url = imgStore[ma];
+  var url = timAnh(ma);
   if(url) return '<img src="'+url+'" style="width:'+size+'px;height:'+size+'px;object-fit:cover;border-radius:8px;margin-right:10px;flex-shrink:0" onerror="this.style.display=\'none\'">';
   return '<div style="width:'+size+'px;height:'+size+'px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;margin-right:10px;flex-shrink:0;font-size:'+(size*0.4)+'px">'+emoji+'</div>';
 }
@@ -1490,6 +1510,10 @@ function renderNgoi(){
 function showNgoi(ma){
   curNgoiMa=ma;
   var p=NGOI.find(function(x){return x.ma===ma;}); if(!p) return;
+  var ndImgUrl=timAnh(p.ma);
+  var ndImgWrap=document.getElementById('nd-img-wrap');
+  if(ndImgUrl){ document.getElementById('nd-img').src=ndImgUrl; ndImgWrap.style.display='block'; }
+  else { ndImgWrap.style.display='none'; }
   document.getElementById('nd-ten').textContent=p.ten;
   document.getElementById('nd-kc').textContent=p.kc+' · '+p.dong_goi;
   document.getElementById('nd-le').textContent=p.le.toLocaleString('vi-VN')+'đ/viên';
@@ -1705,13 +1729,8 @@ function loadImg(ma){
   var btn  = document.getElementById('dp-img-btn');
   var wrap = document.getElementById('dp-img-wrap');
 
-  // Lấy tất cả ảnh của mã SP (multi hoặc single)
-  curImgList = [];
-  if(imgStoreMulti[ma] && imgStoreMulti[ma].length > 0){
-    curImgList = imgStoreMulti[ma];
-  } else if(imgStore[ma]){
-    curImgList = [imgStore[ma]];
-  }
+  // Lấy tất cả ảnh của mã SP (multi hoặc single, khớp linh hoạt hoa/thường)
+  curImgList = timAnhMulti(ma);
 
   curImgIdx = 0;
 
