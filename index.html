@@ -486,6 +486,7 @@ input::placeholder{color:var(--t3)}
       </div>
       <div style="display:flex;gap:6px">
         <button id="dp-img-btn" onclick="toggleImgInput()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:1px dashed var(--bd2);color:var(--t2);background:var(--bg2)">📷 Thêm ảnh Drive</button>
+        <button onclick="chiaSeAnhSanPham(curP_ma)" style="padding:8px 10px;font-size:12px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Ảnh</button>
         <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
         <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:600;font-family:var(--f)">🛒 + Đơn</button>
       </div>
@@ -610,6 +611,7 @@ input::placeholder{color:var(--t3)}
       <button onclick="themNgoiVaoDon()" style="flex:1;padding:11px;border:none;border-radius:var(--r8);background:#C0232A;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">
         🛒 Thêm vào đơn
       </button>
+      <button onclick="chiaSeAnhSanPham(curNgoiMa)" style="padding:11px 12px;border:none;border-radius:var(--r8);background:#388E3C;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)" title="Chia sẻ nhiều ảnh sản phẩm">📤 Ảnh</button>
       <button onclick="shareZaloNgoi(curNgoiMa)" style="padding:11px 14px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">
         Zalo ↗
       </button>
@@ -1105,6 +1107,12 @@ function renderKinhInGach(){
       +'text-align:center;box-sizing:border-box">'
       +(inDon?'✓  Đã thêm vào đơn':'🛒  + Thêm vào đơn')
       +'</button>'
+      +'<button class="kinh-img-btn" title="Chia sẻ nhiều ảnh sản phẩm" style="'
+      +'padding:12px 14px;border:none;border-radius:10px;'
+      +'background:#388E3C;color:#fff;font-size:14px;font-weight:700;'
+      +'cursor:pointer;font-family:var(--f);box-sizing:border-box">'
+      +'📤'
+      +'</button>'
       +'<button class="kinh-zalo-btn" style="'
       +'padding:12px 16px;border:none;border-radius:10px;'
       +'background:#0068FF;color:#fff;font-size:14px;font-weight:700;'
@@ -1118,6 +1126,9 @@ function renderKinhInGach(){
     (function(ma){
       div.querySelector('.kinh-add-btn').addEventListener('click',function(){
         addToDonKinh(ma);
+      });
+      div.querySelector('.kinh-img-btn').addEventListener('click',function(){
+        chiaSeAnhSanPham(ma);
       });
       div.querySelector('.kinh-zalo-btn').addEventListener('click',function(){
         shareZaloKinh(ma);
@@ -1641,11 +1652,17 @@ function renderKinh(){
     btn.textContent='🛒 + Thêm vào đơn';
     btn.style.cssText='flex:1;padding:8px;border:none;border-radius:var(--r8);background:#0D47A1;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btn.onclick=function(ma){ return function(){ addToDonKinh(ma); }; }(p.ma);
+    var btnImg=document.createElement('button');
+    btnImg.textContent='📤 Ảnh';
+    btnImg.title='Chia sẻ nhiều ảnh sản phẩm';
+    btnImg.style.cssText='padding:8px 10px;border:none;border-radius:var(--r8);background:#388E3C;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnImg.onclick=function(ma){ return function(){ chiaSeAnhSanPham(ma); }; }(p.ma);
     var btnZ=document.createElement('button');
     btnZ.textContent='Zalo ↗';
     btnZ.style.cssText='padding:8px 12px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btnZ.onclick=function(ma){ return function(){ shareZaloKinh(ma); }; }(p.ma);
     btnRow.appendChild(btn);
+    btnRow.appendChild(btnImg);
     btnRow.appendChild(btnZ);
     div.appendChild(btnRow);
     el.appendChild(div);
@@ -1695,11 +1712,17 @@ function renderKeo(){
     btnK.textContent='🛒 + Thêm vào đơn';
     btnK.style.cssText='flex:1;padding:7px;border:none;border-radius:var(--r8);background:#7B1FA2;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btnK.onclick=function(ma){return function(){addToDonKeo(ma);};}(p.ma);
+    var btnImg=document.createElement('button');
+    btnImg.textContent='📤 Ảnh';
+    btnImg.title='Chia sẻ nhiều ảnh sản phẩm';
+    btnImg.style.cssText='padding:7px 10px;border:none;border-radius:var(--r8);background:#388E3C;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    btnImg.onclick=function(ma){return function(){chiaSeAnhSanPham(ma);};}(p.ma);
     var btnZ=document.createElement('button');
     btnZ.textContent='Zalo ↗';
     btnZ.style.cssText='padding:7px 12px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
     btnZ.onclick=function(ma){return function(){shareZaloKeo(ma);};}(p.ma);
     btnRow.appendChild(btnK);
+    btnRow.appendChild(btnImg);
     btnRow.appendChild(btnZ);
     div.appendChild(btnRow);
     el.appendChild(div);
@@ -2009,6 +2032,46 @@ function copyZaloMsg(msg){
   navigator.clipboard&&navigator.clipboard.writeText
     ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
     :fallbackCopy(msg);
+}
+
+// ===== CHIA SẺ NHIỀU ẢNH SẢN PHẨM (qua Zalo/app khác trên điện thoại) =====
+// Dùng Web Share API (navigator.share với files) để gửi thẳng nhiều ảnh +
+// tên sản phẩm sang Zalo/Messenger/... giống nút Share gốc trên điện thoại.
+// Nếu máy/trình duyệt không hỗ trợ (thường là máy tính), tự mở từng ảnh ở
+// tab mới để nhân viên bấm giữ lưu ảnh rồi tự gửi qua Zalo.
+function chiaSeAnhSanPham(ma, tenSP){
+  var imgs = timAnhMulti(ma);
+  if(!imgs.length){ alert('Sản phẩm này chưa có ảnh trong Sheet!'); return; }
+
+  function moTabDuPhong(){
+    imgs.slice(0,5).forEach(function(u){ window.open(convertImgUrl(u), '_blank'); });
+    showToast('📷 Đã mở '+Math.min(imgs.length,5)+' ảnh ở tab mới — bấm giữ ảnh để lưu, rồi gửi qua Zalo');
+  }
+
+  if(!(navigator.share && navigator.canShare)){
+    moTabDuPhong();
+    return;
+  }
+
+  showToast('⏳ Đang chuẩn bị ảnh để chia sẻ...');
+  Promise.all(imgs.map(function(u){
+    return fetch(convertImgUrl(u)).then(function(res){
+      if(!res.ok) throw new Error('fetch fail');
+      return res.blob();
+    });
+  })).then(function(blobs){
+    var files = blobs.map(function(b,i){
+      return new File([b], (ma||'anh')+'_'+(i+1)+'.jpg', {type:b.type||'image/jpeg'});
+    });
+    if(navigator.canShare({files:files})){
+      return navigator.share({files:files, title:tenSP||ma, text:tenSP||ma});
+    }
+    throw new Error('canShare false');
+  }).catch(function(err){
+    if(err && err.name==='AbortError') return; // người dùng tự bấm hủy share
+    console.log('Chia sẻ ảnh qua Web Share thất bại, dùng phương án dự phòng:', err);
+    moTabDuPhong();
+  });
 }
 
 function shareZaloNgoi(ma){
