@@ -1948,20 +1948,25 @@ function copyZaloMsg(msg){
 function shareZaloNgoi(ma){
   var p=NGOI.find(function(x){return x.ma===ma;}); if(!p) return;
   var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/viên':'–'; };
+  // CT tháng 07: giảm thêm 10% giá nhận tại kho (chưa có cột riêng trong Sheet
+  // nên tính mặc định = 90% giá nhận kho; nếu cần số chính xác khác theo từng
+  // mã, thêm cột "CT150 Ngói" vào Sheet và đọc qua p.ns/p.ns2 sau).
+  var ct1=p.ns>0?p.ns:Math.round(p.nhan*0.9);
+  var ct2=Math.round(p.nhan2*0.9);
   var lines=['🏠 NGÓI ĐỒNG TÂM'];
   lines.push('📌 Mã: '+p.ma);
   lines.push('📐 Quy cách: '+p.kc+' · '+p.dong_goi);
   lines.push('━━━━━━━━━━━━━━');
   if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
-  lines.push('2. Đại lý dưới 1.500 viên:');
+  lines.push('2. Giá đại lý lấy hàng dưới 1.500 viên:');
   lines.push('   Nhận tại kho: '+f(p.nhan));
+  if(ct1>0) lines.push('   ---->>> Chương trình tháng 7 nhận kho giảm thêm 10% còn: '+f(ct1)+' 🔥');
   lines.push('   Đi giao: '+f(p.giao));
   lines.push('');
-  lines.push('3. Đại lý từ 1.500 viên 🔥:');
+  lines.push('3. Giá đại lý lấy hàng từ 1.500 viên 🔥 trở lên:');
   lines.push('   Nhận tại kho: '+f(p.nhan2));
+  if(ct2>0) lines.push('   ---->>> Chương trình tháng 7 nhận kho giảm thêm 10% còn: '+f(ct2)+' 🔥');
   lines.push('   Đi giao: '+f(p.giao2));
-  lines.push('━━━━━━━━━━━━━━');
-  lines.push('📞 Liên hệ báo giá chi tiết');
   copyZaloMsg(lines.join('\n'));
 }
 
@@ -1973,15 +1978,13 @@ function shareZaloKeo(ma){
   lines.push('📐 Quy cách: '+(p.qc||''));
   lines.push('━━━━━━━━━━━━━━');
   if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
-  lines.push('2. Đại lý dưới 50 bao:');
+  lines.push('2. Giá đại lý lấy hàng dưới 50 bao:');
   lines.push('   Nhận tại kho: '+f(p.nhan));
   lines.push('   Đi giao: '+f(p.giao));
   lines.push('');
-  lines.push('3. Đại lý từ 50 bao 🔥 (giá tốt hơn):');
+  lines.push('3. Giá đại lý lấy hàng từ 50 bao 🔥 trở lên (giá tốt hơn):');
   lines.push('   Nhận tại kho: '+f(p.nhan2));
   lines.push('   Đi giao: '+f(p.giao2));
-  lines.push('━━━━━━━━━━━━━━');
-  lines.push('📞 Liên hệ báo giá chi tiết');
   copyZaloMsg(lines.join('\n'));
 }
 
@@ -1993,19 +1996,17 @@ function shareZaloKinh(ma){
   lines.push('📐 Kích cỡ: '+p.kc+'cm · '+p.dong_goi);
   lines.push('━━━━━━━━━━━━━━');
   if(p.le>0){ lines.push('1. Giá lẻ: '+f(p.le)); lines.push(''); }
-  lines.push('2. Đại lý ≤ 20 thùng:');
+  lines.push('2. Giá đại lý lấy hàng dưới 20 thùng:');
   lines.push('   Nhận tại kho: '+f(p.nhan));
   lines.push('   Đi giao: '+f(p.giao));
   lines.push('');
-  lines.push('3. Đại lý 21–49 thùng:');
+  lines.push('3. Giá đại lý lấy hàng từ 21 đến 49 thùng:');
   lines.push('   Nhận tại kho: '+f(p.nhan2));
   lines.push('   Đi giao: '+f(p.giao2));
   lines.push('');
-  lines.push('4. Đại lý ≥ 50 thùng 🔥 (giá tốt nhất):');
+  lines.push('4. Giá đại lý lấy hàng từ 50 thùng 🔥 trở lên (giá tốt nhất):');
   lines.push('   Nhận tại kho: '+f(p.nhan3));
   lines.push('   Đi giao: '+f(p.giao3));
-  lines.push('━━━━━━━━━━━━━━');
-  lines.push('📞 Liên hệ báo giá chi tiết');
   copyZaloMsg(lines.join('\n'));
 }
 
