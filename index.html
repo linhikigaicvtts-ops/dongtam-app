@@ -1796,48 +1796,57 @@ function shareZalo(){
   var ctData = CT1_DATA.find(function(x){return x.ma===p.ma;})
             || CT2_DATA.find(function(x){return x.ma===p.ma;});
 
-  var isSale = p._fromCT==='CT1' || p._fromCT==='CT2'
-            || (p.ns>0) || (p.gs>0);
+  // isSale = chỉ khi SP từ CT1/CT2 (có đánh dấu _fromCT)
+  // SP thường dù có ns>0 (từ merge) vẫn KHÔNG phải Sale
+  var isSale = p._fromCT==='CT1' || p._fromCT==='CT2';
   var isCT2  = p._fromCT==='CT2';
 
   var f = function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
 
   // Lấy đúng giá
   var le      = p.le      || (ctData?ctData.le:0)       || 0;
-  var nk      = p.nhan    || 0;
-  var gh      = p.giao    || 0;
-  var saleNK  = p.ns      || (ctData?ctData.nk:0)      || 0;
-  var saleGH  = p.gs      || (ctData?ctData.gh:0)      || 0;
+  var nk      = p.nhan    || 0;  // Giá ĐL NK thường
+  var gh      = p.giao    || 0;  // Giá ĐL GH thường
+  var saleNK  = p.ns      || (ctData?ctData.nk:0)      || 0;  // Giá Sale NK
+  var saleGH  = p.gs      || (ctData?ctData.gh:0)      || 0;  // Giá Sale GH
   var ct150nk = p.ct150nk || (ctData?ctData.ct150nk:0) || 0;
-  // Nếu vẫn chưa có CT150 → tự tính 95% giá NK
+  // CT150 fallback = NK × 95%
   if(!ct150nk){
     var baseForCT150 = isSale ? saleNK : nk;
     if(baseForCT150 > 0) ct150nk = Math.round(baseForCT150 * 0.95);
   }
+  // SP thường: nếu nk=0 nhưng ns>0 (do merge) → vẫn dùng ns làm NK thường
+  if(!isSale && nk===0 && saleNK>0) nk = saleNK;
+  if(!isSale && gh===0 && saleGH>0) gh = saleGH;
 
-  var lines = ['GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
-    '📦 Mã: '+p.ma,
-    '📐 Kích cỡ: '+p.kc];
+  var lines = ['GẠCH ĐỒNG TÂM KV23'];
 
   if(isSale){
-    lines.push(isCT2?'📦 Xả kho CT2':'🔥 Sale tháng 07');
-    lines.push('━━━━━━━━━━━━━━');
-    if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
-    if(le>0)      lines.push('');
-    if(saleNK>0)  lines.push('🔥 Giá Sale ĐL nhận kho: '+f(saleNK));
-    if(saleNK>0)  lines.push('');
-    if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
-    if(ct150nk>0) lines.push('');
-    if(saleGH>0)  lines.push('🚚 Giá Sale ĐL giao hàng: '+f(saleGH));
+    lines.push('📌 Mã: '+p.ma+'  🔥 '+(isCT2?'Xả kho CT2':'Sale tháng 07'));
   } else {
-    lines.push('━━━━━━━━━━━━━━');
-    if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
+    lines.push('📌 Mã: '+p.ma);
+  }
+  lines.push('📐 Kích cỡ: '+p.kc);
+  lines.push('━━━━━━━━━━━━━━');
+
+  if(isSale){
+    if(le>0)      lines.push('1. Giá lẻ: '+f(le));
     if(le>0)      lines.push('');
-    if(nk>0)      lines.push('🏪 Giá đại lý nhận kho: '+f(nk));
+    if(saleNK>0){
+      lines.push('2. Giá Sale đại lý nhận kho: '+f(saleNK));
+      if(ct150nk>0) lines.push('---->>> Chương trình tháng 7 nhận kho giảm thêm 5% còn: '+f(ct150nk));
+    }
+    if(saleNK>0)  lines.push('');
+    if(saleGH>0)  lines.push('3. Giá Sale đại lý đi giao tận nơi Hồ Chí Minh: '+f(saleGH));
+  } else {
+    if(le>0)      lines.push('1. Giá lẻ: '+f(le));
+    if(le>0)      lines.push('');
+    if(nk>0){
+      lines.push('2. Giá đại lý nhận kho: '+f(nk));
+      if(ct150nk>0) lines.push('---->>> Chương trình tháng 7 nhận kho giảm thêm 5% còn: '+f(ct150nk));
+    }
     if(nk>0)      lines.push('');
-    if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
-    if(ct150nk>0) lines.push('');
-    if(gh>0)      lines.push('🚚 Giá đại lý giao hàng: '+f(gh));
+    if(gh>0)      lines.push('3. Giá đại lý đi giao tận nơi Hồ Chí Minh: '+f(gh));
   }
 
   var msg=lines.join('\n');
@@ -1849,14 +1858,23 @@ function shareZalo(){
 function shareZaloSale(p){
   var isCT2=p.loai_sale==='ct2';
   var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
-  var lines=['🏪 GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
-    '📦 Mã: '+p.ma, '📐 Kích cỡ: '+(p.kc||''),
-    isCT2?'📦 Xả kho CT2':'🔥 Sale tháng 07',
-    '━━━━━━━━━━━━━━'];
-  if(p.le>0)      lines.push('💰 Giá lẻ:                                             '+f(p.le));
-  if(p.nk>0)      lines.push('🔥 Giá Sale ĐL nhận kho:                    '+f(p.nk));
-  if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
-  if(p.gh>0)      lines.push('🚚 Giá Sale ĐL giao hàng:                   '+f(p.gh));
+  var ct150Sale = p.ct150nk || (p.nk>0 ? Math.round(p.nk*0.95) : 0);
+  var lines=['GẠCH ĐỒNG TÂM KV23'];
+  lines.push('📌 Mã: '+p.ma+'  🔥 '+(isCT2?'Xả kho CT2':'Sale tháng 07'));
+  lines.push('📐 Kích cỡ: '+(p.kc||''));
+  lines.push('━━━━━━━━━━━━━━');
+  if(p.le>0){
+    lines.push('1. Giá lẻ: '+f(p.le));
+    lines.push('');
+  }
+  if(p.nk>0){
+    lines.push('2. Giá Sale đại lý nhận kho: '+f(p.nk));
+    if(ct150Sale>0) lines.push('---->>> Chương trình tháng 7 nhận kho giảm thêm 5% còn: '+f(ct150Sale));
+    lines.push('');
+  }
+  if(p.gh>0){
+    lines.push('3. Giá Sale đại lý đi giao tận nơi Hồ Chí Minh: '+f(p.gh));
+  }
   var msg=lines.join('\n');
   navigator.clipboard&&navigator.clipboard.writeText
     ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
