@@ -1459,6 +1459,12 @@ function renderSale(){
     btnRow.appendChild(btn);
     card.appendChild(btnRow);
 
+    var btnTK=document.createElement('button');
+    btnTK.textContent='📦 Xem tồn kho theo kho/lô';
+    btnTK.style.cssText='width:100%;padding:7px;border:none;border-top:1px solid var(--bd);background:none;color:#C0232A;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
+    (function(pp){ btnTK.onclick=function(e){ e.stopPropagation(); moTonKho(pp.ma,pp.ten); }; })(p);
+    card.appendChild(btnTK);
+
     // Click card → mở detail
     card.addEventListener('click',function(){ swTab('tra'); setTimeout(function(){ showDP(p.ma); },80); });
 
