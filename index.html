@@ -170,7 +170,9 @@ input::placeholder{color:var(--t3)}
 }
 
 /* ===== TAB CONTENT ===== */
-.tc{display:none}.tc.on{display:block}
+/* padding-bottom đủ để nội dung cuối danh sách không bị thanh bottom-nav
+   (cố định, có nút tròn nổi lên -14px) che mất */
+.tc{display:none;padding-bottom:110px;box-sizing:border-box}.tc.on{display:block}
 .tab-wrap{padding:12px 14px}
 
 /* ===== SEARCH BAR (Tab Tra mã) ===== */
