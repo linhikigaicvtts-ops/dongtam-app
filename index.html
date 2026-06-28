@@ -334,7 +334,6 @@ input::placeholder{color:var(--t3)}
 /* ===== ẢNH SP ===== */
 #dp-img-wrap{border-radius:8px;overflow:hidden;margin-bottom:10px;aspect-ratio:1;background:var(--bg2)}
 #dp-img{width:100%;height:100%;object-fit:cover}
-#dp-img-btn{width:100%;padding:9px;border-radius:8px;background:var(--bg2);border:1.5px dashed var(--bd);font-size:12px;color:var(--t2);cursor:pointer;margin-bottom:10px}
 
 /* ===== CNT ===== */
 .cnt{font-size:11px;color:var(--t2);text-align:center;padding:6px 0 2px}
@@ -404,7 +403,6 @@ input::placeholder{color:var(--t3)}
     <button class="fb"    id="f-porcelain" onclick="setF('porcelain')">Porcelain</button>
     <button class="fb"    id="f-ceramic"   onclick="setF('ceramic')">Ceramic</button>
     <button class="fb"    id="f-kinh"      onclick="setF('kinh')">💎 Gạch kính</button>
-    <button class="fb"    id="f-sale"      onclick="setF('sale')">🔥 Sale</button>
   </div>
   <div style="display:flex;gap:0;margin:8px -10px 0;width:calc(100% + 20px)">
     <div id="size-sidebar" style="width:70px;flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--bd);overflow-y:auto;max-height:70vh">
@@ -485,17 +483,9 @@ input::placeholder{color:var(--t3)}
           background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px"></span>
       </div>
       <div style="display:flex;gap:6px">
-        <button id="dp-img-btn" onclick="toggleImgInput()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:1px dashed var(--bd2);color:var(--t2);background:var(--bg2)">📷 Thêm ảnh Drive</button>
-        <button onclick="chiaSeAnhSanPham(curP_ma)" style="padding:8px 10px;font-size:12px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Ảnh</button>
+        <button onclick="chiaSeAnhSanPham(curP_ma)" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Chia sẻ ảnh</button>
         <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
         <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:600;font-family:var(--f)">🛒 + Đơn</button>
-      </div>
-      <div id="dp-img-input-wrap" style="display:none;margin-top:8px">
-        <input type="text" id="dp-img-url" placeholder="Dán link Google Drive vào đây..." style="font-size:12px;padding:8px;margin-bottom:6px"/>
-        <div style="display:flex;gap:6px">
-          <button onclick="saveImg()" style="flex:1;font-size:12px;padding:7px;background:#C0232A;color:#fff;border:none;border-radius:var(--r8)">Lưu ảnh</button>
-          <button onclick="removeImg()" style="flex:1;font-size:12px;padding:7px;border:1px solid var(--bd2);border-radius:var(--r8)">Xóa ảnh</button>
-        </div>
       </div>
     </div>
   </div>
@@ -1304,7 +1294,6 @@ function showDP(ma){
   if(qtyInp) qtyInp.value=1;
   setTimeout(function(){ setDpUnit('m2'); },10);
   loadImg(ma);
-  document.getElementById('dp-img-input-wrap').style.display='none';
 }
 function calcM(){
   var p=DATA.find(function(x){return x.ma===curP_ma;}); if(!p) return;
@@ -1760,38 +1749,10 @@ function driveLink(url){
   return url;
 }
 
-function toggleImgInput(){
-  var w = document.getElementById('dp-img-input-wrap');
-  w.style.display = w.style.display==='none' ? 'block' : 'none';
-  if(w.style.display==='block'){
-    var cur = imgStore[curP_ma]||'';
-    document.getElementById('dp-img-url').value = cur;
-  }
-}
-
-function saveImg(){
-  var url = document.getElementById('dp-img-url').value.trim();
-  if(!url){ alert('Vui lòng dán link Google Drive'); return; }
-  var direct = driveLink(url);
-  imgStore[curP_ma] = direct;
-  saveImgStore();
-  document.getElementById('dp-img-input-wrap').style.display='none';
-  loadImg(curP_ma);
-}
-
-function removeImg(){
-  delete imgStore[curP_ma];
-  saveImgStore();
-  document.getElementById('dp-img-wrap').style.display='none';
-  document.getElementById('dp-img-input-wrap').style.display='none';
-  document.getElementById('dp-img-btn').textContent='📷 Thêm ảnh Drive';
-}
-
 var curImgIdx = 0;
 var curImgList = [];
 
 function loadImg(ma){
-  var btn  = document.getElementById('dp-img-btn');
   var wrap = document.getElementById('dp-img-wrap');
 
   // Lấy tất cả ảnh của mã SP (multi hoặc single, khớp linh hoạt hoa/thường)
@@ -1801,11 +1762,9 @@ function loadImg(ma){
 
   if(curImgList.length > 0){
     wrap.style.display = 'block';
-    btn.textContent = '✏️ Sửa ảnh';
     renderDpImg();
   } else {
     wrap.style.display = 'none';
-    btn.textContent = '📷 Thêm ảnh Drive';
     document.getElementById('dp-img-counter').style.display = 'none';
     document.getElementById('dp-img-dots').innerHTML = '';
   }
