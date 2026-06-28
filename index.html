@@ -463,8 +463,23 @@ input::placeholder{color:var(--t3)}
     </div>
     <!-- Ảnh sản phẩm -->
     <div id="dp-img-section" style="margin-top:10px">
-      <div id="dp-img-wrap" style="display:none;margin-bottom:8px;border-radius:var(--r8);overflow:hidden;background:var(--bg2)">
+      <div id="dp-img-wrap" style="display:none;margin-bottom:8px;border-radius:var(--r8);overflow:hidden;background:var(--bg2);position:relative">
         <img id="dp-img" src="" style="width:100%;max-height:220px;object-fit:cover;display:block"/>
+        <!-- Nút lướt ảnh -->
+        <button id="dp-img-prev" onclick="slideImg(-1)"
+          style="display:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);
+          width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);
+          color:#fff;font-size:16px;cursor:pointer;line-height:1">‹</button>
+        <button id="dp-img-next" onclick="slideImg(1)"
+          style="display:none;position:absolute;right:4px;top:50%;transform:translateY(-50%);
+          width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.45);
+          color:#fff;font-size:16px;cursor:pointer;line-height:1">›</button>
+        <!-- Dots -->
+        <div id="dp-img-dots" style="position:absolute;bottom:5px;left:0;right:0;
+          display:flex;justify-content:center;gap:4px"></div>
+        <!-- Counter -->
+        <span id="dp-img-counter" style="display:none;position:absolute;top:6px;right:8px;
+          background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px"></span>
       </div>
       <div style="display:flex;gap:6px">
         <button id="dp-img-btn" onclick="toggleImgInput()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:1px dashed var(--bd2);color:var(--t2);background:var(--bg2)">📷 Thêm ảnh Drive</button>
@@ -1172,8 +1187,18 @@ function showDP(ma){
     }
   }
   document.getElementById('dp-le').textContent=fmt(p.le);
-  document.getElementById('dp-nhan').textContent=fmt(p.nhan);
-  document.getElementById('dp-giao').textContent=fmt(p.giao);
+  // SP từ CT1/CT2: dùng giá sale làm giá NK/GH chính
+  var dispNhan = p.nhan > 0 ? p.nhan : (p.ns || 0);
+  var dispGiao = p.giao > 0 ? p.giao : (p.gs || 0);
+  document.getElementById('dp-nhan').textContent = fmt(dispNhan);
+  document.getElementById('dp-giao').textContent = fmt(dispGiao);
+  // Cập nhật label GIÁ ĐẠI LÝ → GIÁ SALE nếu là SP từ CT1/CT2
+  var giaDlLabel = document.getElementById('dp-gia-dl-label');
+  if(giaDlLabel){
+    if(p._fromCT==='CT1') giaDlLabel.innerHTML='🔥 GIÁ SALE THÁNG <span style="font-size:10px;background:#E8F5E9;color:#1B5E20;padding:1px 6px;border-radius:4px">CT1</span>';
+    else if(p._fromCT==='CT2') giaDlLabel.innerHTML='📦 GIÁ XẢ KHO <span style="font-size:10px;background:#FFF3E0;color:#E65100;padding:1px 6px;border-radius:4px">CT2</span>';
+    else giaDlLabel.textContent='GIÁ ĐẠI LÝ';
+  }
   // Tra giá sale từ CT1_DATA / CT2_DATA (nếu đã load)
   var saleInfo = CT1_DATA.find(function(x){return x.ma===ma;})
                || CT2_DATA.find(function(x){return x.ma===ma;});
@@ -1664,40 +1689,112 @@ function removeImg(){
   document.getElementById('dp-img-btn').textContent='📷 Thêm ảnh Drive';
 }
 
+var curImgIdx = 0;
+var curImgList = [];
+
 function loadImg(ma){
-  var url = imgStore[ma];
+  var btn  = document.getElementById('dp-img-btn');
   var wrap = document.getElementById('dp-img-wrap');
-  var btn = document.getElementById('dp-img-btn');
-  if(url){
-    document.getElementById('dp-img').src = url;
-    wrap.style.display='block';
-    btn.textContent='✏️ Sửa ảnh';
+
+  // Lấy tất cả ảnh của mã SP (multi hoặc single)
+  curImgList = [];
+  if(imgStoreMulti[ma] && imgStoreMulti[ma].length > 0){
+    curImgList = imgStoreMulti[ma];
+  } else if(imgStore[ma]){
+    curImgList = [imgStore[ma]];
+  }
+
+  curImgIdx = 0;
+
+  if(curImgList.length > 0){
+    wrap.style.display = 'block';
+    btn.textContent = '✏️ Sửa ảnh';
+    renderDpImg();
   } else {
-    wrap.style.display='none';
-    btn.textContent='📷 Thêm ảnh Drive';
+    wrap.style.display = 'none';
+    btn.textContent = '📷 Thêm ảnh Drive';
+    document.getElementById('dp-img-counter').style.display = 'none';
+    document.getElementById('dp-img-dots').innerHTML = '';
   }
 }
 
-function shareZalo(){
-  var p=DATA.find(function(x){return x.ma===curDpMa;});
-  if(!p) return;
-  var isSale=(p.ns>0||p.gs>0||p._fromCT==='CT1'||p._fromCT==='CT2');
-  var f=function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
-  var lines=['🏪 GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
-    '📦 Mã: '+p.ma, '📐 Kích cỡ: '+p.kc];
-  if(isSale) lines.push(p._fromCT==='CT2'?'📦 Xả kho CT2':'🔥 Sale tháng 07');
-  lines.push('━━━━━━━━━━━━━━');
-  if(!isSale){
-    if(p.le>0)      lines.push('💰 Giá lẻ:                                        '+f(p.le));
-    if(p.nhan>0)    lines.push('🏪 Giá ĐL nhận kho:                         '+f(p.nhan));
-    if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
-    if(p.giao>0)    lines.push('🚚 Giá ĐL giao hàng:                         '+f(p.giao));
-  } else {
-    if(p.le>0)      lines.push('💰 Giá lẻ:                                             '+f(p.le));
-    if(p.ns>0)      lines.push('🔥 Giá Sale ĐL nhận kho:                    '+f(p.ns));
-    if(p.ct150nk>0) lines.push('🔵 CT tháng 06-07 nhận kho giảm thêm 5%: '+f(p.ct150nk));
-    if(p.gs>0)      lines.push('🚚 Giá Sale ĐL giao hàng:                   '+f(p.gs));
+function renderDpImg(){
+  var img     = document.getElementById('dp-img');
+  var prev    = document.getElementById('dp-img-prev');
+  var next    = document.getElementById('dp-img-next');
+  var dots    = document.getElementById('dp-img-dots');
+  var counter = document.getElementById('dp-img-counter');
+
+  if(!curImgList.length) return;
+
+  img.src = curImgList[curImgIdx];
+  img.onerror = function(){ this.src=''; };
+
+  var multi = curImgList.length > 1;
+  prev.style.display    = multi ? 'block' : 'none';
+  next.style.display    = multi ? 'block' : 'none';
+  counter.style.display = multi ? 'block' : 'none';
+  counter.textContent   = (curImgIdx+1)+'/'+curImgList.length;
+
+  // Render dots
+  dots.innerHTML = '';
+  if(multi){
+    curImgList.forEach(function(_,i){
+      var d = document.createElement('span');
+      d.style.cssText = 'width:'+(i===curImgIdx?'14':'6')+'px;height:6px;border-radius:3px;'
+        +'background:'+(i===curImgIdx?'#fff':'rgba(255,255,255,.5)')+';transition:.2s';
+      dots.appendChild(d);
+    });
   }
+}
+
+function slideImg(dir){
+  if(!curImgList.length) return;
+  curImgIdx = (curImgIdx + dir + curImgList.length) % curImgList.length;
+  renderDpImg();
+}
+
+function shareZalo(){
+  var p=DATA.find(function(x){return x.ma===curP_ma;});
+  if(!p) return;
+
+  // Lấy thêm data từ CT1/CT2 nếu SP từ Sale
+  var ctData = CT1_DATA.find(function(x){return x.ma===p.ma;})
+            || CT2_DATA.find(function(x){return x.ma===p.ma;});
+
+  var isSale = p._fromCT==='CT1' || p._fromCT==='CT2'
+            || (p.ns>0) || (p.gs>0);
+  var isCT2  = p._fromCT==='CT2';
+
+  var f = function(n){ return n>0?n.toLocaleString('vi-VN')+'đ/m²':'–'; };
+
+  // Lấy đúng giá
+  var le      = p.le      || (ctData?ctData.le:0)       || 0;
+  var nk      = p.nhan    || 0;
+  var gh      = p.giao    || 0;
+  var saleNK  = p.ns      || (ctData?ctData.nk:0)      || 0;
+  var saleGH  = p.gs      || (ctData?ctData.gh:0)      || 0;
+  var ct150nk = p.ct150nk || (ctData?ctData.ct150nk:0) || 0;
+
+  var lines = ['GẠCH ĐỒNG TÂM KV23','━━━━━━━━━━━━━━',
+    '📦 Mã: '+p.ma,
+    '📐 Kích cỡ: '+p.kc];
+
+  if(isSale){
+    lines.push(isCT2?'📦 Xả kho CT2':'🔥 Sale tháng 07');
+    lines.push('━━━━━━━━━━━━━━');
+    if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
+    if(saleNK>0)  lines.push('🔥 Giá Sale ĐL nhận kho: '+f(saleNK));
+    if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
+    if(saleGH>0)  lines.push('🚚 Giá Sale ĐL giao hàng: '+f(saleGH));
+  } else {
+    lines.push('━━━━━━━━━━━━━━');
+    if(le>0)      lines.push('💰 Giá lẻ:  '+f(le));
+    if(nk>0)      lines.push('🏪 Giá đại lý nhận kho: '+f(nk));
+    if(ct150nk>0) lines.push('🔵 Chương trình tháng 06-07 nhận kho giảm thêm 5%: '+f(ct150nk));
+    if(gh>0)      lines.push('🚚 Giá đại lý giao hàng: '+f(gh));
+  }
+
   var msg=lines.join('\n');
   navigator.clipboard&&navigator.clipboard.writeText
     ?navigator.clipboard.writeText(msg).then(function(){showToast('✅ Đã copy! Paste vào Zalo');}).catch(function(){fallbackCopy(msg);})
