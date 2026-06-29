@@ -378,12 +378,16 @@ input::placeholder{color:var(--t3)}
 <div class="topbar">
   <div>
     <div class="topbar-title">Đồng Tâm KV23</div>
-    
+    <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+      <span id="ca-nhan-ten" class="topbar-sub"></span>
+      <button type="button" id="btn-quanly-taikhoan" onclick="moQuanLyTaiKhoan()" style="display:none;font-size:10px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản</button>
+    </div>
   </div>
   <div class="topbar-right">
     <span id="gia-source-badge" onclick="fetchGiaFromSheet()">⏳</span>
   </div>
 </div></div>
+<div id="thongtin-khachhang" style="display:none;background:#E3F2FD;border-bottom:1px solid #BBDEFB;padding:8px 14px;font-size:11px;color:#0D47A1"></div>
 <nav class="bottom-nav">
   <button class="bn on" id="bn-tra" onclick="swTab('tra')"><span class="bn-icon">🔲</span><span>Gạch</span></button>
   <button class="bn" id="bn-ngoi" onclick="swTab('ngoi')"><span class="bn-icon">🏠</span><span>Ngói</span></button>
@@ -680,10 +684,7 @@ input::placeholder{color:var(--t3)}
     <div style="background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r12);padding:14px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <p style="font-size:13px;font-weight:600;margin:0">📋 Thông tin đơn hàng</p>
-        <div style="display:flex;gap:6px">
-          <button type="button" id="btn-quanly-taikhoan" onclick="moQuanLyTaiKhoan()" style="display:none;font-size:11px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">👤 Tài khoản</button>
-          <button type="button" onclick="moLichSuDon()" style="font-size:11px;font-weight:600;color:#C0232A;background:none;border:1px solid #C0232A;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn</button>
-        </div>
+        <button type="button" onclick="moLichSuDon()" style="font-size:11px;font-weight:600;color:#C0232A;background:none;border:1px solid #C0232A;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:7px">
         <input type="text" id="don-ten" list="kh-list-ten" placeholder="Tên khách hàng / đại lý *" style="font-size:13px" oninput="onChonKhachHang()"/>
@@ -2331,6 +2332,8 @@ function saveSession(user){
     user: user.u,
     name: user.name,
     role: user.role || 'nv',
+    tenCty: user.tenCty||'', mst: user.mst||'', diaChi: user.diaChi||'',
+    email: user.email||'', tenKH: user.tenKH||'',
     exp: Date.now() + SESSION_HOURS * 3600 * 1000
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
@@ -2373,7 +2376,7 @@ function doLogin(){
     if(s.parentNode) s.parentNode.removeChild(s);
     delete window[cbName];
     if(data && data.status==='ok'){
-      saveSession({u:u, name:data.name, role:data.role});
+      saveSession({u:u, name:data.name, role:data.role, tenCty:data.tenCty, mst:data.mst, diaChi:data.diaChi, email:data.email, tenKH:data.tenKH});
       showApp(data.name);
     } else {
       errEl.textContent = '❌ Sai tài khoản hoặc mật khẩu!';
@@ -2400,6 +2403,26 @@ function showApp(name){
   var sessChk=checkSession();
   var btnQLTK=document.getElementById('btn-quanly-taikhoan');
   if(btnQLTK) btnQLTK.style.display=(sessChk&&sessChk.role==='admin')?'inline-block':'none';
+  // Hiện thông tin khách hàng (tên công ty/MST/địa chỉ/email) lấy từ Sheet,
+  // nếu tài khoản đăng nhập có gắn thông tin này (thường dùng cho role khachhang)
+  var ttkhEl=document.getElementById('thongtin-khachhang');
+  if(ttkhEl && sessChk && (sessChk.tenCty||sessChk.mst||sessChk.diaChi||sessChk.email)){
+    var parts=[];
+    if(sessChk.tenCty) parts.push('🏢 '+sessChk.tenCty);
+    if(sessChk.mst) parts.push('MST: '+sessChk.mst);
+    if(sessChk.diaChi) parts.push('📍 '+sessChk.diaChi);
+    if(sessChk.email) parts.push('✉️ '+sessChk.email);
+    ttkhEl.innerHTML=parts.join(' &nbsp;·&nbsp; ');
+    ttkhEl.style.display='block';
+  } else if(ttkhEl){
+    ttkhEl.style.display='none';
+  }
+  // Tự điền sẵn thông tin khách vào form đặt hàng (đỡ phải gõ lại) nếu là tài khoản khách hàng
+  if(sessChk && sessChk.role==='khachhang'){
+    var tenEl=document.getElementById('don-ten'), dcEl=document.getElementById('don-dc');
+    if(tenEl && !tenEl.value) tenEl.value=sessChk.tenKH||sessChk.tenCty||sessChk.name||'';
+    if(dcEl && !dcEl.value) dcEl.value=sessChk.diaChi||'';
+  }
   // Khôi phục giỏ hàng đã lưu (tránh mất khi refresh/đóng tab giữa lúc tư vấn khách)
   loadDonItemsFromStorage();
   updateDonBadge();
