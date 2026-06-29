@@ -2338,7 +2338,7 @@ function saveSession(user){
     name: user.name,
     role: user.role || 'nv',
     tenCty: user.tenCty||'', mst: user.mst||'', diaChi: user.diaChi||'',
-    email: user.email||'', tenKH: user.tenKH||'',
+    email: user.email||'', tenKH: user.tenKH||'', khoPhuTrach: user.khoPhuTrach||'',
     exp: Date.now() + SESSION_HOURS * 3600 * 1000
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
@@ -2381,7 +2381,7 @@ function doLogin(){
     if(s.parentNode) s.parentNode.removeChild(s);
     delete window[cbName];
     if(data && data.status==='ok'){
-      saveSession({u:u, name:data.name, role:data.role, tenCty:data.tenCty, mst:data.mst, diaChi:data.diaChi, email:data.email, tenKH:data.tenKH});
+      saveSession({u:u, name:data.name, role:data.role, tenCty:data.tenCty, mst:data.mst, diaChi:data.diaChi, email:data.email, tenKH:data.tenKH, khoPhuTrach:data.khoPhuTrach});
       showApp(data.name);
     } else {
       errEl.textContent = '❌ Sai tài khoản hoặc mật khẩu!';
@@ -3165,6 +3165,25 @@ function timTonKho(ma){
   }
   return tk;
 }
+// Nếu tài khoản được gán "Kho phụ trách" (cột trong tab Users, ngăn cách bởi
+// dấu phẩy) → chỉ trả về tồn kho của đúng (các) kho đó, tự tính lại tổng/tier.
+// Tài khoản không gán gì (admin/nv mặc định) vẫn thấy tất cả như cũ.
+function timTonKhoTheoQuyen(ma){
+  var tk=timTonKho(ma);
+  if(!tk) return tk;
+  var sess=checkSession();
+  var khoPT=(sess&&sess.khoPhuTrach||'').trim();
+  if(!khoPT) return tk;
+  var dsKho=khoPT.split(',').map(function(s){return normMa(s);}).filter(Boolean);
+  if(!dsKho.length) return tk;
+  var khoLoc=tk.kho.filter(function(k){
+    var nk=normMa(k.ten);
+    return dsKho.some(function(d){return nk.indexOf(d)>=0||d.indexOf(nk)>=0;});
+  });
+  var tier={nhanh:0,mai:0,cho15:0}, tong=0;
+  khoLoc.forEach(function(k){ tier[k.tier]=(tier[k.tier]||0)+k.tong; tong+=k.tong; });
+  return {tong:tong, dvt:tk.dvt, tier:tier, kho:khoLoc};
+}
 // Quy đổi thùng → m² cho Gạch (theo quy cách m²/thùng) — Kính/Ngói/Keo không quy đổi
 // vì đơn vị bán khác (Kính bán thẳng theo thùng, Ngói/Keo theo viên/bao).
 function m2PerThungCuaMa(ma){
@@ -3193,7 +3212,7 @@ function hienThiTonChoKhach(soLuong,dvt,m2pt){
   return '📞 Liên hệ NV kinh doanh';
 }
 function tonKhoBadgeHtml(ma){
-  var tk=timTonKho(ma);
+  var tk=timTonKhoTheoQuyen(ma);
   if(!tk || tk.tong<=0) return '';
   if(laKhachHang()){
     var parts=[];
@@ -3209,7 +3228,7 @@ function tonKhoBadgeHtml(ma){
   return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+parts.join(' · ')+' '+(tk.dvt||'thùng')+'</span>';
 }
 function moTonKho(ma, tenSP){
-  var tk=timTonKho(ma);
+  var tk=timTonKhoTheoQuyen(ma);
   var m2pt=m2PerThungCuaMa(ma);
   var dvt=(tk&&tk.dvt)||'thùng';
   var khachHang=laKhachHang();
