@@ -3194,6 +3194,17 @@ function moTonKho(ma, tenSP){
 }
 
 // ===== LỊCH SỬ ĐƠN HÀNG =====
+var lichSuDonAll=[];
+function filterLichSuDon(){
+  var q=(document.getElementById('lich-su-don-search').value||'').trim().toLowerCase();
+  if(!q){ renderLichSuDon(lichSuDonAll); return; }
+  var filtered=lichSuDonAll.filter(function(don){
+    return (don.khach||'').toLowerCase().indexOf(q)>=0
+        || (don.nguoiLap||'').toLowerCase().indexOf(q)>=0
+        || (don.sdt||'').toLowerCase().indexOf(q)>=0;
+  });
+  renderLichSuDon(filtered);
+}
 function moLichSuDon(){
   var sess=checkSession();
   if(!sess){alert('Vui lòng đăng nhập lại!');return;}
@@ -3207,6 +3218,7 @@ function moLichSuDon(){
     +'<p style="font-size:15px;font-weight:700;margin:0">🕘 Lịch sử đơn hàng</p>'
     +'<button onclick="document.getElementById(\'modal-lich-su-don\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
     +'</div>'
+    +'<input type="text" id="lich-su-don-search" placeholder="🔎 Lọc theo tên khách / người lập..." oninput="filterLichSuDon()" style="font-size:13px;margin-bottom:10px"/>'
     +'<div id="lich-su-don-body" style="font-size:13px;color:#888;text-align:center;padding:20px 0">⏳ Đang tải...</div>'
     +'</div>';
   document.body.appendChild(modal);
@@ -3218,7 +3230,7 @@ function moLichSuDon(){
     clearTimeout(t);
     if(s.parentNode) s.parentNode.removeChild(s);
     delete window[cbName];
-    if(res && res.status==='ok'){ renderLichSuDon(res.data||[]); }
+    if(res && res.status==='ok'){ lichSuDonAll=res.data||[]; renderLichSuDon(lichSuDonAll); }
     else { renderLichSuDonError(); }
   };
   s.src=APPS_URL+'?action=getDonHang&username='+encodeURIComponent(sess.user||'')
