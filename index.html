@@ -3180,15 +3180,22 @@ function laKhachHang(){
   var sess=checkSession();
   return !sess || sess.role==='khachhang';
 }
+// Khách hàng chỉ thấy số thật khi ≤ ngưỡng này, vượt quá thì chỉ hiện
+// "Liên hệ nhân viên kinh doanh" thay vì lộ số tồn lớn cho đối thủ dò.
+var NGUONG_TON_KHACH=50;
+function hienThiTonChoKhach(soLuong,dvt,m2pt){
+  if(soLuong<=NGUONG_TON_KHACH) return fmtThung(soLuong,dvt,m2pt);
+  return '📞 Liên hệ NV kinh doanh';
+}
 function tonKhoBadgeHtml(ma){
   var tk=timTonKho(ma);
   if(!tk || tk.tong<=0) return '';
   if(laKhachHang()){
-    var dots=[];
-    if(tk.tier.nhanh>0) dots.push('🟢');
-    if(tk.tier.mai>0)   dots.push('🟡');
-    if(tk.tier.cho15>0) dots.push('🔴');
-    return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+dots.join('')+' Còn hàng</span>';
+    var parts=[];
+    if(tk.tier.nhanh>0) parts.push('🟢'+(tk.tier.nhanh<=NGUONG_TON_KHACH?Math.round(tk.tier.nhanh).toLocaleString('vi-VN'):'Còn hàng'));
+    if(tk.tier.mai>0)   parts.push('🟡'+(tk.tier.mai<=NGUONG_TON_KHACH?Math.round(tk.tier.mai).toLocaleString('vi-VN'):'Còn hàng'));
+    if(tk.tier.cho15>0) parts.push('🔴'+(tk.tier.cho15<=NGUONG_TON_KHACH?Math.round(tk.tier.cho15).toLocaleString('vi-VN'):'Còn hàng'));
+    return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+parts.join(' · ')+'</span>';
   }
   var parts=[];
   if(tk.tier.nhanh>0) parts.push('🟢'+Math.round(tk.tier.nhanh).toLocaleString('vi-VN'));
@@ -3209,17 +3216,22 @@ function moTonKho(ma, tenSP){
     body='<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">Hết hàng / chưa có dữ liệu tồn kho cho mã này.</p>';
     ghiChu='';
   } else if(khachHang){
-    // Khách hàng: chỉ hiện trạng thái định tính theo tốc độ giao, không lộ
-    // tên kho / số lô / số lượng thật.
-    body='';
+    // Khách hàng: thấy tên kho + số lượng thật nếu ≤50, vượt quá thì chỉ
+    // hiện "Liên hệ NV kinh doanh" (không lộ số lớn). Không hiện số lô/màu
+    // (chi tiết vận hành nội bộ, dành riêng cho nhân viên).
+    body='<div style="background:#FDECEA;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center">'
+      +'<p style="font-size:12px;color:#888;margin-bottom:2px">Tổng khả dụng toàn quốc</p>'
+      +'<p style="font-size:16px;font-weight:800;color:#C0232A;margin:0">'+hienThiTonChoKhach(tk.tong,dvt,m2pt)+'</p></div>';
     ['nhanh','mai','cho15'].forEach(function(tier){
-      if(!(tk.tier[tier]>0)) return;
-      body+='<div style="border:1px solid var(--bd,#eee);border-radius:10px;padding:12px;margin-bottom:8px;text-align:center">'
-        +'<p style="font-size:13px;font-weight:700;margin:0">'+TEN_TIER[tier]+'</p>'
-        +'<p style="font-size:12px;color:#1B5E20;font-weight:600;margin-top:4px">✓ Còn hàng</p>'
-        +'</div>';
+      var khoList=tk.kho.filter(function(k){return k.tier===tier;});
+      if(!khoList.length) return;
+      body+='<p style="font-size:12px;font-weight:700;margin:10px 0 6px">'+TEN_TIER[tier]+'</p>';
+      khoList.forEach(function(k){
+        body+='<div style="border:1px solid var(--bd,#eee);border-radius:8px;padding:8px 10px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:13px;font-weight:700">'
+          +'<span>'+k.ten+'</span><span>'+hienThiTonChoKhach(k.tong,dvt,m2pt)+'</span></div>';
+      });
     });
-    ghiChu='<p style="font-size:11px;color:#888;margin-bottom:10px">📞 Số lượng cụ thể và tư vấn lô hàng phù hợp, vui lòng liên hệ nhân viên sale: 0819 548 908.</p>';
+    ghiChu='<p style="font-size:11px;color:#888;margin-bottom:10px">📞 Số lượng lớn vui lòng liên hệ nhân viên kinh doanh để biết chính xác và tư vấn lô hàng phù hợp: 0819 548 908.</p>';
   } else {
     body='<div style="background:#FDECEA;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center">'
       +'<p style="font-size:12px;color:#888;margin-bottom:2px">Tổng khả dụng toàn quốc</p>'
