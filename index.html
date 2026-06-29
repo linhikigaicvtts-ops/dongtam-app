@@ -378,9 +378,14 @@ input::placeholder{color:var(--t3)}
 <div class="topbar">
   <div>
     <div class="topbar-title">Đồng Tâm KV23</div>
-    <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+    <div style="display:flex;align-items:center;gap:6px;margin-top:2px;position:relative">
       <span id="ca-nhan-ten" class="topbar-sub"></span>
-      <button type="button" id="btn-quanly-taikhoan" onclick="moQuanLyTaiKhoan()" style="display:none;font-size:10px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản</button>
+      <button type="button" onclick="toggleMenuTaiKhoan()" style="font-size:10px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản ▾</button>
+      <div id="menu-taikhoan" style="display:none;position:absolute;top:24px;left:0;z-index:200;background:var(--bg1,#fff);border:1px solid var(--bd,#ddd);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:170px;overflow:hidden">
+        <button type="button" onclick="toggleMenuTaiKhoan();moLichSuDon()" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn hàng</button>
+        <button type="button" id="btn-quanly-taikhoan" onclick="toggleMenuTaiKhoan();moQuanLyTaiKhoan()" style="display:none;width:100%;text-align:left;padding:10px 12px;border:none;border-top:1px solid var(--bd,#eee);background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">👤 Quản lý tài khoản</button>
+        <button type="button" onclick="toggleMenuTaiKhoan();doLogout()" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;border-top:1px solid var(--bd,#eee);background:none;font-size:12px;font-weight:600;color:#C0232A;cursor:pointer;font-family:var(--f)">🚪 Đăng xuất</button>
+      </div>
     </div>
   </div>
   <div class="topbar-right">
@@ -3263,6 +3268,19 @@ function moTonKho(ma, tenSP){
     +'</div>';
   document.body.appendChild(modal);
 }
+
+function toggleMenuTaiKhoan(){
+  var m=document.getElementById('menu-taikhoan');
+  if(!m) return;
+  m.style.display=(m.style.display==='none'||!m.style.display)?'block':'none';
+}
+document.addEventListener('click',function(e){
+  var m=document.getElementById('menu-taikhoan');
+  if(!m || m.style.display==='none') return;
+  if(!m.contains(e.target) && e.target.textContent.indexOf('Tài khoản')<0){
+    m.style.display='none';
+  }
+});
 
 // ===== QUẢN LÝ TÀI KHOẢN (chỉ admin) =====
 function moQuanLyTaiKhoan(){
