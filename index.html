@@ -680,7 +680,10 @@ input::placeholder{color:var(--t3)}
     <div style="background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r12);padding:14px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <p style="font-size:13px;font-weight:600;margin:0">📋 Thông tin đơn hàng</p>
-        <button type="button" onclick="moLichSuDon()" style="font-size:11px;font-weight:600;color:#C0232A;background:none;border:1px solid #C0232A;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn</button>
+        <div style="display:flex;gap:6px">
+          <button type="button" id="btn-quanly-taikhoan" onclick="moQuanLyTaiKhoan()" style="display:none;font-size:11px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">👤 Tài khoản</button>
+          <button type="button" onclick="moLichSuDon()" style="font-size:11px;font-weight:600;color:#C0232A;background:none;border:1px solid #C0232A;border-radius:var(--r8);padding:4px 9px;cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn</button>
+        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:7px">
         <input type="text" id="don-ten" list="kh-list-ten" placeholder="Tên khách hàng / đại lý *" style="font-size:13px" oninput="onChonKhachHang()"/>
@@ -2393,6 +2396,10 @@ function showApp(name){
   // Hiện tên user trên header
   var canh = document.getElementById('ca-nhan-ten');
   if(canh) canh.textContent = name;
+  // Chỉ admin mới thấy nút Quản lý tài khoản
+  var sessChk=checkSession();
+  var btnQLTK=document.getElementById('btn-quanly-taikhoan');
+  if(btnQLTK) btnQLTK.style.display=(sessChk&&sessChk.role==='admin')?'inline-block':'none';
   // Khôi phục giỏ hàng đã lưu (tránh mất khi refresh/đóng tab giữa lúc tư vấn khách)
   loadDonItemsFromStorage();
   updateDonBadge();
@@ -3191,6 +3198,71 @@ function moTonKho(ma, tenSP){
     +body
     +'</div>';
   document.body.appendChild(modal);
+}
+
+// ===== QUẢN LÝ TÀI KHOẢN (chỉ admin) =====
+function moQuanLyTaiKhoan(){
+  var modal=document.createElement('div');
+  modal.id='modal-qltk';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:380px;width:100%;max-height:85vh;overflow:auto;padding:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<p style="font-size:15px;font-weight:700;margin:0">👤 Thêm / Sửa tài khoản</p>'
+    +'<button onclick="document.getElementById(\'modal-qltk\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
+    +'</div>'
+    +'<p style="font-size:11px;color:#888;margin-bottom:10px">Nhập username đã có sẵn để SỬA tài khoản đó (đổi tên/quyền, đổi mật khẩu nếu nhập mật khẩu mới). Username chưa có sẽ TẠO MỚI — bắt buộc nhập mật khẩu.</p>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">'
+    +'<input type="text" id="qltk-username" placeholder="Username (vd: anhA_q7)" style="font-size:13px"/>'
+    +'<input type="text" id="qltk-name" placeholder="Tên hiển thị (vd: Anh A - Quận 7)" style="font-size:13px"/>'
+    +'<input type="text" id="qltk-password" placeholder="Mật khẩu (để trống nếu không đổi)" style="font-size:13px"/>'
+    +'<select id="qltk-role" style="font-size:13px;padding:11px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--bg1);font-family:var(--f)">'
+    +'<option value="khachhang">Khách hàng / Đại lý</option>'
+    +'<option value="nv">Nhân viên</option>'
+    +'<option value="admin">Admin</option>'
+    +'</select>'
+    +'<button onclick="luuTaiKhoan()" style="padding:11px;border:none;border-radius:var(--r8);background:#0D47A1;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">💾 Lưu tài khoản</button>'
+    +'<p id="qltk-msg" style="font-size:12px;text-align:center;margin-top:4px"></p>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+}
+function luuTaiKhoan(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var u=document.getElementById('qltk-username').value.trim();
+  var name=document.getElementById('qltk-name').value.trim();
+  var pw=document.getElementById('qltk-password').value;
+  var role=document.getElementById('qltk-role').value;
+  var msgEl=document.getElementById('qltk-msg');
+  if(!u||!name){ msgEl.style.color='#C0232A'; msgEl.textContent='Vui lòng nhập đủ Username và Tên hiển thị!'; return; }
+  msgEl.style.color='#888'; msgEl.textContent='⏳ Đang lưu...';
+
+  var cbName='_cb_themUser_'+Date.now();
+  var s=document.createElement('script');
+  var t=setTimeout(function(){
+    msgEl.style.color='#C0232A'; msgEl.textContent='❌ Lỗi kết nối, thử lại sau.';
+    if(s.parentNode) s.parentNode.removeChild(s);
+    delete window[cbName];
+  },12000);
+  window[cbName]=function(res){
+    clearTimeout(t);
+    if(s.parentNode) s.parentNode.removeChild(s);
+    delete window[cbName];
+    if(res && res.status==='ok'){
+      msgEl.style.color='#1B5E20'; msgEl.textContent='✅ '+res.msg;
+      document.getElementById('qltk-password').value='';
+    } else {
+      msgEl.style.color='#C0232A'; msgEl.textContent='❌ '+(res?res.msg:'Lỗi không xác định');
+    }
+  };
+  var url=APPS_URL+'?action=themUser'
+    +'&username='+encodeURIComponent(u)
+    +'&password='+encodeURIComponent(pw)
+    +'&name='+encodeURIComponent(name)
+    +'&role='+encodeURIComponent(role)
+    +'&callback='+encodeURIComponent(cbName);
+  s.src=url;
+  s.onerror=function(){ clearTimeout(t); msgEl.style.color='#C0232A'; msgEl.textContent='❌ Lỗi kết nối.'; };
+  document.head.appendChild(s);
 }
 
 // ===== LỊCH SỬ ĐƠN HÀNG =====
