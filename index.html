@@ -800,10 +800,13 @@ var VAT_RATE=0.08;
 function giaTruocVAT(giaCoVAT){ return Math.round(giaCoVAT/(1+VAT_RATE)); }
 // Tính tiền hàng trước VAT cho 1 dòng (đơn giá có VAT, làm tròn về giá trước
 // VAT rồi mới nhân số lượng — đúng cách hóa đơn tính từng dòng).
-function tienHangTruocVAT(giaCoVAT, qty){ return giaTruocVAT(giaCoVAT)*(parseFloat(qty)||0); }
+// Làm tròn về đồng nguyên — số lượng m² có thể lẻ (vd 2,5 m²) nên thành tiền
+// dòng có thể ra số lẻ, phải làm tròn ngay để không lộ số thập phân khi hiển thị.
+function tienHangTruocVAT(giaCoVAT, qty){ return Math.round(giaTruocVAT(giaCoVAT)*(parseFloat(qty)||0)); }
 // Từ tổng tiền hàng trước VAT của cả đơn, tính VAT 1 lần + tổng thanh toán
 // (đúng cách hóa đơn VAT chỉ tính thuế 1 lần trên tổng, không cộng VAT từng dòng).
 function tinhVATvaTongThanhToan(tongTienHangTruocVAT){
+  tongTienHangTruocVAT=Math.round(tongTienHangTruocVAT);
   var vat=Math.round(tongTienHangTruocVAT*VAT_RATE);
   return {truocVAT:tongTienHangTruocVAT, vat:vat, tong:tongTienHangTruocVAT+vat};
 }
