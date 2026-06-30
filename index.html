@@ -406,7 +406,10 @@ input::placeholder{color:var(--t3)}
 
 <!-- TAB 1: Tra mã -->
 <div id="tab-tra" class="tc on">
-  <input type="text" id="sq" placeholder="Nhập mã sản phẩm..." oninput="curPage=0;render()" style="margin-bottom:8px"/>
+  <div style="display:flex;gap:8px;margin-bottom:8px">
+    <input type="text" id="sq" placeholder="Nhập mã sản phẩm..." oninput="curPage=0;render()" style="flex:1;margin-bottom:0"/>
+    <button type="button" id="btn-loc-nangcao" onclick="moLocNangCao('tra')" style="flex-shrink:0;width:44px;border-radius:var(--r8);border:1.5px solid var(--bd2);background:var(--bg1);font-size:16px;cursor:pointer">🎛️</button>
+  </div>
   <div class="filters" style="margin-top:4px">
     <button class="fb on" id="f-all"       onclick="setF('all')">Tất cả</button>
     <button class="fb"    id="f-porcelain" onclick="setF('porcelain')">Porcelain</button>
@@ -519,10 +522,13 @@ input::placeholder{color:var(--t3)}
 <!-- TAB 2: Sale -->
 <div id="tab-sale" class="tc">
   <div style="padding:8px 12px 6px;background:var(--bg1);border-bottom:1px solid var(--bd)">
-    <div style="position:relative;margin-bottom:7px">
-      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t3)">🔍</span>
-      <input type="text" id="ssq" placeholder="Tìm mã sale..." oninput="renderSale()"
-        style="width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--bd);border-radius:20px;font-size:13px;background:var(--bg2);outline:none"/>
+    <div style="display:flex;gap:8px;margin-bottom:7px">
+      <div style="position:relative;flex:1">
+        <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--t3)">🔍</span>
+        <input type="text" id="ssq" placeholder="Tìm mã sale..." oninput="renderSale()"
+          style="width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--bd);border-radius:20px;font-size:13px;background:var(--bg2);outline:none"/>
+      </div>
+      <button type="button" id="btn-loc-nangcao-sale" onclick="moLocNangCao('sale')" style="flex-shrink:0;width:44px;border-radius:20px;border:1.5px solid var(--bd2);background:var(--bg1);font-size:16px;cursor:pointer">🎛️</button>
     </div>
     <div style="display:flex;gap:6px">
       <button class="fb on" id="sf2-ct1" onclick="setSF2('ct1')"
@@ -1222,6 +1228,7 @@ function render(){
   else if(curF==='ceramic') list=list.filter(function(p){return p.cat==='ceramic';});
   else if(curF==='sale'){ renderSale(); return; }
   if(curSize&&curSize!=='all') list=list.filter(function(p){return p.kc===curSize||p.kc.toLowerCase()===curSize.toLowerCase();});
+  if(hasLocNangCao()) list=list.filter(function(p){return khopLocNangCao(p.ma);});
   if(q) list=list.filter(function(p){return p.ma.toUpperCase().includes(q)||p.kc.includes(q);});
   var totalItems=list.length;
   var totalPages=Math.max(1,Math.ceil(totalItems/20));
@@ -1397,6 +1404,7 @@ function renderSale(){
   if(typeof curSaleSize!=='undefined'&&curSaleSize&&curSaleSize!=='all'){
     list=list.filter(function(p){ return (p.kc||'')===curSaleSize; });
   }
+  if(hasLocNangCao()) list=list.filter(function(p){return khopLocNangCao(p.ma);});
   if(q) list=list.filter(function(p){ return p.ma.toUpperCase().includes(q)||(p.kc||'').includes(q); });
 
   document.getElementById('scount').textContent=list.length+' mã đang sale';
@@ -2467,6 +2475,8 @@ function showApp(name){
   fetchTonKhoChiTiet();
   // Tải trọng lượng chính xác theo mã SAP (chạy nền)
   fetchTrongLuong();
+  // Tải thuộc tính sản phẩm (Màu/Công năng/Tính năng/Hoa văn/Men) để lọc nâng cao
+  fetchThuocTinhSP();
 }
 
 function doLogout(){
@@ -3174,6 +3184,102 @@ function kgPerVienCuaMa(ma){
     t=k?trongLuongMap[k]:null;
   }
   return t&&t.kg_tong>0?t.kg_tong:null;
+}
+
+// ===== LỌC NÂNG CAO: Màu, Công năng, Tính năng, Hoa văn, Men =====
+var thuocTinhMap={};
+function fetchThuocTinhSP(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var cbName='_onThuocTinhSP';
+  window[cbName]=function(res){
+    if(res && res.status==='ok' && res.data) thuocTinhMap=res.data;
+    var s=document.getElementById('_ttsp_script');
+    if(s) s.remove();
+  };
+  var old=document.getElementById('_ttsp_script');
+  if(old) old.remove();
+  var s=document.createElement('script');
+  s.id='_ttsp_script';
+  s.src=APPS_URL+'?action=getThuocTinhSP&callback='+cbName;
+  s.onerror=function(){ s.remove(); };
+  document.head.appendChild(s);
+}
+function timThuocTinh(ma){
+  var t=thuocTinhMap[ma];
+  if(!t){
+    var k=Object.keys(thuocTinhMap).find(function(key){return normMa(key)===normMa(ma);});
+    t=k?thuocTinhMap[k]:null;
+  }
+  return t;
+}
+var LOC_NANG_CAO_FIELDS=[
+  {key:'mau',label:'Màu'},{key:'congNang',label:'Công năng'},
+  {key:'tinhNang',label:'Tính năng'},{key:'hoaVan',label:'Hoa văn'},{key:'men',label:'Men'}
+];
+var locNangCao={mau:'',congNang:'',tinhNang:'',hoaVan:'',men:''};
+function hasLocNangCao(){ return LOC_NANG_CAO_FIELDS.some(function(f){return locNangCao[f.key];}); }
+function khopLocNangCao(ma){
+  var t=timThuocTinh(ma);
+  if(!t) return false;
+  return LOC_NANG_CAO_FIELDS.every(function(f){ return !locNangCao[f.key] || t[f.key]===locNangCao[f.key]; });
+}
+function capNhatBadgeLocNangCao(){
+  var dem=LOC_NANG_CAO_FIELDS.filter(function(f){return locNangCao[f.key];}).length;
+  ['btn-loc-nangcao','btn-loc-nangcao-sale'].forEach(function(id){
+    var btn=document.getElementById(id);
+    if(btn) btn.style.background=dem>0?'#FDECEA':'var(--bg1)';
+    if(btn) btn.style.borderColor=dem>0?'#C0232A':'var(--bd2)';
+  });
+}
+function moLocNangCao(tab){
+  var giaTri={}; // key -> Set các giá trị khác nhau đang có
+  LOC_NANG_CAO_FIELDS.forEach(function(f){ giaTri[f.key]={}; });
+  Object.keys(thuocTinhMap).forEach(function(ma){
+    var t=thuocTinhMap[ma];
+    LOC_NANG_CAO_FIELDS.forEach(function(f){ if(t[f.key]) giaTri[f.key][t[f.key]]=true; });
+  });
+
+  var modal=document.createElement('div');
+  modal.id='modal-loc-nangcao';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  var body=LOC_NANG_CAO_FIELDS.map(function(f){
+    var opts=Object.keys(giaTri[f.key]).sort();
+    return '<div style="margin-bottom:10px">'
+      +'<label style="font-size:12px;font-weight:700;color:var(--t2);display:block;margin-bottom:4px">'+f.label+'</label>'
+      +'<select id="lnc-'+f.key+'" style="font-size:13px;padding:9px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--bg1);width:100%;font-family:var(--f)">'
+      +'<option value="">Tất cả</option>'
+      +opts.map(function(o){ return '<option value="'+o.replace(/"/g,'&quot;')+'"'+(locNangCao[f.key]===o?' selected':'')+'>'+o+'</option>'; }).join('')
+      +'</select></div>';
+  }).join('');
+  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:380px;width:100%;max-height:85vh;overflow:auto;padding:16px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+    +'<p style="font-size:15px;font-weight:700;margin:0">🎛️ Lọc nâng cao</p>'
+    +'<button onclick="document.getElementById(\'modal-loc-nangcao\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
+    +'</div>'
+    +(Object.keys(thuocTinhMap).length===0?'<p style="font-size:12px;color:#888;margin-bottom:10px">Chưa tải được dữ liệu thuộc tính, vui lòng thử lại sau vài giây.</p>':'')
+    +body
+    +'<div style="display:flex;gap:8px;margin-top:6px">'
+    +'<button onclick="xoaLocNangCao(\''+tab+'\')" style="flex:1;padding:11px;border:1px solid var(--bd2);border-radius:var(--r8);background:none;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Xóa lọc</button>'
+    +'<button onclick="apDungLocNangCao(\''+tab+'\')" style="flex:1;padding:11px;border:none;border-radius:var(--r8);background:#C0232A;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Áp dụng</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+}
+function apDungLocNangCao(tab){
+  LOC_NANG_CAO_FIELDS.forEach(function(f){
+    var el=document.getElementById('lnc-'+f.key);
+    locNangCao[f.key]=el?el.value:'';
+  });
+  document.getElementById('modal-loc-nangcao').remove();
+  capNhatBadgeLocNangCao();
+  if(tab==='sale') renderSale(); else render();
+}
+function xoaLocNangCao(tab){
+  LOC_NANG_CAO_FIELDS.forEach(function(f){ locNangCao[f.key]=''; });
+  var m=document.getElementById('modal-loc-nangcao');
+  if(m) m.remove();
+  capNhatBadgeLocNangCao();
+  if(tab==='sale') renderSale(); else render();
 }
 // Badge gọn hiện trên thẻ sản phẩm — 3 chấm màu theo tốc độ giao, không cần bấm vào
 function timTonKho(ma){
