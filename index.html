@@ -797,6 +797,17 @@ const NGOI_KEO=[{ma:"TITAN001",cat:"ngoi",kc:"300x405x13",ten:"Ngói TITAN",dong
 var curF='all', curSF='all', curP_ma=null, curSize='all', curPage=0;
 var curNgoiMa=null;
 var donItems=[];
+// Khai báo sớm (trước khi render() có thể được gọi lúc khởi động trang qua
+// IIFE init() ở cuối file) — nếu để khai báo này ở dưới cùng với các hàm
+// liên quan, render() gọi hasLocNangCao() lúc trang vừa load sẽ bị lỗi
+// "Cannot read properties of undefined" vì LOC_NANG_CAO_FIELDS chưa được
+// gán giá trị, làm render() dừng giữa hàm → danh sách sản phẩm trống trắng.
+var thuocTinhMap={};
+var LOC_NANG_CAO_FIELDS=[
+  {key:'mau',label:'Màu'},{key:'congNang',label:'Công năng'},
+  {key:'tinhNang',label:'Tính năng'},{key:'hoaVan',label:'Hoa văn'},{key:'men',label:'Men'}
+];
+var locNangCao={mau:'',congNang:'',tinhNang:'',hoaVan:'',men:''};
 // Giá trong Sheet đã bao gồm VAT 8%. Để tổng đơn khớp đúng với hóa đơn VAT
 // thật (kế toán tính: tiền hàng trước VAT theo từng dòng → cộng lại → tính
 // VAT 1 lần trên tổng), KHÔNG được nhân thẳng giá-có-VAT với số lượng rồi
@@ -3187,7 +3198,6 @@ function kgPerVienCuaMa(ma){
 }
 
 // ===== LỌC NÂNG CAO: Màu, Công năng, Tính năng, Hoa văn, Men =====
-var thuocTinhMap={};
 function fetchThuocTinhSP(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var cbName='_onThuocTinhSP';
@@ -3212,11 +3222,6 @@ function timThuocTinh(ma){
   }
   return t;
 }
-var LOC_NANG_CAO_FIELDS=[
-  {key:'mau',label:'Màu'},{key:'congNang',label:'Công năng'},
-  {key:'tinhNang',label:'Tính năng'},{key:'hoaVan',label:'Hoa văn'},{key:'men',label:'Men'}
-];
-var locNangCao={mau:'',congNang:'',tinhNang:'',hoaVan:'',men:''};
 function hasLocNangCao(){ return LOC_NANG_CAO_FIELDS.some(function(f){return locNangCao[f.key];}); }
 function khopLocNangCao(ma){
   var t=timThuocTinh(ma);
