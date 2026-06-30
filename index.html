@@ -791,6 +791,22 @@ const NGOI_KEO=[{ma:"TITAN001",cat:"ngoi",kc:"300x405x13",ten:"Ngói TITAN",dong
 var curF='all', curSF='all', curP_ma=null, curSize='all', curPage=0;
 var curNgoiMa=null;
 var donItems=[];
+// Giá trong Sheet đã bao gồm VAT 8%. Để tổng đơn khớp đúng với hóa đơn VAT
+// thật (kế toán tính: tiền hàng trước VAT theo từng dòng → cộng lại → tính
+// VAT 1 lần trên tổng), KHÔNG được nhân thẳng giá-có-VAT với số lượng rồi
+// cộng (cách đó làm tròn VAT theo từng đơn vị, cộng dồn sai lệch vài đồng so
+// với hóa đơn thật). Phải tách giá trước VAT theo từng dòng trước.
+var VAT_RATE=0.08;
+function giaTruocVAT(giaCoVAT){ return Math.round(giaCoVAT/(1+VAT_RATE)); }
+// Tính tiền hàng trước VAT cho 1 dòng (đơn giá có VAT, làm tròn về giá trước
+// VAT rồi mới nhân số lượng — đúng cách hóa đơn tính từng dòng).
+function tienHangTruocVAT(giaCoVAT, qty){ return giaTruocVAT(giaCoVAT)*(parseFloat(qty)||0); }
+// Từ tổng tiền hàng trước VAT của cả đơn, tính VAT 1 lần + tổng thanh toán
+// (đúng cách hóa đơn VAT chỉ tính thuế 1 lần trên tổng, không cộng VAT từng dòng).
+function tinhVATvaTongThanhToan(tongTienHangTruocVAT){
+  var vat=Math.round(tongTienHangTruocVAT*VAT_RATE);
+  return {truocVAT:tongTienHangTruocVAT, vat:vat, tong:tongTienHangTruocVAT+vat};
+}
 var curGiaoHang='nhan';
 var imgStore=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs')||'{}'); }catch(e){ return {}; } })();
 var imgStoreMulti=(function(){ try{ return JSON.parse(localStorage.getItem('dt_imgs_multi')||'{}'); }catch(e){ return {}; } })();
@@ -3461,10 +3477,16 @@ function calcAndShowTotals(){
       nhanVal=item.ns>0?item.ns:item.nhan;
       giaoVal=item.gs>0?item.gs:item.giao;
     }
-    totalLe  +=( item.le||0)*(parseFloat(item.qty)||0);
-    totalNhan+=(nhanVal||0)*(parseFloat(item.qty)||0);
-    totalGiao+=(giaoVal||0)*(parseFloat(item.qty)||0);
+    // Tính theo đúng cách hóa đơn VAT: làm tròn giá-trước-VAT từng dòng rồi
+    // mới nhân số lượng, thay vì nhân thẳng giá-có-VAT (gây lệch vài đồng).
+    totalLe  +=tienHangTruocVAT(item.le||0, item.qty);
+    totalNhan+=tienHangTruocVAT(nhanVal||0, item.qty);
+    totalGiao+=tienHangTruocVAT(giaoVal||0, item.qty);
   });
+  // Cộng VAT 1 lần trên tổng (giống cách hóa đơn thật tính)
+  totalLe  =tinhVATvaTongThanhToan(totalLe).tong;
+  totalNhan=tinhVATvaTongThanhToan(totalNhan).tong;
+  totalGiao=tinhVATvaTongThanhToan(totalGiao).tong;
   var rowKg=document.getElementById('row-total-kg');
   if(rowKg){
     if(totalKg>0){
@@ -3524,7 +3546,8 @@ function xuatPDF(){
   var dc   = document.getElementById('don-dc').value.trim();
   var note = document.getElementById('don-note').value.trim();
   var ngay = new Date().toLocaleDateString('vi-VN');
-  var totalLe = donItems.reduce(function(s,x){return s+(x.le||0)*(parseFloat(x.qty)||0);},0);
+  // Tính theo đúng cách hóa đơn VAT (xem giải thích ở hàm tienHangTruocVAT)
+  var totalLe = tinhVATvaTongThanhToan(donItems.reduce(function(s,x){return s+tienHangTruocVAT(x.le||0,x.qty);},0)).tong;
   var totalKgPdf=0, coKgChinhXacPdf=false;
   donItems.forEach(function(x){
     var v=tinhSoVien(x);
@@ -3728,13 +3751,15 @@ function xuatExcel(){
   var sess  = checkSession();
   var nguoi = sess?sess.name:'Lê Chí Linh';
 
-  var tLe=0,tNhan=0;
+  var tLeTruocVAT=0,tNhanTruocVAT=0;
   var rowsData=donItems.map(function(item,i){
     var le=item.le||0;
     var nhan=item.ns>0?item.ns:(item.nhan||0);
     var thLe=Math.round(le*item.qty);
     var thNhan=Math.round(nhan*item.qty);
-    tLe+=thLe; tNhan+=thNhan;
+    // Tổng đơn tính theo đúng cách hóa đơn VAT (tách trước-VAT từng dòng,
+    // cộng VAT 1 lần trên tổng) — không cộng thẳng thLe/thNhan từng dòng.
+    tLeTruocVAT+=tienHangTruocVAT(le,item.qty); tNhanTruocVAT+=tienHangTruocVAT(nhan,item.qty);
     var t=tinhThung(item), thungStr='';
     if(t){ var tn=Math.round(t.thung*100)/100; thungStr=(t.chiBanThung?t.thungNguyen:(tn%1===0?tn:tn.toFixed(2)))+' thùng'; }
     var v=tinhSoVien(item);
@@ -3749,6 +3774,8 @@ function xuatExcel(){
       le:le,thLe:thLe,nhan:nhan,thNhan:thNhan};
   });
 
+  var tLe=tinhVATvaTongThanhToan(tLeTruocVAT).tong;
+  var tNhan=tinhVATvaTongThanhToan(tNhanTruocVAT).tong;
   var lnNhan=tLe-tNhan;
   var pN=tLe>0?Math.round(lnNhan/tLe*100)+'%':'–';
 
@@ -3865,19 +3892,21 @@ function xuatExcelNoiBo(){
   var gh=curGiaoHang==='nhan'?'Nhan tai kho':'Giao tan noi';
   var sess=checkSession();
   var nguoi=sess?sess.name:'Le Chi Linh';
-  var tLe=0,tNhan=0;
+  var tLeTruocVAT=0,tNhanTruocVAT=0;
   var rowsData=donItems.map(function(item,i){
     var le=item.le||0;
     var nhan=item.ns>0?item.ns:(item.nhan||0);
     var thLe=Math.round(le*item.qty);
     var thNhan=Math.round(nhan*item.qty);
-    tLe+=thLe; tNhan+=thNhan;
+    tLeTruocVAT+=tienHangTruocVAT(le,item.qty); tNhanTruocVAT+=tienHangTruocVAT(nhan,item.qty);
     var ln=thLe-thNhan;
     var pct=thLe>0?Math.round(ln/thLe*100)+'%':'-';
     var loaiLabel=item.loai==='ngoi'?'Ngoi':item.loai==='keo'?'Keo':item.loai==='kinh'?'Kinh':'Gach';
     return {i:i+1,loai:loaiLabel,ma:item.ma,kc:item.kc||'-',unit:item.unit||'m2',qty:item.qty,
       le:le,thLe:thLe,nhan:nhan,thNhan:thNhan,ln:ln,pct:pct};
   });
+  var tLe=tinhVATvaTongThanhToan(tLeTruocVAT).tong;
+  var tNhan=tinhVATvaTongThanhToan(tNhanTruocVAT).tong;
   var lnNhan=tLe-tNhan;
   var pN=tLe>0?Math.round(lnNhan/tLe*100)+'%':'-';
 
