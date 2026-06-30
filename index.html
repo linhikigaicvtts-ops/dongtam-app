@@ -408,7 +408,7 @@ input::placeholder{color:var(--t3)}
 <div id="tab-tra" class="tc on">
   <div style="display:flex;gap:8px;margin-bottom:8px">
     <input type="text" id="sq" placeholder="Nhập mã sản phẩm..." oninput="curPage=0;render()" style="flex:1;margin-bottom:0"/>
-    <button type="button" id="btn-loc-nangcao" onclick="moLocNangCao('tra')" style="flex-shrink:0;width:44px;border-radius:var(--r8);border:1.5px solid var(--bd2);background:var(--bg1);font-size:16px;cursor:pointer">🎛️</button>
+    <button type="button" id="btn-loc-nangcao" onclick="moLocNangCao('tra')" style="flex-shrink:0;width:44px;border-radius:var(--r8);border:1.5px solid var(--bd2);background:var(--bg1);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button>
   </div>
   <div class="filters" style="margin-top:4px">
     <button class="fb on" id="f-all"       onclick="setF('all')">Tất cả</button>
@@ -528,7 +528,7 @@ input::placeholder{color:var(--t3)}
         <input type="text" id="ssq" placeholder="Tìm mã sale..." oninput="renderSale()"
           style="width:100%;padding:8px 12px 8px 32px;border:1.5px solid var(--bd);border-radius:20px;font-size:13px;background:var(--bg2);outline:none"/>
       </div>
-      <button type="button" id="btn-loc-nangcao-sale" onclick="moLocNangCao('sale')" style="flex-shrink:0;width:44px;border-radius:20px;border:1.5px solid var(--bd2);background:var(--bg1);font-size:16px;cursor:pointer">🎛️</button>
+      <button type="button" id="btn-loc-nangcao-sale" onclick="moLocNangCao('sale')" style="flex-shrink:0;width:44px;border-radius:20px;border:1.5px solid var(--bd2);background:var(--bg1);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/></svg></button>
     </div>
     <div style="display:flex;gap:6px">
       <button class="fb on" id="sf2-ct1" onclick="setSF2('ct1')"
@@ -3234,6 +3234,7 @@ function capNhatBadgeLocNangCao(){
     var btn=document.getElementById(id);
     if(btn) btn.style.background=dem>0?'#FDECEA':'var(--bg1)';
     if(btn) btn.style.borderColor=dem>0?'#C0232A':'var(--bd2)';
+    if(btn) btn.style.color=dem>0?'#C0232A':'var(--t1)';
   });
 }
 function moLocNangCao(tab){
