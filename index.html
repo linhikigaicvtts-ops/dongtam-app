@@ -3204,21 +3204,21 @@ function laKhachHang(){
   var sess=checkSession();
   return !sess || sess.role==='khachhang';
 }
-// Khách hàng chỉ thấy số thật khi ≤ ngưỡng này, vượt quá thì chỉ hiện
-// "Liên hệ nhân viên kinh doanh" thay vì lộ số tồn lớn cho đối thủ dò.
+// Khách hàng chỉ thấy số thật khi ≤ ngưỡng này, vượt quá thì hiện dạng
+// "50+" (giới hạn, không lộ số tồn thật lớn cho đối thủ dò).
 var NGUONG_TON_KHACH=50;
 function hienThiTonChoKhach(soLuong,dvt,m2pt){
   if(soLuong<=NGUONG_TON_KHACH) return fmtThung(soLuong,dvt,m2pt);
-  return '📞 Liên hệ NV kinh doanh';
+  return NGUONG_TON_KHACH+'+ '+(dvt||'thùng');
 }
 function tonKhoBadgeHtml(ma){
   var tk=timTonKhoTheoQuyen(ma);
   if(!tk || tk.tong<=0) return '';
   if(laKhachHang()){
     var parts=[];
-    if(tk.tier.nhanh>0) parts.push('🟢'+(tk.tier.nhanh<=NGUONG_TON_KHACH?Math.round(tk.tier.nhanh).toLocaleString('vi-VN'):'Còn hàng'));
-    if(tk.tier.mai>0)   parts.push('🟡'+(tk.tier.mai<=NGUONG_TON_KHACH?Math.round(tk.tier.mai).toLocaleString('vi-VN'):'Còn hàng'));
-    if(tk.tier.cho15>0) parts.push('🔴'+(tk.tier.cho15<=NGUONG_TON_KHACH?Math.round(tk.tier.cho15).toLocaleString('vi-VN'):'Còn hàng'));
+    if(tk.tier.nhanh>0) parts.push('🟢'+(tk.tier.nhanh<=NGUONG_TON_KHACH?Math.round(tk.tier.nhanh).toLocaleString('vi-VN'):NGUONG_TON_KHACH+'+'));
+    if(tk.tier.mai>0)   parts.push('🟡'+(tk.tier.mai<=NGUONG_TON_KHACH?Math.round(tk.tier.mai).toLocaleString('vi-VN'):NGUONG_TON_KHACH+'+'));
+    if(tk.tier.cho15>0) parts.push('🔴'+(tk.tier.cho15<=NGUONG_TON_KHACH?Math.round(tk.tier.cho15).toLocaleString('vi-VN'):NGUONG_TON_KHACH+'+'));
     return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+parts.join(' · ')+'</span>';
   }
   var parts=[];
@@ -3240,12 +3240,10 @@ function moTonKho(ma, tenSP){
     body='<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">Hết hàng / chưa có dữ liệu tồn kho cho mã này.</p>';
     ghiChu='';
   } else if(khachHang){
-    // Khách hàng: thấy tên kho + số lượng thật nếu ≤50, vượt quá thì chỉ
-    // hiện "Liên hệ NV kinh doanh" (không lộ số lớn). Không hiện số lô/màu
-    // (chi tiết vận hành nội bộ, dành riêng cho nhân viên).
-    body='<div style="background:#FDECEA;border-radius:10px;padding:10px 12px;margin-bottom:12px;text-align:center">'
-      +'<p style="font-size:12px;color:#888;margin-bottom:2px">Tổng khả dụng toàn quốc</p>'
-      +'<p style="font-size:16px;font-weight:800;color:#C0232A;margin:0">'+hienThiTonChoKhach(tk.tong,dvt,m2pt)+'</p></div>';
+    // Khách hàng: KHÔNG hiện tổng toàn quốc. Thấy tên kho + số lượng thật
+    // nếu ≤50, vượt quá thì hiện dạng "50+" (giới hạn, không lộ số lớn).
+    // Không hiện số lô/màu (chi tiết vận hành nội bộ, dành riêng nhân viên).
+    body='';
     ['nhanh','mai','cho15'].forEach(function(tier){
       var khoList=tk.kho.filter(function(k){return k.tier===tier;});
       if(!khoList.length) return;
