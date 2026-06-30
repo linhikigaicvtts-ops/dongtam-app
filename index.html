@@ -3315,6 +3315,7 @@ function moQuanLyTaiKhoan(){
     +'<input type="text" id="qltk-name" placeholder="Tên hiển thị (vd: Anh A - Quận 7)" style="font-size:13px"/>'
     +'<input type="text" id="qltk-password" placeholder="Mật khẩu (để trống nếu không đổi)" style="font-size:13px"/>'
     +'<select id="qltk-role" style="font-size:13px;padding:11px;border:1.5px solid var(--bd2);border-radius:var(--r);background:var(--bg1);font-family:var(--f)">'
+    +'<option value="" selected disabled>-- Chọn loại tài khoản --</option>'
     +'<option value="khachhang">Khách hàng / Đại lý</option>'
     +'<option value="nv">Nhân viên</option>'
     +'<option value="admin">Admin</option>'
@@ -3333,6 +3334,7 @@ function luuTaiKhoan(){
   var role=document.getElementById('qltk-role').value;
   var msgEl=document.getElementById('qltk-msg');
   if(!u||!name){ msgEl.style.color='#C0232A'; msgEl.textContent='Vui lòng nhập đủ Username và Tên hiển thị!'; return; }
+  if(!role){ msgEl.style.color='#C0232A'; msgEl.textContent='Vui lòng chọn loại tài khoản (Khách hàng/Nhân viên/Admin)!'; return; }
   msgEl.style.color='#888'; msgEl.textContent='⏳ Đang lưu...';
 
   var cbName='_cb_themUser_'+Date.now();
