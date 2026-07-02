@@ -2782,6 +2782,12 @@ function doLogout(){
 
 // Khởi động - check session
 (function init(){
+  // Desktop: chuyển #dp ra body để nó hiển thị được từ mọi tab
+  if((window.innerWidth||document.documentElement.clientWidth||0)>=768){
+    var dpEl=document.getElementById('dp');
+    if(dpEl) document.body.appendChild(dpEl);
+  }
+
   var sess = checkSession();
   if(sess){
     showApp(sess.name);
