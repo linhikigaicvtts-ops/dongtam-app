@@ -370,17 +370,28 @@ input::placeholder{color:var(--t3)}
 
 <div id="login-screen">
   <div id="login-header">
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.15)"/>
-      <!-- Flame feathers - Đồng Tâm style -->
-      <path d="M20 54 C18 44 22 34 28 24 C30 32 28 42 24 54 Z" fill="white" opacity="0.6"/>
-      <path d="M28 54 C24 42 30 28 38 16 C42 28 38 42 32 54 Z" fill="white" opacity="0.85"/>
-      <path d="M38 54 C34 40 42 24 50 14 C54 26 48 42 42 54 Z" fill="white" opacity="0.65"/>
-      <path d="M46 54 C44 44 50 32 56 22 C58 34 54 46 50 54 Z" fill="white" opacity="0.45"/>
+    <!-- Logo Đồng Tâm: 4 dải cong, trên đỏ sáng, dưới đỏ đậm -->
+    <svg width="80" height="80" viewBox="0 0 88 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="lh-top"><rect x="0" y="0" width="88" height="64"/></clipPath>
+        <clipPath id="lh-bot"><rect x="0" y="64" width="88" height="36"/></clipPath>
+      </defs>
+      <!-- Dải 1: lệch trái -->
+      <path d="M16,14 C5,42 14,72 18,100 L28,100 C32,72 24,42 16,14 Z" fill="white" clip-path="url(#lh-top)"/>
+      <path d="M16,14 C5,42 14,72 18,100 L28,100 C32,72 24,42 16,14 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#lh-bot)"/>
+      <!-- Dải 2 -->
+      <path d="M34,4 C23,34 28,70 32,100 L42,100 C47,70 43,34 34,4 Z" fill="white" clip-path="url(#lh-top)"/>
+      <path d="M34,4 C23,34 28,70 32,100 L42,100 C47,70 43,34 34,4 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#lh-bot)"/>
+      <!-- Dải 3 (cao nhất) -->
+      <path d="M54,2 C43,32 47,70 51,100 L61,100 C66,70 64,32 54,2 Z" fill="white" clip-path="url(#lh-top)"/>
+      <path d="M54,2 C43,32 47,70 51,100 L61,100 C66,70 64,32 54,2 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#lh-bot)"/>
+      <!-- Dải 4: lệch phải -->
+      <path d="M73,14 C62,42 65,72 68,100 L78,100 C84,72 83,42 73,14 Z" fill="white" clip-path="url(#lh-top)"/>
+      <path d="M73,14 C62,42 65,72 68,100 L78,100 C84,72 83,42 73,14 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#lh-bot)"/>
     </svg>
-    <div style="margin-top:14px;text-align:center">
-      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:1px">ĐỒNG TÂM</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:3px;letter-spacing:2px">KHU VỰC 23</div>
+    <div style="margin-top:10px;text-align:center">
+      <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:2px;font-style:italic">Dongtam</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:4px;letter-spacing:1.5px;font-style:italic">Vì cuộc sống tươi đẹp</div>
     </div>
   </div>
   <div id="login-box">
@@ -405,12 +416,19 @@ input::placeholder{color:var(--t3)}
 <div class="wrap" style="padding:0">
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:10px">
-    <svg width="28" height="28" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="72" height="72" rx="16" fill="rgba(255,255,255,0.18)"/>
-      <path d="M20 54 C18 44 22 34 28 24 C30 32 28 42 24 54 Z" fill="white" opacity="0.6"/>
-      <path d="M28 54 C24 42 30 28 38 16 C42 28 38 42 32 54 Z" fill="white" opacity="0.9"/>
-      <path d="M38 54 C34 40 42 24 50 14 C54 26 48 42 42 54 Z" fill="white" opacity="0.65"/>
-      <path d="M46 54 C44 44 50 32 56 22 C58 34 54 46 50 54 Z" fill="white" opacity="0.45"/>
+    <svg width="26" height="26" viewBox="0 0 88 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="tb-top"><rect x="0" y="0" width="88" height="64"/></clipPath>
+        <clipPath id="tb-bot"><rect x="0" y="64" width="88" height="36"/></clipPath>
+      </defs>
+      <path d="M16,14 C5,42 14,72 18,100 L28,100 C32,72 24,42 16,14 Z" fill="white" clip-path="url(#tb-top)"/>
+      <path d="M16,14 C5,42 14,72 18,100 L28,100 C32,72 24,42 16,14 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#tb-bot)"/>
+      <path d="M34,4 C23,34 28,70 32,100 L42,100 C47,70 43,34 34,4 Z" fill="white" clip-path="url(#tb-top)"/>
+      <path d="M34,4 C23,34 28,70 32,100 L42,100 C47,70 43,34 34,4 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#tb-bot)"/>
+      <path d="M54,2 C43,32 47,70 51,100 L61,100 C66,70 64,32 54,2 Z" fill="white" clip-path="url(#tb-top)"/>
+      <path d="M54,2 C43,32 47,70 51,100 L61,100 C66,70 64,32 54,2 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#tb-bot)"/>
+      <path d="M73,14 C62,42 65,72 68,100 L78,100 C84,72 83,42 73,14 Z" fill="white" clip-path="url(#tb-top)"/>
+      <path d="M73,14 C62,42 65,72 68,100 L78,100 C84,72 83,42 73,14 Z" fill="rgba(255,255,255,0.5)" clip-path="url(#tb-bot)"/>
     </svg>
     <div>
       <div class="topbar-title">Đồng Tâm KV23</div>
