@@ -1707,6 +1707,10 @@ function renderSale(){
       var origGH=baseP?baseP.giao:0;
       var nkFmt=nkSale>0?nkSale.toLocaleString('vi-VN')+'đ':(origNK>0?origNK.toLocaleString('vi-VN')+'đ':'—');
       var ghFmt=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(origGH>0?origGH.toLocaleString('vi-VN')+'đ':'—');
+      var tk=timTonKhoTheoQuyen(p.ma);
+      var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
+      var tkText=tk?tkDot+' Còn '+tk.tong+' '+tk.dvt:'';
+      var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
       dcard.innerHTML=
         '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">📷</span><span style="font-size:9px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span></div>'
         +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.style.display=\'none\'">':'')
@@ -1724,6 +1728,7 @@ function renderSale(){
         +'<span style="font-size:12px;font-weight:700;color:#C0232A">'+nkFmt+'</span>'
         +'</span></div>'
         +prRow('Giao hàng',ghFmt,'#1565C0')
+        +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
         +'<div style="display:flex;gap:4px;margin-top:6px">'
         +'<button onclick="event.stopPropagation();chiaSeAnhSanPham(\''+p.ma+'\')" style="padding:4px 8px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer">📤</button>'
         +'<button onclick="event.stopPropagation();shareZaloSale(window.__salePTmp_'+p.ma.replace(/[^a-z0-9]/gi,'_')+')" style="padding:4px 8px;font-size:11px;border:none;border-radius:4px;background:#0068FF;color:#fff;font-weight:700;cursor:pointer">Zalo ↗</button>'
