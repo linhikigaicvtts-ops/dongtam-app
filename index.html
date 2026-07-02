@@ -187,6 +187,21 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Padding top cho tab content (vì không còn bottom-nav ăn space) */
   #app-content{padding-bottom:0}
 
+  /* Size sidebar: cố định ngay sau panel chi tiết (left:320px) */
+  #size-sidebar{
+    position:fixed !important;
+    left:320px !important;top:57px !important;bottom:56px !important;
+    width:70px !important;
+    overflow-y:auto !important;
+    background:var(--bg1) !important;
+    border-right:1px solid var(--bd) !important;
+    z-index:70;
+    max-height:none !important;
+  }
+
+  /* Product grid: đẩy sang phải chừa chỗ cho size-sidebar cố định */
+  #size-sidebar + div{margin-left:70px !important}
+
   /* Detail panel: trên desktop hiện ở right panel thay vì inline card */
   .dp{
     display:none;
