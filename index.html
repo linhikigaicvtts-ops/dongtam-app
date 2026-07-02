@@ -1626,14 +1626,67 @@ function renderSale(){
   document.getElementById('scount').textContent=list.length+' mã đang sale';
   var el=document.getElementById('slist'); el.innerHTML='';
 
+  var isDesktop = (window.innerWidth||document.documentElement.clientWidth||0)>=768;
+
   list.forEach(function(p){
-    var saleP = p.ns||p.gs;
+    var nkSale = p.ns||p.nk||0;
+    var ghSale = p.gs||p.gh||0;
+    var saleP = nkSale||ghSale;
     var base  = p.nhan||p.giao;
     var save  = base&&saleP ? Math.round((base-saleP)/base*100) : 0;
 
     // Lấy danh sách ảnh (khớp linh hoạt hoa/thường, dư khoảng trắng)
     var imgs = timAnhMulti(p.ma);
+    var imgUrl = (imgStore&&imgStore[p.ma])?imgStore[p.ma]:(imgs.length?imgs[0]:'');
     var curIdx = 0;
+
+    // === DESKTOP CARD ===
+    if(isDesktop){
+      var dcard = document.createElement('div');
+      dcard.className='mk';
+      dcard.style.cssText='padding:0 !important;cursor:pointer;overflow:hidden;display:flex;align-items:stretch;min-height:110px';
+      var badgeHtml=(p.loai_sale==='ct1'?'<span style="background:#E8F5E9;color:#2E7D32;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">🗓️CT1</span>':'')
+                  +(p.loai_sale==='ct2'?'<span style="background:#FFF3E0;color:#E65100;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">📦CT2</span>':'')
+                  +(p.gio==='★'?'<span style="background:#8B0000;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">★ CL</span>':'');
+      var prRow=function(label,val,color){
+        return '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:3px">'
+          +'<span style="font-size:10px;color:#999;flex-shrink:0">'+label+'</span>'
+          +'<span style="font-size:12px;font-weight:700;color:'+color+'">'+val+'</span></div>';
+      };
+      var baseP=(typeof DATA!=='undefined'?DATA:[]).find(function(x){return x.ma===p.ma;});
+      var origNK=baseP?baseP.nhan:0;
+      var origGH=baseP?baseP.giao:0;
+      var nkFmt=nkSale>0?nkSale.toLocaleString('vi-VN')+'đ':(origNK>0?origNK.toLocaleString('vi-VN')+'đ':'—');
+      var ghFmt=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(origGH>0?origGH.toLocaleString('vi-VN')+'đ':'—');
+      dcard.innerHTML=
+        '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;font-size:22px;color:#ccc;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px">◻'
+        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.remove()">':'')
+        +'</div>'
+        +'<div style="flex:1;padding:8px 8px 8px 2px;display:flex;flex-direction:column;justify-content:center;min-width:0">'
+        +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'+badgeHtml
+        +(save>0?'<span style="background:#C0232A;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">-'+save+'%</span>':'')
+        +'<span style="font-size:10px;color:#888">'+p.kc+'</span></div>'
+        +'<div style="font-size:13px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px">'+p.ma+'</div>'
+        +(p.le>0?prRow('Giá lẻ',p.le.toLocaleString('vi-VN')+'đ','#555'):'')
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:3px">'
+        +'<span style="font-size:10px;color:#999;flex-shrink:0">Nhận kho</span>'
+        +'<span>'
+        +(nkSale>0&&origNK>0&&origNK!==nkSale?'<span style="font-size:10px;color:#bbb;text-decoration:line-through;margin-right:4px">'+origNK.toLocaleString('vi-VN')+'đ</span>':'')
+        +'<span style="font-size:12px;font-weight:700;color:#C0232A">'+nkFmt+'</span>'
+        +'</span></div>'
+        +prRow('Giao hàng',ghFmt,'#1565C0')
+        +'<div style="display:flex;gap:4px;margin-top:6px">'
+        +'<button onclick="event.stopPropagation();chiaSeAnhSanPham(\''+p.ma+'\')" style="padding:4px 8px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer">📤</button>'
+        +'<button onclick="event.stopPropagation();shareZaloSale(window.__salePTmp_'+p.ma.replace(/[^a-z0-9]/gi,'_')+')" style="padding:4px 8px;font-size:11px;border:none;border-radius:4px;background:#0068FF;color:#fff;font-weight:700;cursor:pointer">Zalo ↗</button>'
+        +'<button onclick="event.stopPropagation();addToDon(\''+p.ma+'\');showToast(\'✓ Đã thêm '+p.ma+'\')" style="flex:1;padding:4px 8px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm</button>'
+        +'</div>'
+        +'</div>';
+      var safeKey='__salePTmp_'+p.ma.replace(/[^a-z0-9]/gi,'_');
+      window[safeKey]=p;
+      dcard.addEventListener('click',function(){ showDP(p.ma); });
+      el.appendChild(dcard);
+      return;
+    }
 
     var card = document.createElement('div');
     card.className='sale-card';
