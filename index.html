@@ -67,6 +67,118 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   }
 }
 
+/* ===== DESKTOP LAYOUT (≥768px) ===== */
+@media(min-width:768px){
+  html,body{background:var(--bg2)}
+  #app-content{width:100%;max-width:100%;background:var(--bg);box-shadow:none;margin:0}
+  .topbar{position:sticky;top:0;z-index:100;width:100%}
+
+  /* Sidebar trái thay cho bottom-nav */
+  nav.bottom-nav{
+    position:fixed !important;
+    left:0 !important;right:auto !important;
+    top:57px !important;bottom:0 !important;
+    width:190px !important;
+    transform:none !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    justify-content:flex-start !important;
+    border-top:none !important;
+    border-right:1px solid var(--bd) !important;
+    background:var(--bg1) !important;
+    padding:8px 0 !important;
+    overflow-y:auto;
+    box-shadow:2px 0 10px rgba(0,0,0,.06) !important;
+    gap:0 !important;
+    height:auto !important;
+  }
+
+  /* Nút trong sidebar */
+  .bn{
+    flex-direction:row !important;
+    justify-content:flex-start !important;
+    align-items:center !important;
+    padding:11px 16px !important;
+    font-size:13px !important;
+    font-weight:600 !important;
+    gap:10px !important;
+    border:none !important;
+    border-left:3px solid transparent !important;
+    border-radius:0 !important;
+    height:auto !important;
+    min-height:46px !important;
+    color:var(--t2) !important;
+    background:transparent !important;
+    width:100% !important;
+    text-align:left !important;
+    transition:background .12s,color .12s;
+  }
+  .bn.on{color:var(--red) !important;border-left-color:var(--red) !important;background:rgba(192,35,42,.07) !important}
+  .bn-icon{font-size:18px !important}
+
+  /* Nút Đơn (center) trong sidebar */
+  .bn-center{
+    position:static !important;
+    display:flex !important;
+    flex-direction:row !important;
+    justify-content:flex-start !important;
+    align-items:center !important;
+    padding:11px 16px !important;
+    font-size:13px !important;
+    font-weight:600 !important;
+    gap:10px !important;
+    width:100% !important;
+    border:none !important;
+    border-left:3px solid transparent !important;
+    border-radius:0 !important;
+    min-height:46px !important;
+    background:transparent !important;
+    color:var(--t2) !important;
+    cursor:pointer;
+    text-align:left !important;
+  }
+  .bn-center.on{color:var(--red) !important;border-left-color:var(--red) !important;background:rgba(192,35,42,.07) !important}
+  .bn-center-circle{
+    width:26px !important;height:26px !important;
+    box-shadow:none !important;border-radius:8px !important;
+    position:static !important;
+    display:flex !important;align-items:center !important;justify-content:center !important;
+  }
+  #don-badge{position:static !important;top:auto !important;right:auto !important}
+
+  /* Banner thông tin khách hàng: dịch sang phải sidebar, trái cart */
+  #thongtin-khachhang{margin-left:190px;margin-right:320px}
+
+  /* Tab content: nằm giữa sidebar và cart */
+  .tc{display:none;margin-left:190px;margin-right:320px;padding-bottom:24px}
+  .tc.on{display:block}
+
+  /* Cart panel: luôn hiển thị bên phải */
+  #tab-don{
+    display:block !important;
+    position:fixed !important;
+    right:0 !important;top:57px !important;bottom:0 !important;
+    width:320px !important;
+    margin-left:0 !important;margin-right:0 !important;
+    border-left:1px solid var(--bd);
+    background:var(--bg1);
+    overflow-y:auto;
+    z-index:80;
+  }
+
+  /* Product list: 2 cột */
+  #plist{display:grid !important;grid-template-columns:repeat(2,1fr);gap:8px}
+
+  /* Sale grid: 2 cột */
+  #slist.sale-grid{grid-template-columns:repeat(2,1fr) !important}
+
+  /* Search wrap sticky dưới topbar */
+  .search-wrap{position:sticky;top:0;z-index:40;background:var(--bg)}
+
+  /* Padding top cho tab content (vì không còn bottom-nav ăn space) */
+  #app-content{padding-bottom:0}
+}
+
 /* ===== INPUTS ===== */
 input,button,select{font-family:var(--f);outline:none;-webkit-appearance:none}
 input[type=text],input[type=number],input[type=password]{
@@ -1079,6 +1191,14 @@ function swSubKeo(sub){
 }
 
 function swTab(t){
+  // Desktop: cart là panel cố định bên phải, không cần chuyển tab
+  if(t==='don' && window.innerWidth>=768){
+    renderDon();
+    ['tra','sale','ngoi','keo','don'].forEach(function(x){
+      var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',x==='don');
+    });
+    return;
+  }
   ['tra','sale','ngoi','keo','kinh','don'].forEach(function(x){
     var el=document.getElementById('tab-'+x); if(el) el.classList.toggle('on',x===t);
   });
@@ -1280,10 +1400,16 @@ function render(){
     var priceNhan=p.nhan>0?p.nhan.toLocaleString('vi-VN')+'đ':'–';
     var priceGiao=p.giao>0?p.giao.toLocaleString('vi-VN')+'đ':'–';
     var priceNs=p.ns>0?p.ns.toLocaleString('vi-VN')+'đ':'–';
+    var imgUrl=imgStore&&imgStore[p.ma]?imgStore[p.ma]:'';
+    var imgHtml=imgUrl
+      ?'<img src="'+imgUrl+'" style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-right:10px;background:#f0f0f0" onerror="this.outerHTML=\'<div style=\\\"width:72px;height:72px;border-radius:8px;background:#F5F4F2;flex-shrink:0;margin-right:10px;display:flex;align-items:center;justify-content:center;font-size:22px\\\">🔲</div>\'">'
+      :'<div style="width:72px;height:72px;border-radius:8px;background:#F5F4F2;flex-shrink:0;margin-right:10px;display:flex;align-items:center;justify-content:center;font-size:22px">🔲</div>';
     var div=document.createElement('div'); div.className='mk';
     div.style.cssText='padding:10px 12px;cursor:pointer';
     div.innerHTML=
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      '<div style="display:flex;align-items:center">'
+      +imgHtml
+      +'<div style="flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center">'
       +'<div style="flex:1;min-width:0">'
       +'<p style="font-size:13px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.ma+saleDot+'</p>'
       +'<p style="font-size:11px;color:var(--t2);margin-top:2px">'+p.kc+star+'</p>'
@@ -1300,6 +1426,7 @@ function render(){
           +'<p style="font-size:11px;color:#1565C0;font-weight:600">→ giao: '+priceGiao+'</p>'
           +'</div>'
       )
+      +'</div>'
       +'</div>';
     div.addEventListener('click',function(){showDP(p.ma);});
     el.appendChild(div);
