@@ -3607,6 +3607,7 @@ function xoaLocNangCao(tab){
 }
 // Badge gọn hiện trên thẻ sản phẩm — 3 chấm màu theo tốc độ giao, không cần bấm vào
 function timTonKho(ma){
+  if(!tonKhoChiTiet) return null;
   var tk=tonKhoChiTiet[normMa(ma)]||tonKhoChiTiet[ma];
   if(!tk){
     var k=Object.keys(tonKhoChiTiet).find(function(key){return normMa(key)===normMa(ma);});
