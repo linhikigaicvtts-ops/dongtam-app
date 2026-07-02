@@ -227,12 +227,15 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
     border:none !important;
     border-right:1px solid var(--bd) !important;
     max-height:none !important;
-    overflow-y:auto !important;
+    overflow:hidden !important;
+    flex-direction:column !important;
     z-index:85;
     background:var(--bg1);
     box-shadow:none !important;
   }
-  .dp[style*="display:block"],.dp[style*="display: block"]{display:block !important}
+  .dp[style*="display:block"],.dp[style*="display: block"]{display:flex !important}
+  #dp-scroll{flex:1;overflow-y:auto;padding:12px 12px 0}
+  #dp-footer{flex-shrink:0;padding:10px 12px;border-top:1px solid var(--bd);background:var(--bg1)}
   /* Khi dp hiện → ẩn tab-don (cart) phía dưới */
   #tab-don{transition:opacity .15s}
 }
@@ -630,6 +633,7 @@ input::placeholder{color:var(--t3)}
     </div>
     <div style="flex:1;min-width:0;padding:0 10px">
   <div id="dp" class="dp">
+    <div id="dp-scroll">
     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
       <div>
         <p id="dp-ma" style="font-size:14px;font-weight:600;margin-bottom:2px"></p>
@@ -698,12 +702,16 @@ input::placeholder{color:var(--t3)}
         <span id="dp-img-counter" style="display:none;position:absolute;top:6px;right:8px;
           background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px"></span>
       </div>
-      <div style="display:flex;gap:6px">
-        <button onclick="chiaSeAnhSanPham(curP_ma)" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Chia sẻ ảnh</button>
-        <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
-        <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:8px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:600;font-family:var(--f)">🛒 + Đơn</button>
+    </div><!-- end dp-img-section -->
+    </div><!-- end dp-scroll -->
+    <!-- Footer nút cố định đáy panel -->
+    <div id="dp-footer" style="padding:10px 12px;border-top:1px solid var(--bd);background:var(--bg1);flex-shrink:0">
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button onclick="chiaSeAnhSanPham(curP_ma)" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Chia sẻ</button>
+        <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
+        <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:700;font-family:var(--f)">🛒 + Đơn</button>
       </div>
-      <button onclick="moTonKho(curP_ma)" style="width:100%;margin-top:6px;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
+      <button onclick="moTonKho(curP_ma)" style="width:100%;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
     </div>
   </div>
   <div id="pagination" class="pag" style="padding:8px 12px;border-bottom:1px solid #eee;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;align-items:center"></div>
