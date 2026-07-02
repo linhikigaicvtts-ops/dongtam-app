@@ -417,6 +417,32 @@ input::placeholder{color:var(--t3)}
   color:var(--red);font-weight:700;
   border-left-color:var(--red);background:#FFF5F5;
 }
+/* Mobile: size sidebar → horizontal chips */
+@media(max-width:767px){
+  #tab-tra > div[style*="display:flex"]{flex-direction:column !important}
+  #size-sidebar{
+    width:100% !important;max-height:none !important;
+    display:flex !important;flex-direction:row !important;
+    overflow-x:auto !important;overflow-y:hidden !important;
+    border-right:none !important;border-bottom:1px solid var(--bd) !important;
+    padding:6px 8px !important;gap:6px !important;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  #size-sidebar::-webkit-scrollbar{display:none}
+  #size-sidebar .sz-item{
+    display:inline-flex !important;align-items:center !important;
+    flex-shrink:0 !important;white-space:nowrap !important;
+    padding:5px 12px !important;border-radius:20px !important;
+    border:1.5px solid var(--bd) !important;border-left:1.5px solid var(--bd) !important;
+    border-bottom:1.5px solid var(--bd) !important;
+    font-size:11px !important;font-weight:600 !important;
+    background:var(--bg1) !important;
+  }
+  #size-sidebar .sz-item.on{
+    background:var(--red) !important;color:#fff !important;
+    border-color:var(--red) !important;
+  }
+}
 #product-area{flex:1;min-width:0;padding:8px 10px}
 
 /* ===== PRODUCT CARDS ===== */
