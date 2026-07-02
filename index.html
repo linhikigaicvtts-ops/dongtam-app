@@ -11,14 +11,19 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 :root{
   --red:#C0232A;
-  --bg:#F8F8F8;
+  --red2:#8B1A1A;
+  --maroon:#6B1010;
+  --brand-grad:linear-gradient(135deg,#C0232A 0%,#8B1A1A 100%);
+  --bg:#F5F4F2;
   --bg1:#FFFFFF;
-  --bg2:#F2F2F2;
+  --bg2:#F0EEEC;
   --t1:#111111;
   --t2:#888888;
   --t3:#BBBBBB;
-  --bd:#E8E8E8;
+  --bd:#E4E2DF;
+  --bd2:#D0CECC;
   --r:12px;
+  --r8:8px;
   --f:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 html,body{width:100%;height:100%;overflow-x:hidden}
@@ -75,18 +80,27 @@ input::placeholder{color:var(--t3)}
 
 /* ===== LOGIN ===== */
 #login-screen{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
   min-height:100vh;min-height:-webkit-fill-available;
-  padding:24px;background:var(--bg1);
+  background:var(--bg);
 }
-.login-top{text-align:center;margin-bottom:36px}
-.login-logo-circle{
-  width:72px;height:72px;border-radius:20px;
-  background:var(--red);display:flex;align-items:center;justify-content:center;
-  margin:0 auto 14px;
+#login-header{
+  background:var(--brand-grad);
+  padding:48px 24px 36px;
+  display:flex;flex-direction:column;align-items:center;
+  box-shadow:0 4px 20px rgba(139,26,26,0.3);
 }
-.login-logo-circle span{font-size:32px}
-.login-top h1{font-size:22px;font-weight:800;color:var(--t1);margin-bottom:4px}
+#login-box{
+  background:var(--bg1);
+  border-radius:24px 24px 0 0;
+  padding:28px 24px 24px;
+  flex:1;
+  margin-top:-16px;
+  position:relative;
+}
+.login-top{text-align:center;margin-bottom:24px}
+.login-logo-circle{display:none}
+.login-top h1{font-size:20px;font-weight:800;color:var(--t1);margin-bottom:4px}
 .login-top p{font-size:13px;color:var(--t2)}
 .login-form{width:100%;max-width:360px}
 .login-field{margin-bottom:12px}
@@ -105,19 +119,20 @@ input::placeholder{color:var(--t3)}
 /* ===== TOP BAR ===== */
 .topbar{
   display:flex;justify-content:space-between;align-items:center;
-  padding:12px 16px;background:var(--bg1);
-  border-bottom:1px solid var(--bd);
+  padding:10px 14px;background:var(--brand-grad);
+  border-bottom:none;
   position:sticky;top:0;z-index:50;
+  box-shadow:0 2px 8px rgba(139,26,26,0.25);
 }
-.topbar-title{font-size:16px;font-weight:800;color:var(--t1)}
-.topbar-sub{font-size:11px;color:var(--t2);margin-top:1px}
+.topbar-title{font-size:16px;font-weight:800;color:#fff}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px}
 .topbar-right{display:flex;align-items:center;gap:10px}
 #logout-btn{
-  background:none;border:1.5px solid var(--bd);border-radius:8px;
-  padding:5px 12px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;
+  background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);border-radius:8px;
+  padding:5px 12px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;
 }
 #don-badge-btn{
-  position:relative;background:var(--red);border:none;
+  position:relative;background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.5);
   border-radius:8px;padding:5px 14px;
   font-size:13px;font-weight:700;color:#fff;cursor:pointer;
 }
@@ -354,11 +369,24 @@ input::placeholder{color:var(--t3)}
 <body>
 
 <div id="login-screen">
+  <div id="login-header">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.15)"/>
+      <!-- Flame feathers - Đồng Tâm style -->
+      <path d="M20 54 C18 44 22 34 28 24 C30 32 28 42 24 54 Z" fill="white" opacity="0.6"/>
+      <path d="M28 54 C24 42 30 28 38 16 C42 28 38 42 32 54 Z" fill="white" opacity="0.85"/>
+      <path d="M38 54 C34 40 42 24 50 14 C54 26 48 42 42 54 Z" fill="white" opacity="0.65"/>
+      <path d="M46 54 C44 44 50 32 56 22 C58 34 54 46 50 54 Z" fill="white" opacity="0.45"/>
+    </svg>
+    <div style="margin-top:14px;text-align:center">
+      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:1px">ĐỒNG TÂM</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:3px;letter-spacing:2px">KHU VỰC 23</div>
+    </div>
+  </div>
   <div id="login-box">
     <div id="login-logo">
-      <div style="width:56px;height:56px;background:var(--red);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto">🏪</div>
-      <h1>Sales Tool – Đồng Tâm</h1>
-      <p>Khu vực 23 · Dành cho nội bộ</p>
+      <h1>Chào mừng trở lại</h1>
+      <p>Đăng nhập để tiếp tục</p>
     </div>
     <div class="login-field">
       <label>Tài khoản</label>
@@ -376,11 +404,19 @@ input::placeholder{color:var(--t3)}
 <div id="app-content">
 <div class="wrap" style="padding:0">
 <div class="topbar">
-  <div>
-    <div class="topbar-title">Đồng Tâm KV23</div>
-    <div style="display:flex;align-items:center;gap:6px;margin-top:2px;position:relative">
-      <span id="ca-nhan-ten" class="topbar-sub"></span>
-      <button type="button" onclick="toggleMenuTaiKhoan()" style="font-size:10px;font-weight:600;color:#0D47A1;background:none;border:1px solid #0D47A1;border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản ▾</button>
+  <div style="display:flex;align-items:center;gap:10px">
+    <svg width="28" height="28" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="72" height="72" rx="16" fill="rgba(255,255,255,0.18)"/>
+      <path d="M20 54 C18 44 22 34 28 24 C30 32 28 42 24 54 Z" fill="white" opacity="0.6"/>
+      <path d="M28 54 C24 42 30 28 38 16 C42 28 38 42 32 54 Z" fill="white" opacity="0.9"/>
+      <path d="M38 54 C34 40 42 24 50 14 C54 26 48 42 42 54 Z" fill="white" opacity="0.65"/>
+      <path d="M46 54 C44 44 50 32 56 22 C58 34 54 46 50 54 Z" fill="white" opacity="0.45"/>
+    </svg>
+    <div>
+      <div class="topbar-title">Đồng Tâm KV23</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;position:relative">
+        <span id="ca-nhan-ten" class="topbar-sub"></span>
+        <button type="button" onclick="toggleMenuTaiKhoan()" style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản ▾</button>
       <div id="menu-taikhoan" style="display:none;position:absolute;top:24px;left:0;z-index:200;background:var(--bg1,#fff);border:1px solid var(--bd,#ddd);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:170px;overflow:hidden">
         <button type="button" onclick="toggleMenuTaiKhoan();moLichSuDon()" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn hàng</button>
         <button type="button" id="btn-quanly-taikhoan" onclick="toggleMenuTaiKhoan();moQuanLyTaiKhoan()" style="display:none;width:100%;text-align:left;padding:10px 12px;border:none;border-top:1px solid var(--bd,#eee);background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">👤 Quản lý tài khoản</button>
@@ -388,11 +424,12 @@ input::placeholder{color:var(--t3)}
       </div>
     </div>
   </div>
+  </div>
   <div class="topbar-right">
     <span id="gia-source-badge" onclick="fetchGiaFromSheet()">⏳</span>
   </div>
 </div></div>
-<div id="thongtin-khachhang" style="display:none;background:#E3F2FD;border-bottom:1px solid #BBDEFB;padding:8px 14px;font-size:11px;color:#0D47A1"></div>
+<div id="thongtin-khachhang" style="display:none;background:#FFF8F8;border-bottom:1px solid #F5D0D0;padding:8px 14px;font-size:11px;color:#8B1A1A"></div>
 <nav class="bottom-nav">
   <button class="bn on" id="bn-tra" onclick="swTab('tra')"><span class="bn-icon">🔲</span><span>Gạch</span></button>
   <button class="bn" id="bn-ngoi" onclick="swTab('ngoi')"><span class="bn-icon">🏠</span><span>Ngói</span></button>
