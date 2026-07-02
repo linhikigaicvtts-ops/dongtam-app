@@ -213,8 +213,8 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Tab Sale: khi dp mở đẩy sang phải 320px */
   body.dp-open #tab-sale{margin-left:320px !important}
 
-  /* Product grid: đẩy sang phải chừa chỗ cho size-sidebar cố định */
-  #size-sidebar + div{margin-left:85px !important}
+  /* Product grid: KHÔNG cần margin-left vì tab-tra đã có margin-left */
+  #size-sidebar + div{margin-left:0 !important}
 
   /* Detail panel: trên desktop hiện ở right panel thay vì inline card */
   .dp{
