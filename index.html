@@ -194,7 +194,7 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   #size-sidebar{
     position:fixed !important;
     left:0 !important;top:57px !important;bottom:56px !important;
-    width:70px !important;
+    width:85px !important;
     overflow-y:auto !important;
     background:var(--bg1) !important;
     border-right:1px solid var(--bd) !important;
@@ -205,16 +205,16 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Khi dp mở: size-sidebar dịch sang phải 320px */
   body.dp-open #size-sidebar{left:320px !important}
 
-  /* Tab Tra giá: mặc định margin-left 70px (chừa size-sidebar) */
-  #tab-tra{margin-left:70px !important}
+  /* Tab Tra giá: mặc định margin-left 85px (chừa size-sidebar) */
+  #tab-tra{margin-left:85px !important}
   /* Khi dp mở: đẩy thêm 320px */
-  body.dp-open #tab-tra{margin-left:390px !important}
+  body.dp-open #tab-tra{margin-left:405px !important}
 
   /* Tab Sale: khi dp mở đẩy sang phải 320px */
   body.dp-open #tab-sale{margin-left:320px !important}
 
   /* Product grid: đẩy sang phải chừa chỗ cho size-sidebar cố định */
-  #size-sidebar + div{margin-left:70px !important}
+  #size-sidebar + div{margin-left:85px !important}
 
   /* Detail panel: trên desktop hiện ở right panel thay vì inline card */
   .dp{
@@ -611,7 +611,7 @@ input::placeholder{color:var(--t3)}
     <button class="fb"    id="f-kinh"      onclick="setF('kinh')">💎 Gạch kính</button>
   </div>
   <div style="display:flex;gap:0;margin:8px -10px 0;width:calc(100% + 20px)">
-    <div id="size-sidebar" style="width:70px;flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--bd);overflow-y:auto;max-height:70vh">
+    <div id="size-sidebar" style="width:85px;flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--bd);overflow-y:auto;max-height:70vh">
       <div class="sz-item on" id="sz-all"    onclick="setSize('all')">Tất cả</div>
       <div class="sz-item" id="sz-60x120"    onclick="setSize('600x1200')">60x120cm</div>
       <div class="sz-item" id="sz-100x100"   onclick="setSize('1000x1000')">100x100cm</div>
@@ -1484,9 +1484,18 @@ function render(){
       var hasCT1Sale=nkSale>0;
       var giaGiao=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(hasSale&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
       var giaNhan=hasCT1Sale?nkSale.toLocaleString('vi-VN')+'đ':(hasSale?priceNs:priceNhan);
+      var tk=timTonKhoTheoQuyen(p.ma);
+      var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
+      var tkText=tk?tkDot+' Còn '+tk.tong+' '+tk.dvt:'';
+      var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
+      var noImgHtml='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">'
+        +'<span style="font-size:22px">📷</span>'
+        +'<span style="font-size:9px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span>'
+        +'</div>';
       div.innerHTML=
-        '<div style="width:120px;height:120px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;font-size:24px;color:#ccc;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px">◻'
-        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.remove()">':'')
+        '<div style="width:120px;height:120px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px">'
+        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.style.display=\'none\'">':'')
+        +noImgHtml
         +'</div>'
         +'<div style="flex:1;padding:10px 10px 10px 4px;display:flex;flex-direction:column;justify-content:center;min-width:0">'
         +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">'+badgeHtml+'<span style="font-size:10px;color:#888">'+p.kc+'</span></div>'
@@ -1500,6 +1509,7 @@ function render(){
         +'</span>'
         +'</div>'
         +prRow('Giao hàng',giaGiao,'#1565C0')
+        +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
         +'</div>';
     } else {
       // Mobile: layout ngang
@@ -1698,8 +1708,8 @@ function renderSale(){
       var nkFmt=nkSale>0?nkSale.toLocaleString('vi-VN')+'đ':(origNK>0?origNK.toLocaleString('vi-VN')+'đ':'—');
       var ghFmt=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(origGH>0?origGH.toLocaleString('vi-VN')+'đ':'—');
       dcard.innerHTML=
-        '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;font-size:22px;color:#ccc;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px">◻'
-        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.remove()">':'')
+        '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">📷</span><span style="font-size:9px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span></div>'
+        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.style.display=\'none\'">':'')
         +'</div>'
         +'<div style="flex:1;padding:8px 8px 8px 2px;display:flex;flex-direction:column;justify-content:center;min-width:0">'
         +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'+badgeHtml
