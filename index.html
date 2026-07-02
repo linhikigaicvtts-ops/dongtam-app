@@ -3474,7 +3474,11 @@ function fetchTonKhoChiTiet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var cbName='_onTonKhoChiTiet';
   window[cbName]=function(res){
-    if(res && res.status==='ok' && res.data) tonKhoChiTiet=res.data;
+    if(res && res.status==='ok' && res.data){
+      tonKhoChiTiet=res.data;
+      if(typeof render==='function') render();
+      if(typeof renderSale==='function') renderSale();
+    }
     var s=document.getElementById('_tkct_script');
     if(s) s.remove();
   };
