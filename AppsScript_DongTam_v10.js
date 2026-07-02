@@ -376,7 +376,8 @@ function login(e) {
       iName = col('Name', 2),     iRole = col('Role', 3);
   var iCty = col('Tên Công Ty'), iMst = col('Mã số thuế'),
       iDc  = col('Địa chỉ'),     iEmail = col('Email'),
-      iTenKH = col('Tên khách hàng'), iKhoPT = col('Kho phụ trách');
+      iTenKH = col('Tên khách hàng'), iKhoPT = col('Kho phụ trách'),
+      iSdt = col('SDT');
 
   for (var i = 1; i < rows.length; i++) {
     var row = rows[i];
@@ -399,7 +400,8 @@ function login(e) {
           diaChi: iDc    !== undefined ? String(row[iDc]    || '') : '',
           email:  iEmail !== undefined ? String(row[iEmail] || '') : '',
           tenKH:  iTenKH !== undefined ? String(row[iTenKH] || '') : '',
-          khoPhuTrach: iKhoPT !== undefined ? String(row[iKhoPT] || '') : ''
+          khoPhuTrach: iKhoPT !== undefined ? String(row[iKhoPT] || '') : '',
+          sdt:    iSdt   !== undefined ? String(row[iSdt]   || '') : ''
         };
       }
       return {status:'error', msg:'Sai tài khoản hoặc mật khẩu'};

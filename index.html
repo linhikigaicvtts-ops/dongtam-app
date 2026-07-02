@@ -418,31 +418,6 @@ input::placeholder{color:var(--t3)}
   border-left-color:var(--red);background:#FFF5F5;
 }
 /* Mobile: size sidebar → horizontal chips */
-@media(max-width:767px){
-  #tab-tra > div[style*="display:flex"]{flex-direction:column !important}
-  #size-sidebar{
-    width:100% !important;max-height:none !important;
-    display:flex !important;flex-direction:row !important;
-    overflow-x:auto !important;overflow-y:hidden !important;
-    border-right:none !important;border-bottom:1px solid var(--bd) !important;
-    padding:6px 8px !important;gap:6px !important;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none;
-  }
-  #size-sidebar::-webkit-scrollbar{display:none}
-  #size-sidebar .sz-item{
-    display:inline-flex !important;align-items:center !important;
-    flex-shrink:0 !important;white-space:nowrap !important;
-    padding:5px 12px !important;border-radius:20px !important;
-    border:1.5px solid var(--bd) !important;border-left:1.5px solid var(--bd) !important;
-    border-bottom:1.5px solid var(--bd) !important;
-    font-size:11px !important;font-weight:600 !important;
-    background:var(--bg1) !important;
-  }
-  #size-sidebar .sz-item.on{
-    background:var(--red) !important;color:#fff !important;
-    border-color:var(--red) !important;
-  }
-}
 #product-area{flex:1;min-width:0;padding:8px 10px}
 
 /* ===== PRODUCT CARDS ===== */
@@ -762,9 +737,9 @@ input::placeholder{color:var(--t3)}
     <!-- Footer nút cố định đáy panel -->
     <div id="dp-footer" style="padding:10px 12px;border-top:1px solid var(--bd);background:var(--bg1);flex-shrink:0">
       <div style="display:flex;gap:6px;margin-bottom:6px">
-        <button onclick="chiaSeAnhSanPham(curP_ma)" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">📤 Chia sẻ</button>
-        <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">Zalo ↗</button>
-        <button onclick="addToDonWithQty()" style="flex:1;font-size:12px;padding:9px 4px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:700;font-family:var(--f)">🛒 + Đơn</button>
+        <button onclick="chiaSeAnhSanPham(curP_ma)" style="flex:1;font-size:11px;padding:9px 4px;border-radius:var(--r8);border:none;background:#388E3C;color:#fff;font-weight:600" title="Chia sẻ nhiều ảnh sản phẩm">🖼️ Chia sẻ hình ảnh</button>
+        <button id="dp-zalo-btn" onclick="shareZalo()" style="flex:1;font-size:11px;padding:9px 4px;border-radius:var(--r8);border:none;background:#0068FF;color:#fff;font-weight:600">💬 Tin nhắn Zalo</button>
+        <button onclick="addToDonWithQty()" style="flex:1;font-size:11px;padding:9px 4px;border-radius:var(--r8);border:none;background:#C0232A;color:#fff;font-weight:700;font-family:var(--f)">🛒 Thêm đơn</button>
       </div>
       <button onclick="moTonKho(curP_ma)" style="width:100%;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
     </div>
@@ -1574,7 +1549,7 @@ function render(){
         +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
         +'</div>';
     } else {
-      // Mobile: layout ngang — giá lẻ + nhận kho (CT1 nếu có) + giao
+      // Mobile: layout dọc — ảnh + tên/kích cỡ + giá lẻ/nhận kho/giao + tồn kho
       var mCt1=(window.CT1_DATA||[]).find(function(x){return x.ma===p.ma;})
              ||(window.CT2_DATA||[]).find(function(x){return x.ma===p.ma;});
       var mNkSale=mCt1?(mCt1.nk||mCt1.ns||0):0;
@@ -1583,21 +1558,37 @@ function render(){
       var mGiaNhan=mHasCT1?mNkSale.toLocaleString('vi-VN')+'đ':(hasSale?priceNs:priceNhan);
       var mGiaGiao=mGhSale>0?mGhSale.toLocaleString('vi-VN')+'đ':(hasSale&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
       var mGiaGoc=mHasCT1?priceNhan:(hasSale?priceNhan:'');
-      div.style.cssText='padding:12px 12px;cursor:pointer';
-      var imgHtml='<div style="width:68px;height:68px;border-radius:8px;background:#F5F4F2;flex-shrink:0;margin-right:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#ccc;position:relative;overflow:hidden">◻'
-        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.remove()">':'')
-        +'</div>';
-      div.innerHTML=imgHtml
-        +'<div style="flex:1;min-width:0;overflow:hidden;margin-right:6px">'
-        +'<p style="font-size:13px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.ma+saleDot+'</p>'
-        +'<p style="font-size:11px;color:var(--t2);margin-top:2px">'+p.kc+star+'</p>'
+      var mTk=timTonKhoTheoQuyen(p.ma);
+      var mTkDot=mTk?(mTk.tier&&mTk.tier.nhanh>0?'🟢':mTk.tier&&mTk.tier.mai>0?'🟡':'🔴'):'';
+      var mTkText=mTk?mTkDot+' Còn '+mTk.tong.toLocaleString('vi-VN')+' '+mTk.dvt:'';
+      var mTkColor=mTk?(mTk.tier&&mTk.tier.nhanh>0?'#2E7D32':mTk.tier&&mTk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
+      div.style.cssText='padding:12px;cursor:pointer;align-items:flex-start';
+      var mImgHtml='<div style="width:84px;flex-shrink:0;margin-right:10px;display:flex;flex-direction:column;align-items:center;gap:4px">'
+        +'<div style="width:84px;height:84px;border-radius:8px;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">'
+        +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.style.display=\'none\'">'
+          :'<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">📷</span><span style="font-size:8px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span></div>')
         +'</div>'
-        +'<div style="text-align:right;flex-shrink:0;width:105px">'
-        +(p.le>0?'<p style="font-size:10px;color:#999;margin-bottom:2px">Lẻ: '+p.le.toLocaleString('vi-VN')+'đ</p>':'')
-        +(mGiaGoc?'<p style="font-size:10px;color:#aaa;text-decoration:line-through;margin-bottom:1px">'+mGiaGoc+'</p>':'')
-        +'<p style="font-size:15px;font-weight:800;color:#C0232A;margin-bottom:1px">'+mGiaNhan+'</p>'
-        +'<p style="font-size:10px;color:#777;margin-bottom:3px">nhận kho</p>'
-        +'<p style="font-size:11px;color:#1565C0;font-weight:600">→ '+mGiaGiao+'</p>'
+        +'<div style="display:flex;align-items:center;justify-content:center;gap:4px;width:100%;flex-wrap:wrap">'
+        +'<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+p.kc+'</span>'
+        +(star?star:'')
+        +'</div>'
+        +'</div>';
+      div.innerHTML=mImgHtml
+        +'<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">'
+        +'<div>'
+        +'<span style="font-size:13px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">'+p.ma+saleDot+'</span>'
+        +'</div>'
+        +'<div style="height:1px;background:var(--bd);margin:1px 0"></div>'
+        +(p.le>0?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:10px;color:#999">Giá lẻ</span><span style="font-size:11px;color:#555;font-weight:600">'+p.le.toLocaleString('vi-VN')+'đ</span></div>':'')
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+        +'<span style="font-size:10px;color:#999">Giá ĐL nhận kho</span>'
+        +'<span>'
+        +(mGiaGoc?'<span style="font-size:10px;color:#bbb;text-decoration:line-through;margin-right:3px">'+mGiaGoc+'</span>':'')
+        +'<span style="font-size:13px;font-weight:800;color:#C0232A">'+mGiaNhan+'</span>'
+        +'</span>'
+        +'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:10px;color:#999">→ Giá ĐL giao</span><span style="font-size:11px;font-weight:700;color:#1565C0">'+mGiaGiao+'</span></div>'
+        +(mTkText?'<div style="font-size:10px;font-weight:600;color:'+mTkColor+';margin-top:1px">'+mTkText+'</div>':'')
         +'</div>';
     }
     div.addEventListener('click',function(){showDP(p.ma);});
@@ -2498,39 +2489,93 @@ function copyZaloMsg(msg){
 // tên sản phẩm sang Zalo/Messenger/... giống nút Share gốc trên điện thoại.
 // Nếu máy/trình duyệt không hỗ trợ (thường là máy tính), tự mở từng ảnh ở
 // tab mới để nhân viên bấm giữ lưu ảnh rồi tự gửi qua Zalo.
-function chiaSeAnhSanPham(ma, tenSP){
-  var imgs = timAnhMulti(ma);
-  if(!imgs.length){ alert('Sản phẩm này chưa có ảnh trong Sheet!'); return; }
-
+function _thucHienChiaSe(urls, ma, tenSP){
   function moTabDuPhong(){
-    imgs.slice(0,5).forEach(function(u){ window.open(convertImgUrl(u), '_blank'); });
-    showToast('📷 Đã mở '+Math.min(imgs.length,5)+' ảnh ở tab mới — bấm giữ ảnh để lưu, rồi gửi qua Zalo');
+    urls.slice(0,5).forEach(function(u){ window.open(convertImgUrl(u),'_blank'); });
+    showToast('📷 Đã mở '+Math.min(urls.length,5)+' ảnh ở tab mới — bấm giữ ảnh để lưu, rồi gửi qua Zalo');
   }
-
-  if(!(navigator.share && navigator.canShare)){
-    moTabDuPhong();
-    return;
+  function forcePaint(){
+    // Fix blank screen sau khi trở về từ share sheet
+    requestAnimationFrame(function(){
+      document.body.style.opacity='0.99';
+      requestAnimationFrame(function(){ document.body.style.opacity=''; });
+    });
   }
-
-  showToast('⏳ Đang chuẩn bị ảnh để chia sẻ...');
-  Promise.all(imgs.map(function(u){
+  if(!(navigator.share && navigator.canShare)){ moTabDuPhong(); return; }
+  showToast('⏳ Đang chuẩn bị ảnh...');
+  Promise.all(urls.map(function(u){
     return fetch(convertImgUrl(u)).then(function(res){
       if(!res.ok) throw new Error('fetch fail');
       return res.blob();
     });
   })).then(function(blobs){
-    var files = blobs.map(function(b,i){
-      return new File([b], (ma||'anh')+'_'+(i+1)+'.jpg', {type:b.type||'image/jpeg'});
+    var files=blobs.map(function(b,i){
+      return new File([b],(ma||'anh')+'_'+(i+1)+'.jpg',{type:b.type||'image/jpeg'});
     });
     if(navigator.canShare({files:files})){
-      return navigator.share({files:files, title:tenSP||ma, text:tenSP||ma});
+      return navigator.share({files:files,title:tenSP||ma,text:tenSP||ma}).then(forcePaint);
     }
     throw new Error('canShare false');
   }).catch(function(err){
-    if(err && err.name==='AbortError') return; // người dùng tự bấm hủy share
-    console.log('Chia sẻ ảnh qua Web Share thất bại, dùng phương án dự phòng:', err);
+    forcePaint();
+    if(err&&err.name==='AbortError') return;
+    console.log('Web Share thất bại, dùng tab dự phòng:',err);
     moTabDuPhong();
   });
+}
+
+function chiaSeAnhSanPham(ma, tenSP){
+  var imgs=timAnhMulti(ma);
+  if(!imgs.length){ alert('Sản phẩm này chưa có ảnh trong Sheet!'); return; }
+  // Nếu chỉ 1 ảnh → chia sẻ luôn
+  if(imgs.length===1){ _thucHienChiaSe(imgs,ma,tenSP); return; }
+  // Nhiều ảnh → modal chọn ảnh
+  var ov=document.createElement('div');
+  ov.id='img-picker-ov';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  var sel=imgs.map(function(){ return true; }); // mặc định chọn tất
+  function buildUI(){
+    var nSel=sel.filter(Boolean).length;
+    ov.innerHTML='<div style="background:var(--bg1);border-radius:16px 16px 0 0;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--bd)">'
+      +'<span style="font-size:14px;font-weight:700;color:var(--t1)">Chọn ảnh chia sẻ</span>'
+      +'<button id="ipc-close" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--t2);padding:0 4px">×</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;padding:8px 16px;border-bottom:1px solid var(--bd)">'
+      +'<button id="ipc-all" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--bd);background:'+(nSel===imgs.length?'var(--red)':'var(--bg2)')+';color:'+(nSel===imgs.length?'#fff':'var(--t1)')+';font-size:12px;font-weight:600;cursor:pointer">Chọn tất cả</button>'
+      +'<button id="ipc-none" style="flex:1;padding:6px;border-radius:8px;border:1px solid var(--bd);background:var(--bg2);color:var(--t1);font-size:12px;font-weight:600;cursor:pointer">Bỏ chọn</button>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 12px;overflow-y:auto;flex:1">'
+      +imgs.map(function(u,i){
+        var ch=sel[i];
+        return '<div data-i="'+i+'" style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:2.5px solid '+(ch?'var(--red)':'var(--bd)')+';cursor:pointer">'
+          +'<img src="'+convertImgUrl(u)+'" style="width:100%;height:100%;object-fit:cover" onerror="this.src=\'\'">'
+          +'<div style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;background:'+(ch?'var(--red)':'rgba(255,255,255,.7)')+';display:flex;align-items:center;justify-content:center;font-size:12px">'+(ch?'✓':'')+'</div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="padding:10px 16px 20px;border-top:1px solid var(--bd)">'
+      +'<button id="ipc-share" style="width:100%;padding:12px;border:none;border-radius:10px;background:'+(nSel>0?'var(--red)':'#ccc')+';color:#fff;font-size:14px;font-weight:700;cursor:pointer">'
+      +(nSel>0?'🖼️ Chia sẻ '+nSel+' ảnh':'Chưa chọn ảnh nào')
+      +'</button>'
+      +'</div>'
+      +'</div>';
+    // events
+    ov.querySelector('#ipc-close').onclick=function(){ document.body.removeChild(ov); };
+    ov.querySelector('#ipc-all').onclick=function(){ sel=sel.map(function(){return true;}); buildUI(); };
+    ov.querySelector('#ipc-none').onclick=function(){ sel=sel.map(function(){return false;}); buildUI(); };
+    ov.querySelectorAll('[data-i]').forEach(function(el){
+      el.onclick=function(){ var i=+el.getAttribute('data-i'); sel[i]=!sel[i]; buildUI(); };
+    });
+    var shareBtn=ov.querySelector('#ipc-share');
+    if(nSel>0) shareBtn.onclick=function(){
+      document.body.removeChild(ov);
+      _thucHienChiaSe(imgs.filter(function(_,i){return sel[i];}),ma,tenSP);
+    };
+  }
+  buildUI();
+  ov.addEventListener('click',function(e){ if(e.target===ov) document.body.removeChild(ov); });
+  document.body.appendChild(ov);
 }
 
 function shareZaloNgoi(ma){
@@ -2768,7 +2813,7 @@ function saveSession(user){
     name: user.name,
     role: user.role || 'nv',
     tenCty: user.tenCty||'', mst: user.mst||'', diaChi: user.diaChi||'',
-    email: user.email||'', tenKH: user.tenKH||'', khoPhuTrach: user.khoPhuTrach||'',
+    email: user.email||'', tenKH: user.tenKH||'', khoPhuTrach: user.khoPhuTrach||'', sdt: user.sdt||'',
     exp: Date.now() + SESSION_HOURS * 3600 * 1000
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
@@ -2811,7 +2856,7 @@ function doLogin(){
     if(s.parentNode) s.parentNode.removeChild(s);
     delete window[cbName];
     if(data && data.status==='ok'){
-      saveSession({u:u, name:data.name, role:data.role, tenCty:data.tenCty, mst:data.mst, diaChi:data.diaChi, email:data.email, tenKH:data.tenKH, khoPhuTrach:data.khoPhuTrach});
+      saveSession({u:u, name:data.name, role:data.role, tenCty:data.tenCty, mst:data.mst, diaChi:data.diaChi, email:data.email, tenKH:data.tenKH, khoPhuTrach:data.khoPhuTrach, sdt:data.sdt||''});
       showApp(data.name);
     } else {
       errEl.textContent = '❌ Sai tài khoản hoặc mật khẩu!';
@@ -2887,6 +2932,19 @@ function doLogout(){
   sessionStorage.removeItem(SESSION_KEY);
   location.reload();
 }
+
+// Fix blank screen sau khi trở về từ share sheet hoặc bfcache
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible'){
+    requestAnimationFrame(function(){
+      document.body.style.opacity='0.99';
+      requestAnimationFrame(function(){ document.body.style.opacity=''; });
+    });
+  }
+});
+window.addEventListener('pageshow',function(e){
+  if(e.persisted) window.location.reload();
+});
 
 // Khởi động - check session
 (function init(){
@@ -4197,9 +4255,9 @@ function xuatPDF(){
     +'</div>'
     +'<div class="info-box">'
     +'<div class="info-title">Người báo giá</div>'
-    +'<div class="info-row"><span class="info-label">Họ tên</span><span class="info-val">Lê Chí Linh</span></div>'
-    +'<div class="info-row"><span class="info-label">SĐT</span><span class="info-val">0819 548 908</span></div>'
-    +'<div class="info-row"><span class="info-label">Khu vực</span><span class="info-val">Đồng Tâm – KV23</span></div>'
+    +(nguoi?'<div class="info-row"><span class="info-label">Họ tên</span><span class="info-val">'+nguoi+'</span></div>':'')
+    +(nguoiSdt?'<div class="info-row"><span class="info-label">SĐT</span><span class="info-val">'+nguoiSdt+'</span></div>':'')
+    +'<div class="info-row"><span class="info-label">Khu vực</span><span class="info-val">'+nguoiKv+'</span></div>'
     +'</div>'
     +'</div>'
 
@@ -4269,7 +4327,9 @@ function xuatExcel(){
   var ngay  = new Date().toLocaleDateString('vi-VN');
   var gh    = curGiaoHang==='nhan'?'Nhận tại kho':'Giao tận nơi';
   var sess  = checkSession();
-  var nguoi = sess?sess.name:'Lê Chí Linh';
+  var nguoi = sess?sess.name:'';
+  var nguoiSdt = sess?(sess.sdt||''):'';
+  var nguoiKv  = sess?(sess.khoPhuTrach?'Đồng Tâm – '+sess.khoPhuTrach:'Đồng Tâm'):'Đồng Tâm';
 
   var tLeTruocVAT=0,tNhanTruocVAT=0;
   var rowsData=donItems.map(function(item,i){
