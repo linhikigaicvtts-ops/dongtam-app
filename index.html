@@ -1519,8 +1519,9 @@ function render(){
       var nkSale=ct1Info?(ct1Info.nk||ct1Info.ns||0):0;
       var ghSale=ct1Info?(ct1Info.gh||ct1Info.gs||0):0;
       var hasCT1Sale=nkSale>0;
-      var giaGiao=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(hasSale&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
-      var giaNhan=hasCT1Sale?nkSale.toLocaleString('vi-VN')+'đ':(hasSale?priceNs:priceNhan);
+      var hasNsSale=!hasCT1Sale&&p.ns>0&&p.ns<p.nhan;
+      var giaGiao=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':((hasSale||hasNsSale)&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
+      var giaNhan=hasCT1Sale?nkSale.toLocaleString('vi-VN')+'đ':(hasNsSale||hasSale?priceNs:priceNhan);
       var tk=timTonKhoTheoQuyen(p.ma);
       var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
       var tkText=tk?tkDot+' Còn '+fmtTkCard(tk.tong,tk.dvt):'';
@@ -1541,7 +1542,7 @@ function render(){
         +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">'
         +'<span style="font-size:10px;color:#999;flex-shrink:0">Nhận kho</span>'
         +'<span>'
-        +(hasCT1Sale?'<span style="font-size:10px;color:#bbb;text-decoration:line-through;margin-right:4px">'+priceNhan+'</span>':'')
+        +(hasCT1Sale||hasNsSale||hasSale?'<span style="font-size:10px;color:#bbb;text-decoration:line-through;margin-right:4px">'+priceNhan+'</span>':'')
         +'<span style="font-size:12px;font-weight:700;color:#C0232A">'+giaNhan+'</span>'
         +'</span>'
         +'</div>'
@@ -1555,9 +1556,10 @@ function render(){
       var mNkSale=mCt1?(mCt1.nk||mCt1.ns||0):0;
       var mGhSale=mCt1?(mCt1.gh||mCt1.gs||0):0;
       var mHasCT1=mNkSale>0;
-      var mGiaNhan=mHasCT1?mNkSale.toLocaleString('vi-VN')+'đ':(hasSale?priceNs:priceNhan);
-      var mGiaGiao=mGhSale>0?mGhSale.toLocaleString('vi-VN')+'đ':(hasSale&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
-      var mGiaGoc=mHasCT1?priceNhan:(hasSale?priceNhan:'');
+      var mHasNsSale=!mHasCT1&&p.ns>0&&p.ns<p.nhan;
+      var mGiaNhan=mHasCT1?mNkSale.toLocaleString('vi-VN')+'đ':(mHasNsSale||hasSale?priceNs:priceNhan);
+      var mGiaGiao=mGhSale>0?mGhSale.toLocaleString('vi-VN')+'đ':((mHasNsSale||hasSale)&&p.gs>0?p.gs.toLocaleString('vi-VN')+'đ':priceGiao);
+      var mGiaGoc=mHasCT1?priceNhan:(mHasNsSale||hasSale?priceNhan:'');
       var mTk=timTonKhoTheoQuyen(p.ma);
       var mTkDot=mTk?(mTk.tier&&mTk.tier.nhanh>0?'🟢':mTk.tier&&mTk.tier.mai>0?'🟡':'🔴'):'';
       var mTkText=mTk?mTkDot+' Còn '+fmtTkCard(mTk.tong,mTk.dvt):'';
