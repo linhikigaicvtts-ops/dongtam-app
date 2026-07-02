@@ -190,17 +190,25 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Padding top cho tab content (vì không còn bottom-nav ăn space) */
   #app-content{padding-bottom:0}
 
-  /* Size sidebar: cố định ngay sau panel chi tiết (left:320px) */
+  /* Size sidebar: cố định bên trái (mặc định left:0) */
   #size-sidebar{
     position:fixed !important;
-    left:320px !important;top:57px !important;bottom:56px !important;
+    left:0 !important;top:57px !important;bottom:56px !important;
     width:70px !important;
     overflow-y:auto !important;
     background:var(--bg1) !important;
     border-right:1px solid var(--bd) !important;
     z-index:70;
     max-height:none !important;
+    transition:left .2s;
   }
+  /* Khi dp mở: size-sidebar dịch sang phải 320px */
+  body.dp-open #size-sidebar{left:320px !important}
+
+  /* Tab Tra giá: mặc định margin-left 70px (chừa size-sidebar) */
+  #tab-tra{margin-left:70px !important}
+  /* Khi dp mở: đẩy thêm 320px */
+  body.dp-open #tab-tra{margin-left:390px !important}
 
   /* Product grid: đẩy sang phải chừa chỗ cho size-sidebar cố định */
   #size-sidebar + div{margin-left:70px !important}
@@ -625,7 +633,7 @@ input::placeholder{color:var(--t3)}
         <p id="dp-kc" style="font-size:11px;color:var(--t2)"></p>
         <p id="dp-quycach" style="font-size:11px;color:var(--t2);margin-top:2px;display:none"></p>
       </div>
-      <button onclick="document.getElementById('dp').style.display='none';if(window.innerWidth>=768)renderDon();" style="font-size:13px;padding:4px 10px">✕</button>
+      <button onclick="document.getElementById('dp').style.display='none';document.body.classList.remove('dp-open');if(window.innerWidth>=768)renderDon();" style="font-size:13px;padding:4px 10px">✕</button>
     </div>
     <p id="dp-sec-dl" style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px">GIÁ ĐẠI LÝ</p>
     <div class="pr-grid">
@@ -1268,7 +1276,7 @@ function setF(f){
   ['all','porcelain','ceramic','kinh','sale'].forEach(function(x){
     var b=document.getElementById('f-'+x); if(b) b.classList.toggle('on',x===f);
   });
-  curPage=0;document.getElementById('dp').style.display='none';
+  curPage=0;document.getElementById('dp').style.display='none';document.body.classList.remove('dp-open');
   render();
 }
 
@@ -1603,7 +1611,9 @@ function showDP(ma){
     if(badgeEl2) badgeEl2.style.display='none';
   }
   document.getElementById('dp-sell').value=p.nhan>0?Math.round(p.nhan*1.07):'';
-  document.getElementById('dp').style.display='block'; calcM();
+  document.getElementById('dp').style.display='block';
+  if((window.innerWidth||document.documentElement.clientWidth||0)>=768) document.body.classList.add('dp-open');
+  calcM();
   // Reset qty input về m² mặc định
   dpUnit='m2';
   var qtyInp=document.getElementById('dp-qty-input');
@@ -3107,7 +3117,7 @@ function addToDonWithQty(){
   setDpUnit('m2');
   // Desktop: đóng detail panel, hiện cart
   if(window.innerWidth>=768){
-    document.getElementById('dp').style.display='none';
+    document.getElementById('dp').style.display='none';document.body.classList.remove('dp-open');
     renderDon();
   }
 }
