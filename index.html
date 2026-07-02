@@ -1523,7 +1523,7 @@ function render(){
       var giaNhan=hasCT1Sale?nkSale.toLocaleString('vi-VN')+'đ':(hasSale?priceNs:priceNhan);
       var tk=timTonKhoTheoQuyen(p.ma);
       var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
-      var tkText=tk?tkDot+' Còn '+tk.tong+' '+tk.dvt:'';
+      var tkText=tk?tkDot+' Còn '+fmtTkCard(tk.tong,tk.dvt):'';
       var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
       var noImgHtml='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">'
         +'<span style="font-size:22px">📷</span>'
@@ -1560,7 +1560,7 @@ function render(){
       var mGiaGoc=mHasCT1?priceNhan:(hasSale?priceNhan:'');
       var mTk=timTonKhoTheoQuyen(p.ma);
       var mTkDot=mTk?(mTk.tier&&mTk.tier.nhanh>0?'🟢':mTk.tier&&mTk.tier.mai>0?'🟡':'🔴'):'';
-      var mTkText=mTk?mTkDot+' Còn '+mTk.tong.toLocaleString('vi-VN')+' '+mTk.dvt:'';
+      var mTkText=mTk?mTkDot+' Còn '+fmtTkCard(mTk.tong,mTk.dvt):'';
       var mTkColor=mTk?(mTk.tier&&mTk.tier.nhanh>0?'#2E7D32':mTk.tier&&mTk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
       div.style.cssText='padding:12px;cursor:pointer;align-items:flex-start';
       var mImgHtml='<div style="width:84px;flex-shrink:0;margin-right:10px;display:flex;flex-direction:column;align-items:center;gap:4px">'
@@ -1780,7 +1780,7 @@ function renderSale(){
       var ghFmt=ghSale>0?ghSale.toLocaleString('vi-VN')+'đ':(origGH>0?origGH.toLocaleString('vi-VN')+'đ':'—');
       var tk=timTonKhoTheoQuyen(p.ma);
       var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
-      var tkText=tk?tkDot+' Còn '+tk.tong+' '+tk.dvt:'';
+      var tkText=tk?tkDot+' Còn '+fmtTkCard(tk.tong,tk.dvt):'';
       var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
       dcard.innerHTML=
         '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">📷</span><span style="font-size:9px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span></div>'
@@ -3804,6 +3804,12 @@ var NGUONG_TON_KHACH=50;
 function hienThiTonChoKhach(soLuong,dvt,m2pt){
   if(soLuong<=NGUONG_TON_KHACH) return fmtThung(soLuong,dvt,m2pt);
   return NGUONG_TON_KHACH+'+ '+(dvt||'thùng');
+}
+// Dùng cho card danh sách: nhân viên thấy số thật, khách hàng thấy giới hạn + ghi chú
+function fmtTkCard(tong, dvt){
+  if(!laKhachHang()) return tong.toLocaleString('vi-VN')+' '+(dvt||'thùng');
+  if(tong<=NGUONG_TON_KHACH) return tong+' '+(dvt||'thùng');
+  return NGUONG_TON_KHACH+'+ '+(dvt||'thùng')+' (liên hệ NVKD)';
 }
 function tonKhoBadgeHtml(ma){
   var tk=timTonKhoTheoQuyen(ma);
