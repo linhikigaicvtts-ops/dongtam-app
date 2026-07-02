@@ -73,71 +73,77 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   #app-content{width:100%;max-width:100%;background:var(--bg);box-shadow:none;margin:0}
   .topbar{position:sticky;top:0;z-index:100;width:100%}
 
-  /* Nav nằm ngang dưới cùng — giống mobile nhưng có thêm margin-right cho cart */
+  /* Nav nằm ngang dưới cùng — trải đều 5 nút, chừa 320px bên phải cho cart */
   nav.bottom-nav{
     position:fixed !important;
     left:0 !important;right:320px !important;
     bottom:0 !important;top:auto !important;
     width:auto !important;
     height:56px !important;
+    display:flex !important;
     flex-direction:row !important;
     align-items:stretch !important;
-    justify-content:space-around !important;
+    justify-content:space-evenly !important;
     border-top:1px solid var(--bd) !important;
-    border-right:none !important;
+    border-right:1px solid var(--bd) !important;
     background:var(--bg1) !important;
     padding:0 !important;
-    overflow:visible !important;
+    overflow:hidden !important;
     box-shadow:0 -2px 8px rgba(0,0,0,.06) !important;
     gap:0 !important;
     z-index:90 !important;
+    transform:none !important;
   }
 
   .bn{
-    flex-direction:column !important;
-    justify-content:center !important;
-    align-items:center !important;
-    padding:4px 8px !important;
-    font-size:10px !important;
-    font-weight:600 !important;
-    gap:2px !important;
-    border:none !important;
-    border-left:none !important;
-    border-top:2px solid transparent !important;
-    border-radius:0 !important;
-    height:100% !important;
-    min-height:unset !important;
-    width:auto !important;
-    flex:1 !important;
-    color:var(--t2) !important;
-    background:transparent !important;
-    text-align:center !important;
-    transition:background .12s,color .12s;
-  }
-  .bn.on{color:var(--red) !important;border-top-color:var(--red) !important;border-left-color:transparent !important;background:rgba(192,35,42,.05) !important}
-  .bn-icon{font-size:20px !important}
-
-  .bn-center{
-    position:static !important;
+    flex:1 1 0 !important;
     display:flex !important;
     flex-direction:column !important;
     justify-content:center !important;
     align-items:center !important;
-    padding:4px 8px !important;
+    padding:4px 2px !important;
     font-size:10px !important;
     font-weight:600 !important;
     gap:2px !important;
-    flex:1 !important;
-    width:auto !important;
     border:none !important;
     border-left:none !important;
     border-top:2px solid transparent !important;
     border-radius:0 !important;
+    height:56px !important;
+    min-height:unset !important;
+    width:0 !important;
+    color:var(--t2) !important;
+    background:transparent !important;
+    text-align:center !important;
+    transition:color .12s;
+    position:static !important;
+    top:auto !important;
+  }
+  .bn.on{color:var(--red) !important;border-top-color:var(--red) !important;background:rgba(192,35,42,.05) !important}
+  .bn-icon{font-size:20px !important;line-height:1 !important}
+
+  .bn-center{
+    flex:1 1 0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    align-items:center !important;
+    padding:4px 2px !important;
+    font-size:10px !important;
+    font-weight:600 !important;
+    gap:2px !important;
+    width:0 !important;
+    border:none !important;
+    border-top:2px solid transparent !important;
+    border-radius:0 !important;
+    height:56px !important;
     min-height:unset !important;
     background:transparent !important;
     color:var(--t2) !important;
-    cursor:pointer;
+    cursor:pointer !important;
     text-align:center !important;
+    position:static !important;
+    top:auto !important;
   }
   .bn-center.on{color:var(--red) !important;border-top-color:var(--red) !important;background:rgba(192,35,42,.05) !important}
   .bn-center-circle{
