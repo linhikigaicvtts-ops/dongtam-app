@@ -4402,8 +4402,8 @@ function xuatExcel(){
     +'<div class="sec">NGƯỜI BÁO GIÁ</div>'
     +'<table cellspacing="0" cellpadding="2">'
     +'<tr><td class="lbl">Họ tên</td><td class="val">'+nguoi+'</td></tr>'
-    +'<tr><td class="lbl">SĐT</td><td class="val">0819 548 908</td></tr>'
-    +'<tr><td class="lbl">Khu vực</td><td class="val">Đồng Tâm – KV23</td></tr>'
+    +(nguoiSdt?'<tr><td class="lbl">SĐT</td><td class="val">'+nguoiSdt+'</td></tr>':'')
+    +'<tr><td class="lbl">Khu vực</td><td class="val">'+nguoiKv+'</td></tr>'
     +'</table></td>'
     +'</tr></table>';
 
@@ -4479,7 +4479,7 @@ function xuatExcelNoiBo(){
   var ngay=new Date().toLocaleDateString('vi-VN');
   var gh=curGiaoHang==='nhan'?'Nhan tai kho':'Giao tan noi';
   var sess=checkSession();
-  var nguoi=sess?sess.name:'Le Chi Linh';
+  var nguoi=sess?sess.name:'';
   var tLeTruocVAT=0,tNhanTruocVAT=0;
   var rowsData=donItems.map(function(item,i){
     var le=item.le||0;
