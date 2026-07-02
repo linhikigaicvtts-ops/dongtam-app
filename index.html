@@ -4310,19 +4310,16 @@ function xuatPDF(){
     +'</div>'
     +'</body></html>';
 
-  /* Mở tab mới - không gọi print() */
-  var w = window.open('','_blank');
-  if(w){
-    w.document.write(html);
-    w.document.close();
-  } else {
-    /* Fallback: tải file HTML */
-    var blob = new Blob([html],{type:'text/html;charset=utf-8'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'BaoGia_DongTam_'+ten.replace(/\s/g,'_')+'_'+ngay.replace(/\//g,'-')+'.html';
-    a.click();
-  }
+  var blob = new Blob([html],{type:'text/html;charset=utf-8'});
+  var blobUrl = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = blobUrl;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
 function xuatExcel(){
