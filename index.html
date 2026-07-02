@@ -4466,7 +4466,8 @@ function xuatExcel(){
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='BaoGia_DongTam_'+(ten.replace(/\s/g,'_'))+'_'+ngay.replace(/\//g,'-')+'.xls';
-  a.click();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },60000);
 }
 
 // Ban NOI BO - co them % margin + loi nhuan, KHONG duoc gui cho khach hang
@@ -4576,7 +4577,8 @@ function xuatExcelNoiBo(){
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
   a.download='NOIBO_BaoGia_'+(ten.replace(/\s/g,'_'))+'_'+ngay.replace(/\//g,'-')+'.xls';
-  a.click();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },60000);
 }
 
 function xuatZalo(){
