@@ -4385,36 +4385,10 @@ function xuatPDF(){
     +'</div>'
     +'</body></html>';
 
-  // Hiển thị trong overlay toàn màn hình — hoạt động trên mọi thiết bị
-  var ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#f0f2f5;overflow-y:auto;display:flex;flex-direction:column';
-
-  var bar = document.createElement('div');
-  bar.style.cssText = 'display:flex;gap:8px;padding:10px 14px;background:#C0232A;position:sticky;top:0;z-index:1;flex-shrink:0';
-
-  var btnPrint = document.createElement('button');
-  btnPrint.textContent = '🖨️ In / Lưu PDF';
-  btnPrint.style.cssText = 'flex:1;padding:10px;background:#fff;color:#C0232A;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer';
-  btnPrint.onclick = function(){ window.print(); };
-
-  var btnClose = document.createElement('button');
-  btnClose.textContent = '✕ Đóng';
-  btnClose.style.cssText = 'padding:10px 16px;background:rgba(255,255,255,0.2);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer';
-  btnClose.onclick = function(){ document.body.removeChild(ov); };
-
-  bar.appendChild(btnPrint);
-  bar.appendChild(btnClose);
-
+  // Mở báo giá trong tab mới
   var blob = new Blob([html],{type:'text/html;charset=utf-8'});
   var blobUrl = URL.createObjectURL(blob);
-
-  var frame = document.createElement('iframe');
-  frame.style.cssText = 'flex:1;border:none;width:100%;min-height:calc(100vh - 60px)';
-  frame.src = blobUrl;
-
-  ov.appendChild(bar);
-  ov.appendChild(frame);
-  document.body.appendChild(ov);
+  window.open(blobUrl, '_blank');
   setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 120000);
 }
 
