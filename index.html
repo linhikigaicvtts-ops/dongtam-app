@@ -5267,9 +5267,7 @@ function aiBuildChips(){
 
 // ===== CT3 SKU LINH HOẠT =====
 function isCT3(ma){
-  // Ưu tiên CT3_DATA từ GAS; fallback D3 hardcode
   if(ct3Loaded && CT3_DATA.length>0) return CT3_DATA.some(function(p){ return p.ma===ma; });
-  if(typeof D3!=='undefined'&&D3) return D3.some(function(p){ return p.ma===ma; });
   return false;
 }
 
