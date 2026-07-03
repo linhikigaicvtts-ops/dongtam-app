@@ -4132,6 +4132,10 @@ function xuatPDF(){
   var dc   = document.getElementById('don-dc').value.trim();
   var note = document.getElementById('don-note').value.trim();
   var ngay = new Date().toLocaleDateString('vi-VN');
+  var sess = checkSession();
+  var nguoi = sess?sess.name:'';
+  var nguoiSdt = sess?(sess.sdt||''):'';
+  var nguoiKv  = sess?(sess.khoPhuTrach?'Đồng Tâm – '+sess.khoPhuTrach:'Đồng Tâm'):'Đồng Tâm';
   // Tính theo đúng cách hóa đơn VAT (xem giải thích ở hàm tienHangTruocVAT)
   var totalLe = tinhVATvaTongThanhToan(donItems.reduce(function(s,x){return s+tienHangTruocVAT(x.le||0,x.qty);},0)).tong;
   var totalKgPdf=0, coKgChinhXacPdf=false;
