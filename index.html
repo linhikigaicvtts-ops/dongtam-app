@@ -3979,8 +3979,9 @@ function hienThiTonChoKhach(soLuong,dvt,m2pt){
 }
 // Dùng cho card danh sách: nhân viên thấy số thật, khách hàng thấy giới hạn + ghi chú
 function fmtTkCard(tong, dvt){
-  if(!laKhachHang()) return tong.toLocaleString('vi-VN')+' '+(dvt||'thùng');
-  if(tong<=NGUONG_TON_KHACH) return tong+' '+(dvt||'thùng');
+  var t=Math.floor(tong);
+  if(!laKhachHang()) return t.toLocaleString('vi-VN')+' '+(dvt||'thùng');
+  if(t<=NGUONG_TON_KHACH) return t+' '+(dvt||'thùng');
   return NGUONG_TON_KHACH+'+ '+(dvt||'thùng')+' (liên hệ NVKD)';
 }
 function tonKhoBadgeHtml(ma){
