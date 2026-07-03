@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "DongTam App",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-ExecutionPolicy", "Bypass", "-File", "D:\\Dự Án Web App Đồng Tâm\\serve.ps1"],
+      "port": 3456
+    }
+  ]
+}
