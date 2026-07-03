@@ -2036,7 +2036,7 @@ function setSF2(v){
   renderSale();
 }
 
-// Fetch data CT1 / CT2 từ Apps Script
+// Fetch data CT1 / CT2 / CT3 từ Apps Script
 function fetchCT(loai){
   var el=document.getElementById('slist');
   el.innerHTML='<div style="padding:40px;text-align:center;color:var(--t2)">⏳ Đang tải dữ liệu '+loai.toUpperCase()+'...</div>';
@@ -2044,33 +2044,53 @@ function fetchCT(loai){
   var cbName='_onCT_'+loai;
   window[cbName]=function(res){
     if(res && res.status==='ok' && res.data){
-      // Map data từ Apps Script vào format app
-      var mapped = res.data.map(function(r){
-        // CT1: ns=Giá nhận kho sale, gs=Giá giao sale
-        // CT2: ns=Giá vét kho nhận, gs=Giá vét kho giao, nhan=Không vét nhận, giao=Không vét giao
-        return {
-          ma: r.ma || r['Mã sản phẩm'] || r['Mã SP'] || '',
-          kc: (r.kc || r['Kích cỡ (mm)'] || r['Kích cỡ'] || '').replace(/mm/i,'').trim(),
-          cat: (r.cat || r['Loại'] || r['Ngành hàng'] || '').toLowerCase().indexOf('por')>=0?'porcelain':'ceramic',
-          le:  pg(r.le  || r['Giá lẻ (đ/m²)']  || r['Giá lẻ']),
-          nhan:pg(r.nhan|| r['Giá ĐL Nhận kho'] || r['Giá nhận kho (đ/m²)']),
-          giao:pg(r.giao|| r['Giá ĐL Đi giao']  || r['Giá giao hàng (đ/m²)']),
-          ns:  pg(r.ns  || r.nk || r['Giá NET'] || r['Giá NS'] || r['Giá nhà sản xuất'] || r['Giá Sale Nhận kho'] || (loai==='ct3'?0:r.nhan) || 0),
-          gs:  pg(r.gs  || r.gh || r['Giá giao NET'] || r['Giá Sale Đi giao'] || (loai==='ct3'?0:r.giao) || 0),
-          // CT2 thêm giá không vét kho
-          nhan_kv: pg(r['Giá không vét kho nhận (đ/m²)'] || 0),
-          giao_kv: pg(r['Giá không vét kho giao (đ/m²)'] || 0),
-          // Thông tin chương trình
-          ct: r.ct || r['Chương trình'] || loai.toUpperCase(),
-          tu_ngay: r.tu_ngay || r['Từ ngày'] || '',
-          den_ngay: r.den_ngay || r['Đến ngày'] || '',
-          loai_sale: loai // 'ct1' hoặc 'ct2'
-        };
-      }).filter(function(p){ return p.ma && p.ma.length>1; });
+      var mapped;
 
-      if(loai==='ct1'){ CT1_DATA=mapped; ct1Loaded=true; }
-      else if(loai==='ct2'){ CT2_DATA=mapped; ct2Loaded=true; }
-      else if(loai==='ct3'){ CT3_DATA=mapped; ct3Loaded=true; }
+      if(loai==='ct3'){
+        // GAS trả về: ma (đã strip prefix), tenNM, kc, ns (NET/m²), net_th, tyle_giam
+        // Tra thêm le/nhan/giao từ DATA chính để hiển thị đủ thông tin
+        mapped = res.data.map(function(r){
+          var maApp = r.ma || '';
+          var baseP = (typeof DATA!=='undefined'?DATA:[]).find(function(x){ return x.ma===maApp; });
+          return {
+            ma: maApp,
+            tenNM: r.tenNM || '',
+            kc: r.kc || (baseP?baseP.kc:''),
+            cat: r.cat || (baseP?baseP.cat:'porcelain'),
+            le:   baseP ? (baseP.le||0)   : 0,
+            nhan: baseP ? (baseP.nhan||0) : 0,
+            giao: baseP ? (baseP.giao||0) : 0,
+            ns:   pg(r.ns || 0),           // Giá NET/m² — Admin only
+            gs:   0,
+            net_th: pg(r.net_th || 0),     // Giá NET/thùng
+            tyle_giam: parseFloat(r.tyle_giam || 0),  // % giảm tối đa
+            loai_sale: 'ct3'
+          };
+        }).filter(function(p){ return p.ma && p.ma.length>1; });
+        CT3_DATA=mapped; ct3Loaded=true;
+      } else {
+        // CT1/CT2: mapping như cũ
+        mapped = res.data.map(function(r){
+          return {
+            ma: r.ma || r['Mã sản phẩm'] || r['Mã SP'] || '',
+            kc: (r.kc || r['Kích cỡ (mm)'] || r['Kích cỡ'] || '').replace(/mm/i,'').trim(),
+            cat: (r.cat || r['Loại'] || r['Ngành hàng'] || '').toLowerCase().indexOf('por')>=0?'porcelain':'ceramic',
+            le:  pg(r.le  || r['Giá lẻ (đ/m²)']  || r['Giá lẻ']),
+            nhan:pg(r.nhan|| r['Giá ĐL Nhận kho'] || r['Giá nhận kho (đ/m²)']),
+            giao:pg(r.giao|| r['Giá ĐL Đi giao']  || r['Giá giao hàng (đ/m²)']),
+            ns:  pg(r.ns  || r.nk || r['Giá NET'] || r['Giá NS'] || r['Giá Sale Nhận kho'] || 0),
+            gs:  pg(r.gs  || r.gh || r['Giá Sale Đi giao'] || 0),
+            nhan_kv: pg(r['Giá không vét kho nhận (đ/m²)'] || 0),
+            giao_kv: pg(r['Giá không vét kho giao (đ/m²)'] || 0),
+            ct: r.ct || r['Chương trình'] || loai.toUpperCase(),
+            tu_ngay: r.tu_ngay || r['Từ ngày'] || '',
+            den_ngay: r.den_ngay || r['Đến ngày'] || '',
+            loai_sale: loai
+          };
+        }).filter(function(p){ return p.ma && p.ma.length>1; });
+        if(loai==='ct1'){ CT1_DATA=mapped; ct1Loaded=true; }
+        else if(loai==='ct2'){ CT2_DATA=mapped; ct2Loaded=true; }
+      }
     }
     renderSale();
   };
@@ -5272,11 +5292,15 @@ function renderCT3Card(p, el){
   if(isAdmin){
     var netGia=p.ns||0;
     var dlGia=p.nhan||0;
+    var tyleGiam=p.tyle_giam||0;  // % từ sheet (vd: 40 = 40%)
     var thuong=netGia&&dlGia?Math.round((dlGia-netGia)*0.5):0;
+    var netTH=p.net_th||0;
     adminPriceHtml=
       '<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:6px;padding:6px 8px;margin-top:4px;font-size:10px">'
-      +'<div style="display:flex;justify-content:space-between"><span style="color:#795548">NET (Admin)</span><b style="color:#E65100">'+netGia.toLocaleString('vi-VN')+'đ/m²</b></div>'
-      +'<div style="display:flex;justify-content:space-between"><span style="color:#795548">Giá ĐL nhận kho</span><b style="color:#C0232A">'+dlGia.toLocaleString('vi-VN')+'đ/m²</b></div>'
+      +(netGia>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá NET/m² (Admin)</span><b style="color:#E65100">'+netGia.toLocaleString('vi-VN')+'đ</b></div>':'')
+      +(netTH>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá NET/thùng</span><b style="color:#E65100">'+netTH.toLocaleString('vi-VN')+'đ</b></div>':'')
+      +(tyleGiam>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Tỷ lệ giảm tối đa</span><b style="color:#C0232A">-'+tyleGiam+'%</b></div>':'')
+      +(dlGia>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá ĐL nhận kho</span><b style="color:#1565C0">'+dlGia.toLocaleString('vi-VN')+'đ/m²</b></div>':'')
       +(thuong>0?'<div style="display:flex;justify-content:space-between"><span style="color:#795548">Thưởng NVKD (50%)</span><b style="color:#1B5E20">+'+thuong.toLocaleString('vi-VN')+'đ/m²</b></div>':'')
       +'</div>';
   }
