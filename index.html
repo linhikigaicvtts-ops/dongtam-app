@@ -1621,7 +1621,7 @@ function render(){
         +noImgHtml
         +'</div>'
         +'<div style="flex:1;padding:10px 10px 10px 4px;display:flex;flex-direction:column;justify-content:center;min-width:0">'
-        +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">'+badgeHtml+'<span style="font-size:10px;color:#888">'+p.kc+'</span></div>'
+        +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">'+badgeHtml+ct3BadgeHtml(p.ma)+'<span style="font-size:10px;color:#888">'+p.kc+'</span></div>'
         +'<div style="font-size:13px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:6px">'+p.ma+'</div>'
         +(p.le>0?prRow('Giá lẻ',p.le.toLocaleString('vi-VN')+'đ','#555'):'')
         +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">'
@@ -1663,7 +1663,7 @@ function render(){
       div.innerHTML=mImgHtml
         +'<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">'
         +'<div>'
-        +'<span style="font-size:13px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">'+p.ma+saleDot+'</span>'
+        +'<span style="font-size:13px;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">'+p.ma+saleDot+ct3BadgeHtml(p.ma)+'</span>'
         +'</div>'
         +'<div style="height:1px;background:var(--bd);margin:1px 0"></div>'
         +(p.le>0?'<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:10px;color:#999">Giá lẻ</span><span style="font-size:11px;color:#555;font-weight:600">'+p.le.toLocaleString('vi-VN')+'đ</span></div>':'')
@@ -1867,7 +1867,8 @@ function renderSale(){
       dcard.style.cssText='padding:0 !important;cursor:pointer;overflow:hidden;display:flex;align-items:stretch;min-height:110px';
       var badgeHtml=(p.loai_sale==='ct1'?'<span style="background:#E8F5E9;color:#2E7D32;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">🗓️CT1</span>':'')
                   +(p.loai_sale==='ct2'?'<span style="background:#FFF3E0;color:#E65100;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">📦CT2</span>':'')
-                  +(p.gio==='★'?'<span style="background:#8B0000;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">★ CL</span>':'');
+                  +(p.gio==='★'?'<span style="background:#8B0000;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">★ CL</span>':'')
+                  +ct3BadgeHtml(p.ma);
       var prRow=function(label,val,color){
         return '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:3px">'
           +'<span style="font-size:10px;color:#999;flex-shrink:0">'+label+'</span>'
@@ -3323,6 +3324,7 @@ function laTronQtyTheoQuyDinh(item){
 function addToDon(ma, qty){
   if(!ma) return;
   qty = qty || 1;
+  if(isCT3(ma)){ ct3ThemVaoDon(ma); return; }
   var p = DATA.find(function(x){return x.ma===ma;});
   if(!p) return;
   var exist = donItems.find(function(x){return x.ma===ma;});
