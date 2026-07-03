@@ -791,6 +791,10 @@ input::placeholder{color:var(--t3)}
       <button onclick="moTonKho(curP_ma)" style="width:100%;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
     </div>
   </div>
+  <div id="tk-loading-bar" style="display:none;align-items:center;gap:8px;padding:7px 14px;background:#FFF8E1;border-bottom:1px solid #FFE082;font-size:12px;color:#795548">
+    <span style="animation:aidot .9s infinite;display:inline-block">⏳</span>
+    <span>Đang tải tồn kho, vui lòng chờ...</span>
+  </div>
   <div id="pagination" class="pag" style="padding:8px 12px;border-bottom:1px solid #eee;display:flex;flex-wrap:wrap;justify-content:center;gap:4px;align-items:center"></div>
   <div id="plist"></div>
   <p id="pcount" class="pag-info"></p>
@@ -3040,6 +3044,18 @@ function showApp(name){
   fetchTrongLuong();
   // Tải thuộc tính sản phẩm (Màu/Công năng/Tính năng/Hoa văn/Men) để lọc nâng cao
   fetchThuocTinhSP();
+  // Warm-up GAS: ping nhẹ ngay sau login để GAS "thức" sẵn cho các request sau
+  gasWarmUp();
+}
+function gasWarmUp(){
+  var old=document.getElementById('_warmup_script');
+  if(old) old.remove();
+  var s=document.createElement('script');
+  s.id='_warmup_script';
+  s.src='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec?action=ping&callback=_onGasWarmUp';
+  window._onGasWarmUp=function(){ s.remove(); };
+  s.onerror=function(){ s.remove(); };
+  document.head.appendChild(s);
 }
 
 function doLogout(){
@@ -3725,12 +3741,33 @@ function onChonKhachHang(){
 // ===== TỒN KHO CHI TIẾT THEO KHO + SỐ LÔ =====
 var tonKhoChiTiet={};
 var TEN_TIER={nhanh:'🟢 Có hàng ngay',mai:'🟡 Hôm nay chuyển – mai có hàng',cho15:'🔴 Chờ 15 ngày'};
+var TK_CACHE_KEY='dt_tk_v1', TK_CACHE_TTL=30*60*1000;
+function tkLoadingBanner(show){
+  var el=document.getElementById('tk-loading-bar');
+  if(!el) return;
+  el.style.display=show?'flex':'none';
+}
 function fetchTonKhoChiTiet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  // Hiện loading indicator
+  tkLoadingBanner(true);
+  // Load cache ngay lập tức nếu còn hiệu lực
+  try{
+    var cached=JSON.parse(localStorage.getItem(TK_CACHE_KEY)||'{}');
+    if(cached.ts && cached.data && (Date.now()-cached.ts)<TK_CACHE_TTL){
+      tonKhoChiTiet=cached.data;
+      tkLoadingBanner(false);
+      if(typeof render==='function') render();
+      if(typeof renderSale==='function') renderSale();
+    }
+  }catch(e){}
+  // Vẫn fetch GAS để cập nhật mới nhất (chạy nền)
   var cbName='_onTonKhoChiTiet';
   window[cbName]=function(res){
     if(res && res.status==='ok' && res.data){
       tonKhoChiTiet=res.data;
+      try{ localStorage.setItem(TK_CACHE_KEY,JSON.stringify({ts:Date.now(),data:res.data})); }catch(e){}
+      tkLoadingBanner(false);
       if(typeof render==='function') render();
       if(typeof renderSale==='function') renderSale();
     }
@@ -3742,7 +3779,7 @@ function fetchTonKhoChiTiet(){
   var s=document.createElement('script');
   s.id='_tkct_script';
   s.src=APPS_URL+'?action=getTonKhoChiTiet&callback='+cbName;
-  s.onerror=function(){ s.remove(); };
+  s.onerror=function(){ tkLoadingBanner(false); s.remove(); };
   document.head.appendChild(s);
 }
 
