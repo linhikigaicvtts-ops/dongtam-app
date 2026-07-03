@@ -459,6 +459,7 @@ input::placeholder{color:var(--t3)}
 .mk-old-price{font-size:11px;color:var(--t3);text-decoration:line-through}
 .mk-sale-label{font-size:10px;color:var(--red)}
 .sale-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:4px;vertical-align:middle}
+#ct3-confirm-btn:disabled{opacity:.45;cursor:not-allowed}
 .badge{font-size:10px;padding:1px 6px;border-radius:5px;background:#FFF3CD;color:#856404;font-weight:600;margin-left:4px}
 
 /* ===== DETAIL POPUP ===== */
@@ -818,6 +819,8 @@ input::placeholder{color:var(--t3)}
         style="flex:1;font-size:12px;padding:6px 0;background:#C0232A;color:#fff;border-color:#C0232A;text-align:center">🔥 CT1 · Sale tháng</button>
       <button class="fb" id="sf2-ct2" onclick="setSF2('ct2')"
         style="flex:1;font-size:12px;padding:6px 0;text-align:center">📦 CT2 · Xả kho</button>
+      <button class="fb" id="sf2-ct3" onclick="setSF2('ct3')"
+        style="flex:1;font-size:12px;padding:6px 0;text-align:center">🎯 CT3 · SKU linh hoạt</button>
     </div>
   </div>
   <div style="font-size:11px;color:var(--t2);padding:4px 12px;background:var(--bg2);border-bottom:1px solid var(--bd)" id="scount"></div>
@@ -1059,8 +1062,8 @@ input::placeholder{color:var(--t3)}
         <span style="font-size:13px;color:#0D47A1">Chi phí vốn (đi giao)</span>
         <span id="don-total-giao" style="font-size:14px;font-weight:700;color:#0D47A1"></span>
       </div>
-      <!-- Lợi nhuận box -->
-      <div style="background:#E8F5E9;border:1.5px solid #4CAF50;border-radius:var(--r8);padding:10px 12px;margin-top:8px">
+      <!-- Lợi nhuận box — chỉ Admin thấy, kiểm tra bởi JS không phải CSS -->
+      <div id="don-margin-box" style="background:#E8F5E9;border:1.5px solid #4CAF50;border-radius:var(--r8);padding:10px 12px;margin-top:8px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
           <span id="lbl-margin" style="font-size:13px;font-weight:600;color:#1B5E20">💰 Lợi nhuận (nhận kho)</span>
           <span id="don-margin" style="font-size:15px;font-weight:700;color:#1B5E20"></span>
@@ -1818,6 +1821,8 @@ function renderSale(){
   var list;
   if(sf2==='ct2'){
     list = CT2_DATA.slice();
+  } else if(sf2==='ct3'){
+    list = (typeof D3!=='undefined'?D3:[]).map(function(p){ return Object.assign({},p,{loai_sale:'ct3'}); });
   } else {
     list = CT1_DATA.slice();
   }
@@ -1833,6 +1838,12 @@ function renderSale(){
   var isDesktop = (window.innerWidth||document.documentElement.clientWidth||0)>=768;
 
   list.forEach(function(p){
+    // CT3: render riêng biệt với phân quyền dữ liệu
+    if(p.loai_sale==='ct3'){
+      renderCT3Card(p, el);
+      return;
+    }
+
     var nkSale = p.ns||p.nk||0;
     var ghSale = p.gs||p.gh||0;
     var saleP = nkSale||ghSale;
@@ -2010,11 +2021,13 @@ function setSaleSize(sz){
 }
 function setSF2(v){
   window._sf2=v;
-  var b1=document.getElementById('sf2-ct1'), b2=document.getElementById('sf2-ct2');
-  if(b1){ b1.className='fb'+(v==='ct1'?' on':'');
-    b1.style.cssText=v==='ct1'?'flex:1;font-size:12px;padding:6px 0;background:#C0232A;color:#fff;border-color:#C0232A;text-align:center':'flex:1;font-size:12px;padding:6px 0;text-align:center'; }
-  if(b2){ b2.className='fb'+(v==='ct2'?' on':'');
-    b2.style.cssText=v==='ct2'?'flex:1;font-size:12px;padding:6px 0;background:#C0232A;color:#fff;border-color:#C0232A;text-align:center':'flex:1;font-size:12px;padding:6px 0;text-align:center'; }
+  ['ct1','ct2','ct3'].forEach(function(k){
+    var btn=document.getElementById('sf2-'+k);
+    if(!btn) return;
+    var on=v===k;
+    btn.className='fb'+(on?' on':'');
+    btn.style.cssText='flex:1;font-size:12px;padding:6px 0;text-align:center'+(on?';background:#C0232A;color:#fff;border-color:#C0232A':'');
+  });
   renderSale();
 }
 
@@ -3046,6 +3059,8 @@ function showApp(name){
   fetchThuocTinhSP();
   // Warm-up GAS: ping nhẹ ngay sau login để GAS "thức" sẵn cho các request sau
   gasWarmUp();
+  // Áp dụng phân quyền hiển thị lợi nhuận (chỉ Admin thấy)
+  apDungPhanQuyenLoi();
 }
 function gasWarmUp(){
   var old=document.getElementById('_warmup_script');
@@ -4007,6 +4022,10 @@ function laKhachHang(){
   var sess=checkSession();
   return !sess || sess.role==='khachhang';
 }
+function laAdmin(){
+  var sess=checkSession();
+  return sess && sess.role==='admin';
+}
 // Khách hàng chỉ thấy số thật khi ≤ ngưỡng này, vượt quá thì hiện dạng
 // "50+" (giới hạn, không lộ số tồn thật lớn cho đối thủ dò).
 var NGUONG_TON_KHACH=50;
@@ -4324,6 +4343,7 @@ function calcAndShowTotals(){
 
 function renderDonTotals(){
   calcAndShowTotals();
+  apDungPhanQuyenLoi();
 }
 
 function clearDon(){
@@ -5217,6 +5237,156 @@ function aiBuildChips(){
   aiCheckApiKey();
 })();
 
+// ===== CT3 SKU LINH HOẠT =====
+function isCT3(ma){
+  if(typeof D3==='undefined'||!D3) return false;
+  return D3.some(function(p){ return p.ma===ma; });
+}
+
+// render card CT3 vào container el
+function renderCT3Card(p, el){
+  var isAdmin=laAdmin();
+  var imgs=timAnhMulti(p.ma);
+  var imgUrl=(imgStore&&imgStore[p.ma])?imgStore[p.ma]:(imgs.length?imgs[0]:'');
+  var isDesktop=(window.innerWidth||0)>=768;
+
+  var card=document.createElement('div');
+  card.className=isDesktop?'mk':'sale-card';
+  if(isDesktop) card.style.cssText='padding:0 !important;cursor:pointer;overflow:hidden;display:flex;align-items:stretch;min-height:110px';
+
+  var tk=timTonKhoTheoQuyen(p.ma);
+  var tkDot=tk?(tk.tier&&tk.tier.nhanh>0?'🟢':tk.tier&&tk.tier.mai>0?'🟡':'🔴'):'';
+  var tkText=tk?tkDot+' Còn '+fmtTkCard(tk.tong,tk.dvt):'';
+  var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
+
+  // Phần giá chỉ Admin thấy — KHÔNG render vào DOM cho non-admin
+  var adminPriceHtml='';
+  if(isAdmin){
+    var netGia=p.ns||0;
+    var dlGia=p.nhan||0;
+    var thuong=netGia&&dlGia?Math.round((dlGia-netGia)*0.5):0;
+    adminPriceHtml=
+      '<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:6px;padding:6px 8px;margin-top:4px;font-size:10px">'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#795548">NET (Admin)</span><b style="color:#E65100">'+netGia.toLocaleString('vi-VN')+'đ/m²</b></div>'
+      +'<div style="display:flex;justify-content:space-between"><span style="color:#795548">Giá ĐL nhận kho</span><b style="color:#C0232A">'+dlGia.toLocaleString('vi-VN')+'đ/m²</b></div>'
+      +(thuong>0?'<div style="display:flex;justify-content:space-between"><span style="color:#795548">Thưởng NVKD (50%)</span><b style="color:#1B5E20">+'+thuong.toLocaleString('vi-VN')+'đ/m²</b></div>':'')
+      +'</div>';
+  }
+
+  var safeKey='__salePTmp_'+p.ma.replace(/[^a-z0-9]/gi,'_');
+  window[safeKey]=p;
+
+  var imgHtml='<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-size:20px">📷</span><span style="font-size:9px;color:#bbb;text-align:center;line-height:1.2">Chưa<br>có ảnh</span></div>'
+    +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.style.display=\'none\'">':'');
+
+  if(isDesktop){
+    card.innerHTML=
+      '<div style="width:110px;height:110px;flex-shrink:0;background:#F0EEEC;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;align-self:center;margin:6px;border-radius:8px">'+imgHtml+'</div>'
+      +'<div style="flex:1;padding:8px 8px 8px 2px;display:flex;flex-direction:column;justify-content:center;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'
+      +'<span style="background:#E8EAF6;color:#3949AB;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">🎯CT3</span>'
+      +'<span style="font-size:10px;color:#888">'+p.kc+'</span>'
+      +'</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">'+p.ma+'</div>'
+      +'<div style="font-size:10px;color:#5C6BC0;margin-bottom:4px">SKU linh hoạt · 03/07–03/08/2026</div>'
+      +adminPriceHtml
+      +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
+      +'<div style="display:flex;gap:4px;margin-top:6px">'
+      +'<button onclick="event.stopPropagation();xinDuyetGiaCT3(\''+p.ma+'\')" style="padding:4px 8px;font-size:11px;border:1px solid #3949AB;border-radius:4px;background:#E8EAF6;color:#3949AB;cursor:pointer;font-weight:700">🎯 Xin duyệt giá</button>'
+      +'<button onclick="event.stopPropagation();ct3ThemVaoDon(\''+p.ma+'\')" style="flex:1;padding:4px 8px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm đơn</button>'
+      +'</div>'
+      +'</div>';
+    card.addEventListener('click',function(){ showDP(p.ma); });
+  } else {
+    card.innerHTML=
+      '<div class="sale-img-wrap"><div class="sale-img-placeholder" style="font-size:28px">🎯</div></div>'
+      +'<div style="padding:6px 8px 8px">'
+      +'<span style="background:#E8EAF6;color:#3949AB;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">🎯 CT3</span>'
+      +'<div class="sale-card-ma">'+p.ma+'</div>'
+      +'<div class="sale-card-kc">'+p.kc+' · SKU linh hoạt</div>'
+      +adminPriceHtml
+      +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
+      +'<button onclick="xinDuyetGiaCT3(\''+p.ma+'\')" style="width:100%;margin-top:6px;padding:6px;font-size:11px;border:1px solid #3949AB;border-radius:4px;background:#E8EAF6;color:#3949AB;cursor:pointer;font-weight:700">🎯 Xin duyệt giá</button>'
+      +'<button onclick="ct3ThemVaoDon(\''+p.ma+'\')" style="width:100%;margin-top:4px;padding:6px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm vào đơn</button>'
+      +'</div>';
+  }
+  el.appendChild(card);
+}
+
+// Nút "Xin duyệt giá" → ghi request lên GAS, KHÔNG lộ số liệu giá
+function xinDuyetGiaCT3(ma){
+  var sess=checkSession();
+  var nguoi=sess?sess.name:'Khách';
+  var ts=new Date().toLocaleString('vi-VN');
+  showToast('📩 Đã gửi yêu cầu duyệt giá cho '+ma+'. NVKD sẽ liên hệ sớm!');
+  // Ghi log lên GAS
+  var cbName='_ct3ReqCb_'+Date.now();
+  window[cbName]=function(){};
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var s=document.createElement('script');
+  s.src=APPS_URL+'?action=logCT3Request&ma='+encodeURIComponent(ma)+'&nguoi='+encodeURIComponent(nguoi)+'&ts='+encodeURIComponent(ts)+'&callback='+cbName;
+  document.head.appendChild(s);
+  setTimeout(function(){ s.remove(); delete window[cbName]; },8000);
+}
+
+// Khi thêm CT3 vào đơn → bắt buộc xác nhận 7 điều kiện trước
+var _ct3PendingMa=null;
+function ct3ThemVaoDon(ma){
+  _ct3PendingMa=ma;
+  document.getElementById('ct3-popup').style.display='flex';
+  document.getElementById('ct3-chk').checked=false;
+  document.getElementById('ct3-confirm-btn').disabled=true;
+}
+function ct3ClosePopup(){
+  document.getElementById('ct3-popup').style.display='none';
+  _ct3PendingMa=null;
+}
+function ct3ConfirmDieuKien(){
+  if(!document.getElementById('ct3-chk').checked) return;
+  var ma=_ct3PendingMa;
+  ct3ClosePopup();
+  if(!ma) return;
+  // Tìm trong D3 để push vào đơn
+  var p=(typeof D3!=='undefined'?D3:[]).find(function(x){return x.ma===ma;});
+  if(!p){ showToast('Không tìm thấy sản phẩm!'); return; }
+  var exist=donItems.find(function(x){return x.ma===ma;});
+  var ts=new Date().toISOString();
+  var sess=checkSession();
+  if(exist){ exist.qty=Math.round((exist.qty+1)*100)/100; }
+  else {
+    donItems.push({
+      ma:p.ma, ten:p.ten||p.ma, kc:p.kc, cat:p.cat, unit:'m²', loai:'gach',
+      le:p.le||0,
+      nhan:p.nhan||0,
+      giao:p.giao||0,
+      ns:p.ns||0,
+      gs:p.gs||0,
+      qty:1,
+      ct3_consent:{ts:ts, nguoi:sess?sess.name:'Khách', user:sess?sess.user:''}
+    });
+  }
+  updateDonBadge();
+  renderDon();
+  showToast('✓ Đã thêm '+ma+' (CT3) vào đơn');
+}
+
+// Update scount text cho CT3
+// (đã được gọi sau renderSale chung — override text nếu cần)
+
+// Ẩn/hiện profit block theo role
+function apDungPhanQuyenLoi(){
+  var box=document.getElementById('don-margin-box');
+  if(!box) return;
+  box.style.display=laAdmin()?'block':'none';
+}
+
+// Badge CT3 trong danh sách sản phẩm chính (Tab Tra giá)
+function ct3BadgeHtml(ma){
+  if(!isCT3(ma)) return '';
+  return '<span title="Áp dụng chương trình SKU linh hoạt – Liên hệ NVKD để biết chi tiết" '
+    +'style="background:#E8EAF6;color:#3949AB;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;cursor:help;vertical-align:middle">🎯CT3</span>';
+}
+
 </script>
 
 <!-- ===== AI CHAT WIDGET HTML ===== -->
@@ -5243,5 +5413,42 @@ function aiBuildChips(){
   </div>
 </div>
 </div><!-- end app-content -->
+
+<!-- ===== POPUP 7 ĐIỀU KIỆN CT3 ===== -->
+<div id="ct3-popup" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg1);border-radius:14px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+    <div style="background:#3949AB;color:#fff;padding:14px 16px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:15px;font-weight:700">🎯 Chương trình SKU linh hoạt (CT3)</div>
+        <div style="font-size:11px;opacity:.8;margin-top:2px">Hiệu lực 03/07/2026 – 03/08/2026 · Đại lý C2</div>
+      </div>
+      <button onclick="ct3ClosePopup()" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="padding:14px 16px">
+      <p style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px">Vui lòng đọc kỹ và đồng thuận 7 điều kiện vận hành trước khi đặt hàng:</p>
+      <ol style="padding-left:18px;font-size:13px;color:var(--t1);line-height:1.7">
+        <li style="margin-bottom:8px">Chỉ áp dụng cho SKU đang tồn kho tại DC/kho Nhà máy thuộc Miền theo danh sách đã duyệt.</li>
+        <li style="margin-bottom:8px">Nhận hàng tại kho DC thuộc Miền, <b>không điều chuyển hàng giữa các DC</b>.</li>
+        <li style="margin-bottom:8px">Nếu kho DC không đủ hàng, đơn cần chờ Khu vực phối hợp nhập hàng bổ sung, có phê duyệt của GĐ CTTM.</li>
+        <li style="margin-bottom:8px">Giá bán tính theo <b>giá nhận hàng tại Nhà máy/kho DC</b>.</li>
+        <li style="margin-bottom:8px"><b>Thanh toán trước khi nhận hàng</b> (khác điều khoản N+3 thông thường).</li>
+        <li style="margin-bottom:8px">Chiết khấu 01 lần, <b>không cộng thêm chính sách kinh doanh hiện hành</b>, không áp dụng chừa hàng; vẫn được áp dụng giao chành xe và đổi hàng.</li>
+        <li style="margin-bottom:8px">Phiếu đặt hàng chỉ được xử lý khi có <b>đầy đủ chữ ký phê duyệt của GĐKV</b>.</li>
+      </ol>
+      <label style="display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:10px 12px;background:var(--bg2);border-radius:8px;cursor:pointer">
+        <input type="checkbox" id="ct3-chk" onchange="document.getElementById('ct3-confirm-btn').disabled=!this.checked"
+          style="margin-top:2px;width:16px;height:16px;accent-color:#3949AB;flex-shrink:0"/>
+        <span style="font-size:12px;font-weight:600;color:var(--t1)">Tôi đã đọc và đồng thuận 7 điều kiện vận hành trên</span>
+      </label>
+    </div>
+    <div style="padding:0 16px 16px;display:flex;gap:8px">
+      <button onclick="ct3ClosePopup()" style="flex:1;padding:11px;border:1.5px solid var(--bd2);border-radius:10px;background:var(--bg1);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Hủy</button>
+      <button id="ct3-confirm-btn" onclick="ct3ConfirmDieuKien()" disabled
+        style="flex:2;padding:11px;border:none;border-radius:10px;background:#3949AB;color:#fff;font-size:13px;font-weight:700;font-family:var(--f)"
+        onchange="">✓ Xác nhận & Thêm vào đơn</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
