@@ -895,26 +895,57 @@ input::placeholder{color:var(--t3)}
   <div id="sub-keo-content">
   <p style="font-size:13px;color:var(--t2);margin-bottom:10px">Keo dán gạch GECKO Đồng Tâm · Giá <b>đồng/bao</b></p>
   <div id="keo-detail" style="display:none;background:var(--bg1);border:2px solid #7B1FA2;border-radius:var(--r12);padding:14px;margin-bottom:12px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
       <div>
-        <p id="kd-ten" style="font-size:14px;font-weight:600;margin-bottom:2px"></p>
+        <p id="kd-ten" style="font-size:15px;font-weight:700;margin-bottom:2px"></p>
         <p style="font-size:11px;color:var(--t2)">Đơn vị: đồng/bao</p>
       </div>
       <button onclick="document.getElementById('keo-detail').style.display='none'" style="font-size:13px;padding:4px 10px">✕</button>
     </div>
-    <div class="pr-grid">
-      <div class="pr-box full"><p>Giá lẻ niêm yết</p><p id="kd-le"></p></div>
+    <!-- Giá 2 tier -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div id="kd-box1" style="background:var(--bg2);border-radius:var(--r8);padding:10px;text-align:center">
+        <p style="font-size:10px;color:var(--t2);margin-bottom:4px">&lt; 50 bao</p>
+        <p id="kd-nhan1" style="font-size:14px;font-weight:700;color:#7B1FA2;margin-bottom:2px"></p>
+        <p style="font-size:10px;color:var(--t2)">nhận kho</p>
+        <p id="kd-giao1" style="font-size:12px;font-weight:600;color:#7B1FA2;margin-top:4px"></p>
+        <p style="font-size:10px;color:var(--t2)">giao hàng</p>
+      </div>
+      <div id="kd-box2" style="background:#EDE7F6;border-radius:var(--r8);padding:10px;text-align:center">
+        <p style="font-size:10px;color:#1B5E20;margin-bottom:4px">≥ 50 bao</p>
+        <p id="kd-nhan2" style="font-size:14px;font-weight:700;color:#388E3C;margin-bottom:2px"></p>
+        <p style="font-size:10px;color:var(--t2)">nhận kho</p>
+        <p id="kd-giao2" style="font-size:12px;font-weight:600;color:#388E3C;margin-top:4px"></p>
+        <p style="font-size:10px;color:var(--t2)">giao hàng</p>
+      </div>
     </div>
-    <p style="font-size:11px;font-weight:700;color:var(--t2);margin:8px 0 6px">ĐẠI LÝ – DƯỚI 50 BAO</p>
-    <div class="pr-grid">
-      <div class="pr-box"><p>Nhận tại kho</p><p id="kd-nhan1"></p></div>
-      <div class="pr-box"><p>Giao hàng</p><p id="kd-giao1"></p></div>
+    <!-- Nhập SL -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:13px;color:var(--t2)">Số lượng:</span>
+      <button onclick="chinhSLKeo(-5)" style="width:32px;height:32px;border:1px solid var(--bd2);border-radius:6px;background:var(--bg2);font-size:14px;cursor:pointer">−</button>
+      <input type="number" id="kd-soluong" value="10" min="1" oninput="tinhTienKeo()"
+        style="width:70px;text-align:center;font-size:14px;font-weight:700;padding:6px;border:1px solid var(--bd2);border-radius:6px"/>
+      <button onclick="chinhSLKeo(5)" style="width:32px;height:32px;border:1px solid var(--bd2);border-radius:6px;background:var(--bg2);font-size:14px;cursor:pointer">+</button>
+      <span style="font-size:12px;color:var(--t2)">bao</span>
     </div>
-    <p style="font-size:11px;font-weight:700;color:var(--t2);margin:8px 0 6px">ĐẠI LÝ – TỪ 50 BAO (giá tốt hơn)</p>
-    <div class="pr-grid">
-      <div class="pr-box" style="background:#EDE7F6"><p>Nhận tại kho</p><p id="kd-nhan2" style="color:#6A1B9A"></p></div>
-      <div class="pr-box" style="background:#EDE7F6"><p>Giao hàng</p><p id="kd-giao2" style="color:#6A1B9A"></p></div>
+    <!-- Tổng tiền preview -->
+    <div style="background:var(--bg2);border-radius:var(--r8);padding:10px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--t2)">Nhận kho:</span>
+        <span id="kd-tien-nhan" style="font-size:13px;font-weight:700;color:#7B1FA2"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="font-size:12px;color:var(--t2)">Giao hàng:</span>
+        <span id="kd-tien-giao" style="font-size:13px;font-weight:700;color:#7B1FA2"></span>
+      </div>
     </div>
+    <!-- Buttons -->
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <button onclick="themKeoVaoDon()" style="flex:1;padding:11px;border:none;border-radius:var(--r8);background:#7B1FA2;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">🛒 Thêm vào đơn</button>
+      <button onclick="chiaSeAnhSanPham(curKeoMa)" style="padding:11px 12px;border:none;border-radius:var(--r8);background:#388E3C;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)" title="Chia sẻ ảnh">📤 Ảnh</button>
+      <button onclick="shareZaloKeo(curKeoMa)" style="padding:11px 14px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Zalo ↗</button>
+    </div>
+    <button onclick="moTonKho(curKeoMa)" style="width:100%;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #7B1FA2;background:none;color:#7B1FA2;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
   </div>
   <div id="keo-list"></div>
   </div><!-- /sub-keo-content -->
@@ -1041,7 +1072,7 @@ const DATA=D1.concat(D2,D3);
 const NGOI_KEO=[{ma:"TITAN001",cat:"ngoi",kc:"300x405x13",ten:"Ngói TITAN",dong_goi:"6v/thùng",unit:"vien",le:35500,nhan:27700,nhan2:27000,giao:28800,giao2:28000,ns:24930,gs:28800},{ma:"ALPHA001",cat:"ngoi",kc:"300x405x14",ten:"Ngói ALPHA",dong_goi:"6v/thùng",unit:"vien",le:46000,nhan:35900,nhan2:35000,giao:37300,giao2:36300,ns:32310,gs:37300},{ma:"NGOI-RIA",cat:"ngoi",kc:"190x320x14",ten:"Ngói rìa",dong_goi:"10v/thùng",unit:"vien",le:42000,nhan:32800,nhan2:31900,giao:34000,giao2:33200,ns:29520,gs:34000},{ma:"CHAN-CUOI-RIA",cat:"ngoi",kc:"190x80x14",ten:"Ngói chặn cuối rìa",dong_goi:"10v/thùng",unit:"vien",le:28000,nhan:21800,nhan2:21300,giao:22700,giao2:22100,ns:19620,gs:22700},{ma:"NOC-CO-GO",cat:"ngoi",kc:"240x300x15",ten:"Ngói nóc có gờ",dong_goi:"10v/thùng",unit:"vien",le:45000,nhan:35100,nhan2:34200,giao:36500,giao2:35600,ns:31590,gs:36500},{ma:"CHAN-CUOI-NOC",cat:"ngoi",kc:"187x182x12",ten:"Ngói chặn cuối nóc",dong_goi:"10v/thùng",unit:"vien",le:40300,nhan:31400,nhan2:30600,giao:32600,giao2:31800,ns:28260,gs:32600},{ma:"CHAC-BA",cat:"ngoi",kc:"280x340x86",ten:"Ngói chạc ba CBK/CBY",dong_goi:"5v/thùng",unit:"vien",le:360000,nhan:280800,nhan2:273600,giao:291600,giao2:284400,ns:252720,gs:291600},{ma:"CHAC-CHU-T",cat:"ngoi",kc:"280x340x86",ten:"Ngói chạc chữ T",dong_goi:"5v/thùng",unit:"vien",le:360000,nhan:280800,nhan2:273600,giao:291600,giao2:284400,ns:252720,gs:291600},{ma:"CHAC-TU",cat:"ngoi",kc:"390x390x120",ten:"Ngói chạc tư",dong_goi:"5v/thùng",unit:"vien",le:460000,nhan:358800,nhan2:349600,giao:372600,giao2:363400,ns:322920,gs:372600},{ma:"KEO-WALL",cat:"keo",kc:"–",ten:"Keo GECKO WALL (tường)",unit:"bao",le:278640,nhan:209000,nhan2:200600,giao:217300,giao2:209000,ns:0,gs:0},{ma:"KEO-FLOOR",cat:"keo",kc:"–",ten:"Keo GECKO FLOOR (sàn)",unit:"bao",le:234360,nhan:175800,nhan2:168700,giao:182800,giao2:175800,ns:0,gs:0},{ma:"KEO-PRO",cat:"keo",kc:"–",ten:"Keo GECKO PRO (cao cấp)",unit:"bao",le:945000,nhan:708800,nhan2:680400,giao:737100,giao2:708800,ns:0,gs:0},{ma:"KEO-SUPER",cat:"keo",kc:"–",ten:"Keo GECKO SUPER (siêu bền)",unit:"bao",le:567000,nhan:425300,nhan2:408200,giao:442300,giao2:425300,ns:0,gs:0},,{ma:"KINH-95001",cat:"kinh",kc:"19x19",ten:"Gạch kính 95001",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:319800,nhan:255800,nhan2:249400,nhan3:239900,giao:265400,giao2:259000,giao3:249400,ns:0,gs:0},{ma:"KINH-95005",cat:"kinh",kc:"19x19",ten:"Gạch kính 95005",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:319800,nhan:255800,nhan2:249400,nhan3:239900,giao:265400,giao2:259000,giao3:249400,ns:0,gs:0},{ma:"KINH-95021",cat:"kinh",kc:"19x19",ten:"Gạch kính 95021",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:325800,nhan:260600,nhan2:254100,nhan3:244400,giao:270400,giao2:263900,giao3:254100,ns:0,gs:0},{ma:"BCR-GRX-S-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 01-04,07,10,13 – 1kg",unit:"bao",le:30900,nhan:23200,nhan2:22200,giao:24100,giao2:23200,ns:0,gs:0},{ma:"BCR-GRX-S-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 01-04,07,10,13 – 5kg",unit:"bao",le:133400,nhan:100100,nhan2:96000,giao:104100,giao2:100100,ns:0,gs:0},{ma:"BCR-GRX-M-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 05,06,11,14 – 1kg",unit:"bao",le:36500,nhan:27400,nhan2:26300,giao:28500,giao2:27400,ns:0,gs:0},{ma:"BCR-GRX-M-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 05,06,11,14 – 5kg",unit:"bao",le:157200,nhan:117900,nhan2:113200,giao:122600,giao2:117900,ns:0,gs:0},{ma:"BCR-GRX-L-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 08,09,12,15 – 1kg",unit:"bao",le:43500,nhan:32600,nhan2:31300,giao:33900,giao2:32600,ns:0,gs:0},{ma:"BCR-GRX-L-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 08,09,12,15 – 5kg",unit:"bao",le:195200,nhan:146400,nhan2:140500,giao:152300,giao2:146400,ns:0,gs:0},{ma:"BCR-KK-S-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 01-04,07,10,13 – 1kg",unit:"bao",le:46300,nhan:34700,nhan2:33300,giao:36100,giao2:34700,ns:0,gs:0},{ma:"BCR-KK-S-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 01-04,07,10,13 – 5kg",unit:"bao",le:200100,nhan:150100,nhan2:144100,giao:156100,giao2:150100,ns:0,gs:0},{ma:"BCR-KK-M-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 05,06,11,14 – 1kg",unit:"bao",le:54800,nhan:41100,nhan2:39500,giao:42700,giao2:41100,ns:0,gs:0},{ma:"BCR-KK-M-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 05,06,11,14 – 5kg",unit:"bao",le:235900,nhan:176900,nhan2:169800,giao:184000,giao2:176900,ns:0,gs:0},{ma:"BCR-KK-L-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 08,09,12,15 – 1kg",unit:"bao",le:65200,nhan:48900,nhan2:46900,giao:50900,giao2:48900,ns:0,gs:0},{ma:"BCR-KK-L-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 08,09,12,15 – 5kg",unit:"bao",le:292800,nhan:219600,nhan2:210800,giao:228400,giao2:219600,ns:0,gs:0}];
 
 var curF='all', curSF='all', curP_ma=null, curSize='all', curPage=0;
-var curNgoiMa=null;
+var curNgoiMa=null, curKeoMa=null;
 var donItems=[];
 // Khai báo sớm (trước khi render() có thể được gọi lúc khởi động trang qua
 // IIFE init() ở cuối file) — nếu để khai báo này ở dưới cùng với các hàm
@@ -2028,7 +2059,9 @@ function renderNgoi(){
         +'<div><p style="font-size:13px;font-weight:600;margin-bottom:2px">'+p.ten+'</p>'
         +'<p style="font-size:11px;color:var(--t2)">'+p.kc+' · '+p.dong_goi+'</p></div>'
         +'<div style="text-align:right"><p style="font-size:13px;font-weight:700;color:#C0232A">'+p.nhan.toLocaleString('vi-VN')+'đ</p>'
-        +'<p style="font-size:10px;color:var(--t2)">/viên (nhận kho)</p></div></div></div></div>';
+        +'<p style="font-size:10px;color:var(--t2)">/viên (nhận kho)</p>'
+        +(p.nhan2&&p.nhan2!==p.nhan?'<p style="font-size:10px;color:#388E3C;margin-top:2px">≥1.500v: '+p.nhan2.toLocaleString('vi-VN')+'đ</p>':'')
+        +'</div></div></div></div>';
       div.addEventListener('click',function(){showNgoi(p.ma);});
       el.appendChild(div);
     });
@@ -2186,43 +2219,76 @@ function addToDonKinh(ma){
 function renderKeo(){
   var el=document.getElementById('keo-list'); el.innerHTML='';
   KEO.forEach(function(p){
-    var div=document.createElement('div'); div.className='keo-card';
-        div.innerHTML='<div style="display:flex;align-items:center;margin-bottom:8px">'
+    var div=document.createElement('div'); div.className='mk';
+    div.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex:1">'
       +getImgHtml(p.ma,48,'🧱')
-      +'<div style="flex:1;display:flex;justify-content:space-between;align-items:center">'
-      +'<p style="font-size:13px;font-weight:600">'+p.ten+'</p>'
-      +'<span style="font-size:11px;padding:2px 8px;border-radius:6px;background:#EDE7F6;color:#6A1B9A;font-weight:600">đ/bao</span></div></div>'
-      +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Giá lẻ</span><span style="font-size:12px;font-weight:600">'+p.le.toLocaleString('vi-VN')+'đ</span></div>'
-      +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Nhận kho &lt;50 bao</span><span style="font-size:13px;font-weight:700;color:#7B1FA2">'+p.nhan.toLocaleString('vi-VN')+'đ</span></div>'
-      +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Giao hàng &lt;50 bao</span><span style="font-size:13px;font-weight:700;color:#7B1FA2">'+p.giao.toLocaleString('vi-VN')+'đ</span></div>'
-      +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Nhận kho ≥50 bao</span><span style="font-size:13px;font-weight:700;color:#388E3C">'+p.nhan2.toLocaleString('vi-VN')+'đ</span></div>'
-      +'<div class="tier-row"><span style="font-size:12px;color:var(--t2)">Giao hàng ≥50 bao</span><span style="font-size:13px;font-weight:700;color:#388E3C">'+p.giao2.toLocaleString('vi-VN')+'đ</span></div>';
-    var btnRow=document.createElement('div');
-    btnRow.style.cssText='display:flex;gap:6px;margin-top:8px';
-    var btnK=document.createElement('button');
-    btnK.textContent='🛒 + Thêm vào đơn';
-    btnK.style.cssText='flex:1;padding:7px;border:none;border-radius:var(--r8);background:#7B1FA2;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
-    btnK.onclick=function(ma){return function(){addToDonKeo(ma);};}(p.ma);
-    var btnImg=document.createElement('button');
-    btnImg.textContent='📤 Ảnh';
-    btnImg.title='Chia sẻ nhiều ảnh sản phẩm';
-    btnImg.style.cssText='padding:7px 10px;border:none;border-radius:var(--r8);background:#388E3C;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
-    btnImg.onclick=function(ma){return function(){chiaSeAnhSanPham(ma);};}(p.ma);
-    var btnZ=document.createElement('button');
-    btnZ.textContent='Zalo ↗';
-    btnZ.style.cssText='padding:7px 12px;border:none;border-radius:var(--r8);background:#0068FF;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)';
-    btnZ.onclick=function(ma){return function(){shareZaloKeo(ma);};}(p.ma);
-    btnRow.appendChild(btnK);
-    btnRow.appendChild(btnImg);
-    btnRow.appendChild(btnZ);
-    div.appendChild(btnRow);
-    var btnTK=document.createElement('button');
-    btnTK.textContent='📦 Xem tồn kho theo kho/lô';
-    btnTK.style.cssText='width:100%;margin-top:6px;padding:7px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--f)';
-    btnTK.onclick=function(ma,ten){return function(){moTonKho(ma,ten);};}(p.ma,p.ten);
-    div.appendChild(btnTK);
+      +'<div style="flex:1">'
+      +'<p style="font-size:13px;font-weight:700;margin-bottom:2px">'+p.ten+'</p>'
+      +'<p style="font-size:11px;color:var(--t2)">NK &lt;50 bao: <b style="color:#7B1FA2">'+p.nhan.toLocaleString('vi-VN')+'đ</b>'
+      +' · ≥50: <b style="color:#388E3C">'+p.nhan2.toLocaleString('vi-VN')+'đ</b></p>'
+      +'</div></div>'
+      +'<div style="font-size:11px;color:var(--t2);margin-left:6px;flex-shrink:0">đ/bao ›</div>';
+    div.addEventListener('click', function(){ showKeo(p.ma); });
     el.appendChild(div);
   });
+}
+
+function showKeo(ma){
+  curKeoMa=ma;
+  var p=KEO.find(function(x){return x.ma===ma;}); if(!p) return;
+  document.getElementById('kd-ten').textContent=p.ten;
+  document.getElementById('kd-nhan1').textContent=p.nhan.toLocaleString('vi-VN')+'đ';
+  document.getElementById('kd-giao1').textContent=p.giao.toLocaleString('vi-VN')+'đ';
+  document.getElementById('kd-nhan2').textContent=p.nhan2.toLocaleString('vi-VN')+'đ';
+  document.getElementById('kd-giao2').textContent=p.giao2.toLocaleString('vi-VN')+'đ';
+  document.getElementById('kd-soluong').value=10;
+  document.getElementById('keo-detail').style.display='block';
+  tinhTienKeo();
+  document.getElementById('keo-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function chinhSLKeo(d){
+  var inp=document.getElementById('kd-soluong');
+  inp.value=Math.max(1,(parseInt(inp.value)||0)+d);
+  tinhTienKeo();
+}
+
+function tinhTienKeo(){
+  var p=KEO.find(function(x){return x.ma===curKeoMa;}); if(!p) return;
+  var sl=parseInt(document.getElementById('kd-soluong').value)||0;
+  var use2=sl>=50;
+  var nhanVal=use2?p.nhan2:p.nhan;
+  var giaoVal=use2?p.giao2:p.giao;
+  var tierLabel=use2?' (≥50 bao)':' (<50 bao)';
+  var color=use2?'#388E3C':'#7B1FA2';
+  document.getElementById('kd-tien-nhan').textContent=(nhanVal*sl).toLocaleString('vi-VN')+'đ'+tierLabel;
+  document.getElementById('kd-tien-nhan').style.color=color;
+  document.getElementById('kd-tien-giao').textContent=(giaoVal*sl).toLocaleString('vi-VN')+'đ'+tierLabel;
+  document.getElementById('kd-tien-giao').style.color=color;
+  // Highlight active tier box
+  document.getElementById('kd-box1').style.border=use2?'none':'2px solid #7B1FA2';
+  document.getElementById('kd-box2').style.border=use2?'2px solid #388E3C':'none';
+}
+
+function themKeoVaoDon(){
+  var p=KEO.find(function(x){return x.ma===curKeoMa;}); if(!p) return;
+  var sl=parseInt(document.getElementById('kd-soluong').value)||0;
+  if(sl<=0){alert('Vui lòng nhập số lượng!');return;}
+  var use2=sl>=50;
+  var exist=donItems.find(function(x){return x.ma===p.ma;});
+  if(exist){exist.qty+=sl;}
+  else{
+    donItems.push({
+      ma:p.ma, ten:p.ten, kc:'–', unit:'bao',
+      le:p.le||0,
+      nhan:use2?p.nhan2:p.nhan, giao:use2?p.giao2:p.giao,
+      nhan2:p.nhan2||0, giao2:p.giao2||0,
+      ns:0, gs:0, qty:sl, loai:'keo'
+    });
+  }
+  updateDonBadge();
+  showToast('✓ Đã thêm '+sl+' bao '+p.ten+' vào đơn!');
+  document.getElementById('keo-detail').style.display='none';
 }
 
 // --- TAB 5 Pitch ---
