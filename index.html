@@ -4495,7 +4495,7 @@ function xuatExcel(){
 
   var css=cssExcelChung();
 
-  var isLinh = sess && sess.u === 'linh';
+  var isLinh = sess && sess.user === 'linh';
   var sheet2Xml = isLinh
     ? '<x:ExcelWorksheet><x:Name>Đại lý Tiến Phát</x:Name>'
       +'<x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>'
