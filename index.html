@@ -5345,7 +5345,7 @@ function renderCT3Card(p, el){
       +'<button onclick="event.stopPropagation();xinDuyetGiaCT3(\''+p.ma+'\')" style="width:100%;margin-top:6px;padding:6px;font-size:11px;border:1px solid #3949AB;border-radius:4px;background:#E8EAF6;color:#3949AB;cursor:pointer;font-weight:700">🎯 Xin duyệt giá</button>'
       +'<button onclick="event.stopPropagation();ct3ThemVaoDon(\''+p.ma+'\')" style="width:100%;margin-top:4px;padding:6px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm vào đơn</button>'
       +'</div>';
-    card.addEventListener('click',function(){ showDP(p.ma); });
+    card.addEventListener('click',function(){ swTab('tra'); setTimeout(function(){ showDP(p.ma); },80); });
   }
   el.appendChild(card);
 }
