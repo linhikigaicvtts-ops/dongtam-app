@@ -5622,6 +5622,8 @@ function ct3BadgeHtml(ma){
 <style>
 #tra-head{position:sticky;top:var(--tbH,56px);z-index:41;background:var(--bg)}
 #tab-tra #pagination{position:sticky;top:var(--headBottom,150px);z-index:40;background:var(--bg)}
+#sale-head{position:sticky;top:var(--tbH,56px);z-index:41;background:var(--bg)}
+#sale-size-sidebar{position:sticky;top:var(--saleHeadBottom,150px);align-self:flex-start;max-height:calc(100vh - var(--saleHeadBottom,150px) - 62px);overflow-y:auto}
 @media(max-width:767px){
   #tab-tra #size-sidebar{position:sticky !important;top:var(--headBottom,150px) !important;align-self:flex-start;max-height:calc(100vh - var(--headBottom,150px) - 62px) !important}
 }
@@ -5636,6 +5638,8 @@ function ct3BadgeHtml(ma){
     var r=document.documentElement.style;
     r.setProperty('--tbH', tbH+'px');
     r.setProperty('--headBottom', (tbH+hH)+'px');
+    var sHead=document.getElementById('sale-head');
+    if(sHead){ var shH=Math.round(sHead.getBoundingClientRect().height); if(shH>0) r.setProperty('--saleHeadBottom', (tbH+shH)+'px'); }
   }
   function init(){
     var tra=document.getElementById('tab-tra'); if(!tra){ setTimeout(init,300); return; }
@@ -5649,6 +5653,22 @@ function ct3BadgeHtml(ma){
       tra.insertBefore(head, tra.firstChild);
       if(searchRow) head.appendChild(searchRow);
       if(filters) head.appendChild(filters);
+    }
+    var sale=document.getElementById('tab-sale');
+    if(sale && !document.getElementById('sale-head')){
+      var sHeaderBlock=sale.children[0];
+      var scount=document.getElementById('scount');
+      var sHead=document.createElement('div'); sHead.id='sale-head';
+      sale.insertBefore(sHead, sale.firstChild);
+      if(sHeaderBlock) sHead.appendChild(sHeaderBlock);
+      if(scount) sHead.appendChild(scount);
+      var saleRow=sHead.nextElementSibling;
+      if(saleRow && saleRow.children[0]) saleRow.children[0].id='sale-size-sidebar';
+    }
+    if(typeof window.renderSale==='function' && !window.renderSale._sticky){
+      var _rs=window.renderSale;
+      window.renderSale=function(){ var r=_rs.apply(this,arguments); setTimeout(measure,60); return r; };
+      window.renderSale._sticky=true;
     }
     measure();
     window.addEventListener('resize', measure);
