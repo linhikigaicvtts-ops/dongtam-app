@@ -5385,8 +5385,10 @@ function ct3ConfirmDieuKien(){
   var ma=_ct3PendingMa;
   ct3ClosePopup();
   if(!ma) return;
-  // Tìm trong D3 để push vào đơn
-  var p=(typeof D3!=='undefined'?D3:[]).find(function(x){return x.ma===ma;});
+  // Tìm trong CT3_DATA (có đủ 68 mã), fallback DATA — KHÔNG dùng D3
+  // (D3 chỉ là 1 phần của mảng DATA chính, mã CT3 có thể nằm ở D1/D2)
+  var p=(typeof CT3_DATA!=='undefined'?CT3_DATA:[]).find(function(x){return x.ma===ma;})
+      ||(typeof DATA!=='undefined'?DATA:[]).find(function(x){return x.ma===ma;});
   if(!p){ showToast('Không tìm thấy sản phẩm!'); return; }
   var exist=donItems.find(function(x){return x.ma===ma;});
   var ts=new Date().toISOString();
