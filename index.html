@@ -430,8 +430,7 @@ input::placeholder{color:var(--t3)}
 .loc-sec-hdr.active{color:var(--red);background:#FFF5F5;border-left:3px solid var(--red);}
 .loc-sec-hdr .loc-chev{flex-shrink:0;transition:transform .2s;}
 .loc-sec-hdr.open .loc-chev{transform:rotate(180deg);}
-@media(max-width:767px){#loc-sidebar{display:none}}
-@media(min-width:768px){#btn-loc-nangcao{display:none!important}}
+#loc-sidebar{display:none}
 
 /* ===== PRODUCT CARDS ===== */
 .mk{
@@ -3973,13 +3972,13 @@ function moLocNangCao(tab){
       +opts.map(function(o){ return '<option value="'+o.replace(/"/g,'&quot;')+'"'+(locNangCao[f.key]===o?' selected':'')+'>'+o+'</option>'; }).join('')
       +'</select></div>';
   }).join('');
-  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:380px;width:100%;max-height:85vh;overflow:auto;padding:16px">'
+  modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:min(560px,94vw);width:100%;max-height:85vh;overflow:auto;padding:16px">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
     +'<p style="font-size:15px;font-weight:700;margin:0">🎛️ Lọc nâng cao</p>'
     +'<button onclick="document.getElementById(\'modal-loc-nangcao\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
     +'</div>'
     +(Object.keys(thuocTinhMap).length===0?'<p style="font-size:12px;color:#888;margin-bottom:10px">Chưa tải được dữ liệu thuộc tính, vui lòng thử lại sau vài giây.</p>':'')
-    +body
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 12px">'+body+'</div>'
     +'<div style="display:flex;gap:8px;margin-top:6px">'
     +'<button onclick="xoaLocNangCao(\''+tab+'\')" style="flex:1;padding:11px;border:1px solid var(--bd2);border-radius:var(--r8);background:none;color:var(--t2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Xóa lọc</button>'
     +'<button onclick="apDungLocNangCao(\''+tab+'\')" style="flex:1;padding:11px;border:none;border-radius:var(--r8);background:#C0232A;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">Áp dụng</button>'
