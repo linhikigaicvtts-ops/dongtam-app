@@ -5617,5 +5617,47 @@ function ct3BadgeHtml(ma){
 })();
 </script>
 
+
+<!-- ===== STICKY: giu header (tim kiem + filter + phan trang) + cot kich co khi cuon ===== -->
+<style>
+#tra-head{position:sticky;top:var(--tbH,56px);z-index:41;background:var(--bg)}
+#tab-tra #pagination{position:sticky;top:var(--headBottom,150px);z-index:40;background:var(--bg)}
+@media(max-width:767px){
+  #tab-tra #size-sidebar{position:sticky !important;top:var(--headBottom,150px) !important;align-self:flex-start;max-height:calc(100vh - var(--headBottom,150px) - 62px) !important}
+}
+</style>
+<script>
+(function(){
+  function measure(){
+    var tb=document.querySelector('.topbar');
+    var tbH=tb?Math.round(tb.getBoundingClientRect().height):56;
+    var head=document.getElementById('tra-head');
+    var hH=head?Math.round(head.getBoundingClientRect().height):0;
+    var r=document.documentElement.style;
+    r.setProperty('--tbH', tbH+'px');
+    r.setProperty('--headBottom', (tbH+hH)+'px');
+  }
+  function init(){
+    var tra=document.getElementById('tab-tra'); if(!tra){ setTimeout(init,300); return; }
+    var _wrap=document.querySelector('.wrap');
+    if(_wrap && _wrap.parentElement && _wrap.children.length===1 && _wrap.firstElementChild.classList.contains('topbar')){ _wrap.parentElement.insertBefore(_wrap.firstElementChild,_wrap); _wrap.remove(); }
+    if(!document.getElementById('tra-head')){
+      var sq=tra.querySelector('#sq');
+      var searchRow=sq?sq.closest('div'):tra.children[0];
+      var filters=tra.querySelector('.filters');
+      var head=document.createElement('div'); head.id='tra-head';
+      tra.insertBefore(head, tra.firstChild);
+      if(searchRow) head.appendChild(searchRow);
+      if(filters) head.appendChild(filters);
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    setTimeout(measure, 500);
+  }
+  if(document.readyState!=='loading') setTimeout(init,250);
+  else document.addEventListener('DOMContentLoaded',function(){ setTimeout(init,250); });
+})();
+</script>
+
 </body>
 </html>
