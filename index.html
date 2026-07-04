@@ -5330,17 +5330,22 @@ function renderCT3Card(p, el){
       +'</div>';
     card.addEventListener('click',function(){ showDP(p.ma); });
   } else {
+    card.style.cursor='pointer';
+    var mobImg='<div class="sale-img-wrap"><div class="sale-img-placeholder" style="font-size:28px">🎯</div>'
+      +(imgUrl?'<img src="'+imgUrl+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">':'')
+      +'</div>';
     card.innerHTML=
-      '<div class="sale-img-wrap"><div class="sale-img-placeholder" style="font-size:28px">🎯</div></div>'
+      mobImg
       +'<div style="padding:6px 8px 8px">'
       +'<span style="background:#E8EAF6;color:#3949AB;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px">🎯 CT3</span>'
       +'<div class="sale-card-ma">'+p.ma+'</div>'
       +'<div class="sale-card-kc">'+p.kc+' · SKU linh hoạt</div>'
       +adminPriceHtml
       +(tkText?'<div style="margin-top:5px;font-size:10px;font-weight:600;color:'+tkColor+'">'+tkText+'</div>':'')
-      +'<button onclick="xinDuyetGiaCT3(\''+p.ma+'\')" style="width:100%;margin-top:6px;padding:6px;font-size:11px;border:1px solid #3949AB;border-radius:4px;background:#E8EAF6;color:#3949AB;cursor:pointer;font-weight:700">🎯 Xin duyệt giá</button>'
-      +'<button onclick="ct3ThemVaoDon(\''+p.ma+'\')" style="width:100%;margin-top:4px;padding:6px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm vào đơn</button>'
+      +'<button onclick="event.stopPropagation();xinDuyetGiaCT3(\''+p.ma+'\')" style="width:100%;margin-top:6px;padding:6px;font-size:11px;border:1px solid #3949AB;border-radius:4px;background:#E8EAF6;color:#3949AB;cursor:pointer;font-weight:700">🎯 Xin duyệt giá</button>'
+      +'<button onclick="event.stopPropagation();ct3ThemVaoDon(\''+p.ma+'\')" style="width:100%;margin-top:4px;padding:6px;font-size:11px;border:none;border-radius:4px;background:#C0232A;color:#fff;font-weight:700;cursor:pointer">+ Thêm vào đơn</button>'
       +'</div>';
+    card.addEventListener('click',function(){ showDP(p.ma); });
   }
   el.appendChild(card);
 }
