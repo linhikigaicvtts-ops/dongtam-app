@@ -3420,8 +3420,8 @@ function xuatPDF(){
     +'<div class="info-box">'
     +'<div class="info-title">Người báo giá</div>'
     +(nguoi?'<div class="info-row"><span class="info-label">Họ tên</span><span class="info-val">'+nguoi+'</span></div>':'')
-    +(nguoiSdt?'<div class="info-row"><span class="info-label">SĐT</span><span class="info-val">'+nguoiSdt+'</span></div>':'')
     +'<div class="info-row"><span class="info-label">Khu vực</span><span class="info-val">'+nguoiKv+'</span></div>'
+    +(nguoiSdt?'<div class="info-row"><span class="info-label">SĐT</span><span class="info-val">'+nguoiSdt+'</span></div>':'')
     +'</div>'
     +'</div>'
 
@@ -3461,7 +3461,7 @@ function xuatPDF(){
     /* FOOTER */
     +'<div class="footer">'
     +'<div class="footer-left">Cảm ơn quý khách đã quan tâm sản phẩm Đồng Tâm<br>Mọi thắc mắc xin liên hệ nhân viên tư vấn</div>'
-    +'<div class="footer-right">☎ 0819 548 908</div>'
+    +'<div class="footer-right">☎ '+(nguoiSdt||'0819 548 908')+'</div>'
     +'</div>'
     +'</div>'
     +'</body></html>';
@@ -3616,8 +3616,8 @@ function xuatExcel(){
     +'<div class="sec">NGƯỜI BÁO GIÁ</div>'
     +'<table cellspacing="0" cellpadding="2">'
     +'<tr><td class="lbl">Họ tên</td><td class="val">'+nguoi+'</td></tr>'
-    +(nguoiSdt?'<tr><td class="lbl">SĐT</td><td class="val">'+nguoiSdt+'</td></tr>':'')
     +'<tr><td class="lbl">Khu vực</td><td class="val">'+nguoiKv+'</td></tr>'
+    +(nguoiSdt?'<tr><td class="lbl">SĐT</td><td class="val">'+nguoiSdt+'</td></tr>':'')
     +'</table></td>'
     +'</tr></table>';
 
@@ -3676,7 +3676,7 @@ function xuatExcel(){
 
   h+='<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:14px;border-top:1px solid #eee">'
     +'<tr><td style="padding:10px 14px;color:#aaa;font-size:9pt">Cảm ơn quý khách đã quan tâm sản phẩm Đồng Tâm<br>Mọi thắc mắc xin liên hệ nhân viên tư vấn</td>'
-    +'<td style="text-align:right;padding:10px 14px;color:#C0232A;font-weight:bold">☎ 0819 548 908</td></tr>'
+    +'<td style="text-align:right;padding:10px 14px;color:#C0232A;font-weight:bold">☎ '+(nguoiSdt||'0819 548 908')+'</td></tr>'
     +'</table>';
 
   // Sheet 2: Đại lý Tiến Phát — chỉ hiện khi tài khoản linh
@@ -3702,8 +3702,8 @@ function xuatExcel(){
       +'<div class="sec">NGƯỜI BÁO GIÁ</div>'
       +'<table cellspacing="0" cellpadding="2">'
       +'<tr><td class="lbl">Họ tên</td><td class="val">'+nguoi+'</td></tr>'
-      +(nguoiSdt?'<tr><td class="lbl">SĐT</td><td class="val">'+nguoiSdt+'</td></tr>':'')
       +'<tr><td class="lbl">Khu vực</td><td class="val">'+nguoiKv+'</td></tr>'
+      +(nguoiSdt?'<tr><td class="lbl">SĐT</td><td class="val">'+nguoiSdt+'</td></tr>':'')
       +'</table></td>'
       +'</tr></table>';
 
