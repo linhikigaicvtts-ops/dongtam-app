@@ -1547,13 +1547,6 @@ function _thucHienChiaSe(urls, ma, tenSP){
     urls.slice(0,5).forEach(function(u){ window.open(convertImgUrl(u),'_blank'); });
     showToast('📷 Đã mở '+Math.min(urls.length,5)+' ảnh ở tab mới — bấm giữ ảnh để lưu, rồi gửi qua Zalo');
   }
-  function forcePaint(){
-    // Fix blank screen sau khi trở về từ share sheet
-    requestAnimationFrame(function(){
-      document.body.style.opacity='0.99';
-      requestAnimationFrame(function(){ document.body.style.opacity=''; });
-    });
-  }
   if(!(navigator.share && navigator.canShare)){ moTabDuPhong(); return; }
   showToast('⏳ Đang chuẩn bị ảnh...');
   Promise.all(urls.map(function(u){
@@ -1566,11 +1559,11 @@ function _thucHienChiaSe(urls, ma, tenSP){
       return new File([b],(ma||'anh')+'_'+(i+1)+'.jpg',{type:b.type||'image/jpeg'});
     });
     if(navigator.canShare({files:files})){
-      return navigator.share({files:files,title:tenSP||ma,text:tenSP||ma}).then(forcePaint);
+      return navigator.share({files:files,title:tenSP||ma,text:tenSP||ma}).then(forcePaintStrong);
     }
     throw new Error('canShare false');
   }).catch(function(err){
-    forcePaint();
+    forcePaintStrong();
     if(err&&err.name==='AbortError') return;
     console.log('Web Share thất bại, dùng tab dự phòng:',err);
     moTabDuPhong();
@@ -2000,14 +1993,28 @@ function doLogout(){
   location.reload();
 }
 
-// Fix blank screen sau khi trở về từ share sheet hoặc bfcache
+// Fix blank screen sau khi trở về từ share sheet hoặc bfcache.
+// Truoc day chi "nhap nhay" opacity 1 lan duy nhat -> khong du manh tren
+// nhieu may Android/iOS (nguoi dung phai thoat/vao lai 2 lan moi het trang).
+// Gio: force reflow + nudge scroll + lap lai nhieu lan theo do tre tang dan,
+// vi mot so thiet bi can vai trieu-giay + nhieu lan "kick" moi thuc su repaint.
+function forcePaintStrong(){
+  [0, 150, 400, 900].forEach(function(delay){
+    setTimeout(function(){
+      void document.body.offsetHeight; // force reflow
+      document.body.style.opacity = '0.9999';
+      requestAnimationFrame(function(){
+        document.body.style.opacity = '';
+        var sc = document.scrollingElement || document.body;
+        var y = sc.scrollTop;
+        sc.scrollTop = y + 1;
+        sc.scrollTop = y;
+      });
+    }, delay);
+  });
+}
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible'){
-    requestAnimationFrame(function(){
-      document.body.style.opacity='0.99';
-      requestAnimationFrame(function(){ document.body.style.opacity=''; });
-    });
-  }
+  if(document.visibilityState==='visible') forcePaintStrong();
 });
 window.addEventListener('pageshow',function(e){
   if(e.persisted) window.location.reload();
