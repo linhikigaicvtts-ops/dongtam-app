@@ -1,0 +1,15 @@
+{
+  "id": "phong-khach-1",
+  "name": "Phòng khách mẫu 1",
+  "image": "assets/room-templates/phong-khach-1.svg",
+  "width": 900,
+  "height": 600,
+  "zones": [
+    {
+      "name": "san",
+      "label": "Sàn",
+      "points": [[300,320],[600,320],[820,580],[80,580]],
+      "tileRepeat": [5, 3]
+    }
+  ]
+}

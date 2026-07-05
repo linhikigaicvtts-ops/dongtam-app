@@ -519,6 +519,49 @@
     <button id="ai-btn-send">➤</button>
   </div>
 </div>
+
+<!-- ===== XEM THU SKU TAI MAU (canvas, client-side) ===== -->
+<button id="rp-fab" title="Xem thử mẫu tại nhà">🏠</button>
+<div id="rp-modal">
+  <div id="rp-box">
+    <div id="rp-hdr">
+      <span style="font-size:20px">🏠</span>
+      <div style="flex:1">
+        <div id="rp-hdr-ttl">Xem thử SKU tại mẫu nhà</div>
+        <div id="rp-hdr-sub">Chọn mẫu phòng/mái → chọn sản phẩm</div>
+      </div>
+      <button id="rp-close" title="Đóng">×</button>
+    </div>
+    <div id="rp-body">
+      <div id="rp-step-tpl" class="rp-step on">
+        <p class="rp-step-title">1. Chọn mẫu phòng/mái</p>
+        <div id="rp-tpl-list" class="rp-grid"></div>
+      </div>
+      <div id="rp-step-zone" class="rp-step">
+        <p class="rp-step-title">2. Chọn vùng cần lắp</p>
+        <div id="rp-zone-list" class="rp-chiprow"></div>
+      </div>
+      <div id="rp-step-sku" class="rp-step">
+        <p class="rp-step-title">3. Chọn sản phẩm</p>
+        <input id="rp-sku-search" type="text" placeholder="🔎 Tìm mã sản phẩm..." />
+        <div id="rp-sku-list" class="rp-grid"></div>
+      </div>
+      <div id="rp-step-canvas" class="rp-step">
+        <p class="rp-step-title">4. Kết quả xem thử</p>
+        <div id="rp-canvas-wrap">
+          <canvas id="rp-canvas"></canvas>
+        </div>
+        <p id="rp-canvas-note"></p>
+        <div id="rp-actions">
+          <button id="rp-change-tpl" class="rp-btn-outline">🔄 Đổi mẫu khác</button>
+          <button id="rp-change-sku" class="rp-btn-outline">🔄 Đổi sản phẩm khác</button>
+          <button id="rp-download" class="rp-btn-solid">📥 Tải ảnh xem thử</button>
+          <button id="rp-zalo" class="rp-btn-zalo">💬 Chia sẻ Zalo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </div><!-- end app-content -->
 
 <!-- ===== POPUP 7 ĐIỀU KIỆN CT3 ===== -->

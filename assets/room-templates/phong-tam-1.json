@@ -1,0 +1,21 @@
+{
+  "id": "phong-tam-1",
+  "name": "Phòng tắm mẫu 1",
+  "image": "assets/room-templates/phong-tam-1.svg",
+  "width": 900,
+  "height": 600,
+  "zones": [
+    {
+      "name": "san",
+      "label": "Sàn",
+      "points": [[350,340],[560,340],[720,560],[190,560]],
+      "tileRepeat": [4, 2]
+    },
+    {
+      "name": "tuong",
+      "label": "Tường",
+      "points": [[300,80],[610,80],[610,330],[300,330]],
+      "tileRepeat": [4, 3]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#EFEAE3"/>
+  <polygon points="0,0 900,0 600,320 300,320" fill="#F5F1EC"/>
+  <polygon points="0,0 0,580 80,580 300,320 300,0" fill="#E3DDD3"/>
+  <polygon points="900,0 900,580 820,580 600,320 600,0" fill="#DED7CC"/>
+  <polygon points="300,320 600,320 820,580 80,580" fill="#C9B896" stroke="#8a7a5c" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="450" y="450" font-family="Arial" font-size="20" fill="#6b5d42" text-anchor="middle">VÙNG SÀN (zone: san)</text>
+  <text x="450" y="30" font-family="Arial" font-size="18" fill="#a89b86" text-anchor="middle">ẢNH MẪU PLACEHOLDER — Phòng khách 1 — thay bằng ảnh thật</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#E8F0F2"/>
+  <polygon points="150,40 750,40 720,330 300,330" fill="#F2F8FA"/>
+  <polygon points="0,0 0,560 190,560 350,340 300,330 150,40 0,0" fill="#D9E5E8"/>
+  <polygon points="900,0 900,560 720,560 560,340 610,330 750,40 900,0" fill="#CFDFE3"/>
+  <polygon points="300,80 610,80 610,330 300,330" fill="#F7EFD8" stroke="#c9a95e" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="455" y="205" font-family="Arial" font-size="18" fill="#8a7226" text-anchor="middle">VÙNG TƯỜNG (zone: tuong)</text>
+  <polygon points="350,340 560,340 720,560 190,560" fill="#C9B896" stroke="#8a7a5c" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="455" y="470" font-family="Arial" font-size="18" fill="#6b5d42" text-anchor="middle">VÙNG SÀN (zone: san)</text>
+  <text x="450" y="580" font-family="Arial" font-size="16" fill="#7b9297" text-anchor="middle">ẢNH MẪU PLACEHOLDER — Phòng tắm 1 — thay bằng ảnh thật</text>
+</svg>

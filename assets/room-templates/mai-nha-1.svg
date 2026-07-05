@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#BFE0F5"/>
+  <rect y="380" width="900" height="220" fill="#7FA05C"/>
+  <polygon points="20,150 560,40 900,140 900,420 20,420" fill="#B0AFA9"/>
+  <polygon points="60,120 520,60 560,300 80,340" fill="#9C3B32" stroke="#5c211b" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="300" y="210" font-family="Arial" font-size="18" fill="#f0e4e0" text-anchor="middle">VÙNG MÁI (zone: mai)</text>
+  <text x="450" y="580" font-family="Arial" font-size="16" fill="#3a5c3a" text-anchor="middle">ẢNH MẪU PLACEHOLDER — Mái nhà 1 — thay bằng ảnh thật</text>
+</svg>

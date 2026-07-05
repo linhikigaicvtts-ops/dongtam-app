@@ -1,0 +1,15 @@
+{
+  "id": "mai-nha-1",
+  "name": "Mái nhà mẫu 1",
+  "image": "assets/room-templates/mai-nha-1.svg",
+  "width": 900,
+  "height": 600,
+  "zones": [
+    {
+      "name": "mai",
+      "label": "Mái",
+      "points": [[60,120],[520,60],[560,300],[80,340]],
+      "tileRepeat": [6, 4]
+    }
+  ]
+}

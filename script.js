@@ -4414,3 +4414,284 @@ function ct3BadgeHtml(ma){
   if(document.readyState!=='loading') setTimeout(init,250);
   else document.addEventListener('DOMContentLoaded',function(){ setTimeout(init,250); });
 })();
+
+
+// ===== XEM THU SKU TAI MAU NHA (Canvas 2D thuan JS, khong AI, khong goi API ngoai) =====
+var rpTemplates = [];
+var rpCurTpl = null;
+var rpCurZone = null;
+var rpCurSku = null;
+
+function rpLoadTemplates(){
+  if(rpTemplates.length) return Promise.resolve(rpTemplates);
+  return fetch('assets/room-templates/index.json')
+    .then(function(r){ return r.json(); })
+    .then(function(paths){
+      return Promise.all(paths.map(function(p){ return fetch(p).then(function(r){ return r.json(); }); }));
+    })
+    .then(function(list){ rpTemplates = list; return list; })
+    .catch(function(){ rpTemplates = []; return []; });
+}
+
+function rpOpen(){
+  document.getElementById('rp-modal').classList.add('open');
+  rpShowStep('tpl');
+  rpLoadTemplates().then(rpRenderTplList);
+}
+function rpClose(){
+  document.getElementById('rp-modal').classList.remove('open');
+}
+function rpShowStep(name){
+  document.querySelectorAll('.rp-step').forEach(function(el){ el.classList.remove('on'); });
+  var el = document.getElementById('rp-step-' + name);
+  if(el) el.classList.add('on');
+}
+
+function rpRenderTplList(){
+  var el = document.getElementById('rp-tpl-list');
+  if(!el) return;
+  el.innerHTML = '';
+  if(!rpTemplates.length){
+    el.innerHTML = '<p style="font-size:12px;color:var(--t2)">Chưa có ảnh mẫu, vui lòng thêm vào assets/room-templates/.</p>';
+    return;
+  }
+  rpTemplates.forEach(function(t){
+    var card = document.createElement('div');
+    card.className = 'rp-tpl-card';
+    card.innerHTML = '<img src="' + t.image + '" onerror="this.style.display=\'none\'">'
+      + '<div class="rp-cap">' + (t.name || t.id) + '</div>';
+    card.addEventListener('click', function(){ rpSelectTemplate(t); });
+    el.appendChild(card);
+  });
+}
+
+function rpSelectTemplate(t){
+  rpCurTpl = t;
+  rpCurZone = null;
+  if(!t.zones || !t.zones.length) return;
+  if(t.zones.length === 1){
+    rpCurZone = t.zones[0];
+    rpShowStep('sku');
+    rpRenderSkuList();
+  } else {
+    rpRenderZoneList();
+    rpShowStep('zone');
+  }
+}
+
+function rpRenderZoneList(){
+  var el = document.getElementById('rp-zone-list');
+  el.innerHTML = '';
+  rpCurTpl.zones.forEach(function(z){
+    var b = document.createElement('button');
+    b.className = 'rp-zone-chip';
+    b.textContent = z.label || z.name;
+    b.addEventListener('click', function(){
+      rpCurZone = z;
+      document.querySelectorAll('.rp-zone-chip').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      setTimeout(function(){ rpShowStep('sku'); rpRenderSkuList(); }, 150);
+    });
+    el.appendChild(b);
+  });
+}
+
+function rpRenderSkuList(filterText){
+  var el = document.getElementById('rp-sku-list');
+  if(!el) return;
+  el.innerHTML = '';
+  if(typeof DATA === 'undefined' || !DATA.length) return;
+  var norm = filterText ? chatNorm(filterText) : '';
+  var list = DATA.filter(function(p){
+    if(!norm) return true;
+    return chatNorm(p.ma).indexOf(norm) >= 0;
+  }).slice(0, 60);
+  list.forEach(function(p){
+    var img = (typeof imgStore !== 'undefined' && imgStore[p.ma]) ? imgStore[p.ma] : '';
+    var card = document.createElement('div');
+    card.className = 'rp-sku-card';
+    card.innerHTML = (img
+        ? '<img src="' + convertImgUrl(img) + '" onerror="this.style.display=\'none\'">'
+        : '<div style="height:84px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:24px">🧱</div>')
+      + '<div class="rp-cap">' + p.ma + '</div>';
+    card.addEventListener('click', function(){ rpSelectSku(p); });
+    el.appendChild(card);
+  });
+}
+
+function rpSelectSku(p){
+  rpCurSku = p;
+  rpShowStep('canvas');
+  rpRenderCanvas();
+}
+
+// ---- Warp phối cảnh bằng Canvas 2D (chia quad thanh luoi tam giac, affine tung tam giac) ----
+function rpLerp(a, b, t){ return a + (b - a) * t; }
+function rpBilerp(quad, u, v){
+  var top = { x: rpLerp(quad[0][0], quad[1][0], u), y: rpLerp(quad[0][1], quad[1][1], u) };
+  var bot = { x: rpLerp(quad[3][0], quad[2][0], u), y: rpLerp(quad[3][1], quad[2][1], u) };
+  return { x: rpLerp(top.x, bot.x, v), y: rpLerp(top.y, bot.y, v) };
+}
+function rpDet3(m){
+  return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+       - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+       + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+}
+function rpSolve3x3(M, r){
+  var D = rpDet3(M);
+  if(Math.abs(D) < 1e-9) return null;
+  function replaceCol(col, rr){
+    var N = [M[0].slice(), M[1].slice(), M[2].slice()];
+    for(var i = 0; i < 3; i++) N[i][col] = rr[i];
+    return N;
+  }
+  return [rpDet3(replaceCol(0, r)) / D, rpDet3(replaceCol(1, r)) / D, rpDet3(replaceCol(2, r)) / D];
+}
+function rpComputeAffine(srcTri, dstTri){
+  var M = [[srcTri[0].x, srcTri[0].y, 1], [srcTri[1].x, srcTri[1].y, 1], [srcTri[2].x, srcTri[2].y, 1]];
+  var ru = [dstTri[0].x, dstTri[1].x, dstTri[2].x];
+  var rv = [dstTri[0].y, dstTri[1].y, dstTri[2].y];
+  var s1 = rpSolve3x3(M, ru), s2 = rpSolve3x3(M, rv);
+  if(!s1 || !s2) return null;
+  return { a: s1[0], b: s2[0], c: s1[1], d: s2[1], e: s1[2], f: s2[2] };
+}
+function rpDrawTri(ctx, img, srcTri, dstTri){
+  var m = rpComputeAffine(srcTri, dstTri);
+  if(!m) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(dstTri[0].x, dstTri[0].y);
+  ctx.lineTo(dstTri[1].x, dstTri[1].y);
+  ctx.lineTo(dstTri[2].x, dstTri[2].y);
+  ctx.closePath();
+  ctx.clip();
+  ctx.transform(m.a, m.b, m.c, m.d, m.e, m.f);
+  ctx.drawImage(img, 0, 0);
+  ctx.restore();
+}
+function rpWarpQuad(ctx, img, srcQuadPts, dstQuadPts, grid){
+  grid = grid || 8;
+  for(var j = 0; j < grid; j++){
+    for(var i = 0; i < grid; i++){
+      var u0 = i / grid, u1 = (i + 1) / grid, v0 = j / grid, v1 = (j + 1) / grid;
+      var s00 = rpBilerp(srcQuadPts, u0, v0), s10 = rpBilerp(srcQuadPts, u1, v0);
+      var s11 = rpBilerp(srcQuadPts, u1, v1), s01 = rpBilerp(srcQuadPts, u0, v1);
+      var d00 = rpBilerp(dstQuadPts, u0, v0), d10 = rpBilerp(dstQuadPts, u1, v0);
+      var d11 = rpBilerp(dstQuadPts, u1, v1), d01 = rpBilerp(dstQuadPts, u0, v1);
+      rpDrawTri(ctx, img, [s00, s10, s11], [d00, d10, d11]);
+      rpDrawTri(ctx, img, [s00, s11, s01], [d00, d11, d01]);
+    }
+  }
+}
+function rpBuildTiledTexture(img, repX, repY){
+  var tw = img.naturalWidth || img.width || 300, th = img.naturalHeight || img.height || 300;
+  repX = Math.max(1, repX || 1); repY = Math.max(1, repY || 1);
+  var c = document.createElement('canvas');
+  c.width = tw * repX; c.height = th * repY;
+  var cx = c.getContext('2d');
+  for(var j = 0; j < repY; j++){ for(var i = 0; i < repX; i++){ cx.drawImage(img, i * tw, j * th, tw, th); } }
+  return c;
+}
+function rpLoadImage(url){
+  return new Promise(function(resolve, reject){
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function(){ resolve(img); };
+    img.onerror = function(){ reject(new Error('load fail: ' + url)); };
+    img.src = url;
+  });
+}
+
+var rpRenderGen = 0;
+function rpRenderCanvas(){
+  if(!rpCurTpl || !rpCurZone || !rpCurSku) return;
+  var myGen = ++rpRenderGen; // huy ket qua cua lan goi truoc neu da co lan moi hon
+  var canvas = document.getElementById('rp-canvas');
+  var note = document.getElementById('rp-canvas-note');
+  note.textContent = '⏳ Đang dựng ảnh xem thử...';
+  canvas.width = rpCurTpl.width || 900;
+  canvas.height = rpCurTpl.height || 600;
+  var ctx = canvas.getContext('2d');
+
+  var skuMa = rpCurSku.ma;
+  var skuUrlRaw = (typeof imgStore !== 'undefined' && imgStore[skuMa]) ? imgStore[skuMa] : null;
+  if(!skuUrlRaw){ note.textContent = 'Sản phẩm này chưa có ảnh, không thể xem thử.'; return; }
+  var skuUrl = convertImgUrl(skuUrlRaw);
+  var tplForRender = rpCurTpl, zoneForRender = rpCurZone;
+
+  Promise.all([rpLoadImage(tplForRender.image), rpLoadImage(skuUrl)])
+    .then(function(imgs){
+      if(myGen !== rpRenderGen) return; // co lan render moi hon, bo qua ket qua cu
+      var bgImg = imgs[0], skuImg = imgs[1];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+      var rep = zoneForRender.tileRepeat || [4, 4];
+      var tex = rpBuildTiledTexture(skuImg, rep[0], rep[1]);
+      var srcQuad = [[0, 0], [tex.width, 0], [tex.width, tex.height], [0, tex.height]];
+      rpWarpQuad(ctx, tex, srcQuad, zoneForRender.points, 10);
+      note.textContent = 'Mẫu: ' + (tplForRender.name || tplForRender.id) + ' · SP: ' + skuMa;
+    })
+    .catch(function(){
+      if(myGen !== rpRenderGen) return;
+      note.textContent = '❌ Không tải được ảnh (mạng hoặc nguồn ảnh lỗi). Thử lại hoặc chọn SKU khác.';
+    });
+}
+
+function rpDownload(){
+  var canvas = document.getElementById('rp-canvas');
+  try{
+    var url = canvas.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'xem-thu-' + (rpCurTpl ? rpCurTpl.id : 'mau') + '-' + (rpCurSku ? rpCurSku.ma : 'sp') + '.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }catch(e){
+    if(typeof showToast === 'function') showToast('❌ Không tải được ảnh do giới hạn nguồn ảnh (CORS). Vui lòng chụp màn hình để lưu.');
+    else alert('Không tải được ảnh do giới hạn nguồn ảnh (CORS). Vui lòng chụp màn hình để lưu.');
+  }
+}
+
+function rpShareZalo(){
+  var canvas = document.getElementById('rp-canvas');
+  try{
+    canvas.toBlob(function(blob){
+      if(!blob){ rpDownload(); return; }
+      var file = new File([blob], 'xem-thu-dong-tam.png', { type: 'image/png' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        navigator.share({ files: [file], title: 'Xem thử sản phẩm Đồng Tâm' }).catch(function(){});
+      } else {
+        rpDownload();
+        if(typeof showToast === 'function') showToast('📥 Đã lưu ảnh. Mở Zalo và gửi ảnh từ thư viện nhé!');
+        else alert('Đã lưu ảnh. Mở Zalo và gửi ảnh từ thư viện nhé!');
+      }
+    }, 'image/png');
+  }catch(e){
+    if(typeof showToast === 'function') showToast('❌ Không chia sẻ được do giới hạn nguồn ảnh (CORS).');
+    else alert('Không chia sẻ được do giới hạn nguồn ảnh (CORS).');
+  }
+}
+
+(function(){
+  var fab = document.getElementById('rp-fab');
+  if(!fab) return;
+  fab.addEventListener('click', rpOpen);
+  document.getElementById('rp-close').addEventListener('click', rpClose);
+  document.getElementById('rp-modal').addEventListener('click', function(e){
+    if(e.target.id === 'rp-modal') rpClose();
+  });
+  document.getElementById('rp-change-tpl').addEventListener('click', function(){
+    rpCurTpl = null; rpCurZone = null; rpCurSku = null;
+    rpShowStep('tpl'); rpRenderTplList();
+  });
+  document.getElementById('rp-change-sku').addEventListener('click', function(){
+    rpCurSku = null;
+    rpShowStep('sku'); rpRenderSkuList();
+  });
+  document.getElementById('rp-sku-search').addEventListener('input', function(e){
+    rpRenderSkuList(e.target.value);
+  });
+  document.getElementById('rp-download').addEventListener('click', rpDownload);
+  document.getElementById('rp-zalo').addEventListener('click', rpShareZalo);
+})();
