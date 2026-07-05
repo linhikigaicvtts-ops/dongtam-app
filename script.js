@@ -3939,71 +3939,95 @@ function xuatZalo(){
   showZaloChat(msg);
 }
 
-// ===== AI CHAT AGENT =====
-var AI_SYSTEM_PROMPT = 'Bạn là AI tư vấn của Đồng Tâm KV23 — Lê Chí Linh (0819 548 908).\n'
-  + 'Hỗ trợ nhân viên kinh doanh và khách hàng về sản phẩm gạch, ngói, keo Đồng Tâm.\n\n'
-  + 'SẢN PHẨM VÀ GIÁ THAM KHẢO (tháng 07/2026):\n'
-  + 'Gạch Porcelain:\n'
-  + '- 100x100: NK 428.000-572.000đ/m², GH cao hơn ~4%\n'
-  + '- 60x120:  NK 490.000-603.000đ/m²\n'
-  + '- 80x80:   NK 320.000-450.000đ/m²\n'
-  + '- 60x60:   NK 280.000-380.000đ/m²\n'
-  + '- 40x80:   NK 250.000-320.000đ/m²\n'
-  + 'Gạch Ceramic:\n'
-  + '- 30x60:   NK 195.000-255.000đ/m²\n'
-  + '- 40x40:   NK 170.000-220.000đ/m²\n'
-  + '- 20x80:   NK 180.000-240.000đ/m²\n'
-  + 'Keo GECKO:\n'
-  + '- < 50 bao: NK 46.900-176.900đ/bao\n'
-  + '- ≥ 50 bao: giảm thêm ~5%\n'
-  + 'Ngói tráng men: 21.800-280.800đ/viên\n\n'
-  + 'CHƯƠNG TRÌNH THÁNG 07/2026:\n'
-  + '- CT1 Sale tháng: nhiều mã đang giảm giá (xem trong app)\n'
-  + '- CT2 Xả kho: nhiều mã thanh lý\n'
-  + '- CT150 (01/06-31/07): nhận kho giảm thêm 5% trên giá Sale\n\n'
-  + 'QUY ĐỊNH GIAO DỊCH:\n'
-  + '- Giá NK (nhận kho): khách tự đến kho nhận\n'
-  + '- Giá GH (giao hàng): giao tận nơi tại TP.HCM\n'
-  + '- CT150: chỉ áp dụng khi nhận tại kho\n'
-  + '- Đơn vị: đ/m² (gạch), đ/viên (ngói), đ/bao (keo)\n\n'
-  + 'TÍNH SỐ LƯỢNG GẠCH:\n'
-  + '- Công thức: Diện tích × 1.1 (hao hụt 10%) ÷ m²/thùng\n'
-  + '- 60x60 = 1.44 m²/thùng | 80x80 = 1.92 m²/thùng\n'
-  + '- 60x120 = 1.44 m²/thùng | 100x100 = 2.00 m²/thùng\n'
-  + '- 30x60 = 1.08 m²/thùng | 40x80 = 1.28 m²/thùng\n\n'
-  + 'HƯỚNG TƯ VẤN:\n'
-  + '- Phòng khách: Porcelain 60x60, 80x80 hoặc 60x120\n'
-  + '- Phòng tắm/bếp: Ceramic 30x60 hoặc 40x80 chống trượt\n'
-  + '- Không gian rộng: Porcelain 100x100\n'
-  + '- Sân vườn/ngoài trời: loại chống trượt\n\n'
-  + 'PHONG CÁCH TRẢ LỜI:\n'
-  + '- Ngắn gọn, có số liệu cụ thể, thực tế\n'
-  + '- Với nhân viên: thêm thông tin margin, CT150, gợi ý upsell\n'
-  + '- Với khách: tư vấn phù hợp ngân sách và không gian\n'
-  + '- Luôn gợi ý liên hệ Linh 0819 548 908 để có giá chính xác nhất\n'
-  + '- Trả lời bằng tiếng Việt, tối đa 200 từ';
-
-var AI_CHIPS = [
-  {label:'🧱 Giá 60x120',          msg:'Báo giá gạch Porcelain 60x120 nhận kho tháng 7'},
-  {label:'📐 Tính m² → thùng',      msg:'Phòng khách 30m² dùng gạch 80x80 cần mấy thùng?'},
-  {label:'🎁 CT150 tháng 7',        msg:'Chương trình CT150 tháng 7 là gì, điều kiện thế nào?'},
-  {label:'⚖️ Porcelain vs Ceramic', msg:'Khác nhau giữa gạch Porcelain và Ceramic, nên chọn loại nào?'},
-  {label:'🪣 Giá keo GECKO',        msg:'Báo giá keo dán gạch GECKO mua 100 bao giá bao nhiêu?'},
-  {label:'🔥 SP đang Sale',         msg:'Có những loại gạch nào đang sale tháng 7 không?'}
+// ===== HO TRO KHACH HANG (client-side, khong goi API tra phi) =====
+var chatbotData = [];
+var AI_QUICK_REPLIES = [
+  {label:'💰 Chính sách thanh toán', intent:'thanh_toan'},
+  {label:'🔄 Đổi/trả hàng',          intent:'doi_tra'},
+  {label:'📦 Tồn kho',               intent:'ton_kho'},
+  {label:'🎯 Chương trình đang áp dụng', intent:'chuong_trinh_km'},
+  {label:'📞 Gặp NVKD',              intent:'lien_he_nvkd'}
 ];
+var AI_DEFAULT_ANSWER = 'Mình chưa tìm được câu trả lời phù hợp, bạn có thể chọn 1 trong các mục bên dưới hoặc liên hệ trực tiếp NVKD.';
 
-var aiChatHistory = [];
-var AI_MAX_HISTORY = 20;
 var aiPanelOpen = false;
-var aiTypingEl = null;
+
+function chatNorm(s){
+  return String(s||'')
+    .toLowerCase()
+    .replace(/đ/g,'d')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function chatLoadData(){
+  fetch('chatbot_data.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){ chatbotData = Array.isArray(data)?data:[]; })
+    .catch(function(){ chatbotData = []; });
+}
+
+// Khớp intent theo số từ khóa xuất hiện nhiều nhất; hòa điểm -> giữ intent
+// xuất hiện trước trong file JSON (đã sắp: chính sách/thanh toán trước, KM sau)
+function chatMatchIntent(text){
+  var norm = chatNorm(text);
+  var best = null, bestScore = 0;
+  chatbotData.forEach(function(it){
+    var score = 0;
+    (it.keywords||[]).forEach(function(k){
+      if(norm.indexOf(chatNorm(k)) >= 0) score++;
+    });
+    if(score > bestScore){ best = it; bestScore = score; }
+  });
+  return best;
+}
+
+// Tìm sản phẩm theo mã SKU (đúng hoặc gần đúng) trong catalog đang có
+function chatFindProduct(text){
+  if(typeof DATA === 'undefined' || !DATA.length) return null;
+  var normTight = chatNorm(text).replace(/\s+/g,'');
+  var found = DATA.find(function(p){ return chatNorm(p.ma).replace(/\s+/g,'') === normTight; });
+  if(found) return found;
+  var normSp = chatNorm(text);
+  found = DATA.find(function(p){
+    var m = chatNorm(p.ma);
+    return m.length >= 5 && normSp.indexOf(m) >= 0;
+  });
+  return found || null;
+}
+
+function chatBuildProductAnswer(p){
+  var lines = ['📦 ' + p.ma + (p.kc?(' · '+p.kc):'')];
+  if(p.le>0) lines.push('Giá lẻ: ' + p.le.toLocaleString('vi-VN') + 'đ/m²');
+  if(typeof laKhachHang !== 'function' || !laKhachHang()){
+    if(p.nhan>0) lines.push('Giá ĐL nhận kho: ' + p.nhan.toLocaleString('vi-VN') + 'đ/m²');
+    if(p.giao>0) lines.push('Giá ĐL đi giao: ' + p.giao.toLocaleString('vi-VN') + 'đ/m²');
+  }
+  try{
+    var tk = (typeof timTonKhoTheoQuyen==='function') ? timTonKhoTheoQuyen(p.ma) : null;
+    if(tk && tk.tong>0){
+      if(typeof laKhachHang==='function' && laKhachHang()){
+        lines.push('Tồn kho: ' + (typeof hienThiTonChoKhach==='function' ? hienThiTonChoKhach(tk.tong, tk.dvt||'thùng', null) : (tk.tong+' '+(tk.dvt||'thùng'))));
+      } else {
+        lines.push('Tồn kho: ' + (typeof fmtThung==='function' ? fmtThung(tk.tong, tk.dvt||'thùng', null) : (tk.tong+' '+(tk.dvt||'thùng'))));
+      }
+    } else {
+      lines.push('Tồn kho: liên hệ NVKD để kiểm tra chính xác.');
+    }
+  }catch(e){}
+  lines.push('Xem chi tiết đầy đủ (ảnh, quy cách...) tại tab 🔲 Gạch, gõ mã ' + p.ma + '.');
+  return lines.join('\n');
+}
 
 function toggleAIChat(){
   aiPanelOpen = !aiPanelOpen;
   var panel = document.getElementById('ai-panel');
   if(aiPanelOpen){
     panel.classList.add('open');
-    if(aiChatHistory.length === 0) aiShowWelcome();
-    setTimeout(function(){ document.getElementById('ai-inp').focus(); }, 200);
+    if(!chatbotData.length) chatLoadData();
+    if(!document.getElementById('ai-msgs').children.length) aiShowWelcome();
+    setTimeout(function(){ var i=document.getElementById('ai-inp'); if(i) i.focus(); }, 200);
   } else {
     panel.classList.remove('open');
   }
@@ -4011,12 +4035,12 @@ function toggleAIChat(){
 
 function aiShowWelcome(){
   aiAppendBubble('bot',
-    'Xin chào! Tôi là AI tư vấn Đồng Tâm KV23. 👋\n'
-    + 'Tôi có thể giúp:\n'
-    + '• Báo giá gạch, ngói, keo\n'
-    + '• Tính số lượng thùng cần mua\n'
-    + '• Tư vấn chọn sản phẩm phù hợp\n\n'
-    + 'Bạn cần hỏi gì?'
+    'Xin chào! Mình là trợ lý hỗ trợ Đồng Tâm KV23. 👋\n'
+    + 'Mình có thể giúp:\n'
+    + '• Tra thông tin sản phẩm theo mã SKU\n'
+    + '• Chính sách thanh toán, đổi/trả hàng\n'
+    + '• Chương trình đang áp dụng, tồn kho\n\n'
+    + 'Bạn cần hỏi gì, hoặc chọn nhanh bên dưới 👇'
   );
 }
 
@@ -4033,40 +4057,6 @@ function aiAppendBubble(role, text){
   return wrap;
 }
 
-function aiShowTyping(){
-  var msgs = document.getElementById('ai-msgs');
-  var wrap = document.createElement('div');
-  wrap.className = 'ai-bw b';
-  var dots = document.createElement('div');
-  dots.className = 'ai-dot-wrap';
-  for(var i=0;i<3;i++){
-    var d = document.createElement('span');
-    d.className = 'ai-dot';
-    dots.appendChild(d);
-  }
-  wrap.appendChild(dots);
-  msgs.appendChild(wrap);
-  msgs.scrollTop = msgs.scrollHeight;
-  aiTypingEl = wrap;
-}
-
-function aiHideTyping(){
-  if(aiTypingEl){ aiTypingEl.remove(); aiTypingEl = null; }
-}
-
-function aiGetApiKey(){
-  return localStorage.getItem('ai_api_key') || '';
-}
-
-function aiCheckApiKey(){
-  var bar = document.getElementById('ai-apikey-bar');
-  if(!aiGetApiKey()){
-    bar.style.display = 'flex';
-  } else {
-    bar.style.display = 'none';
-  }
-}
-
 function aiSendMessage(){
   var inp = document.getElementById('ai-inp');
   var text = inp.value.trim();
@@ -4075,105 +4065,49 @@ function aiSendMessage(){
   aiSend(text);
 }
 
-function aiSendChip(msg){
-  aiSend(msg);
+function aiSendQuickReply(intentId){
+  var qr = AI_QUICK_REPLIES.find(function(q){ return q.intent === intentId; });
+  if(qr) aiAppendBubble('user', qr.label);
+  var it = chatbotData.find(function(x){ return x.id === intentId; });
+  aiAppendBubble('bot', it ? it.answer : AI_DEFAULT_ANSWER);
 }
 
 function aiSend(text){
   if(!text.trim()) return;
-  // Hiện bubble user
   aiAppendBubble('user', text);
-  // Thêm vào history
-  aiChatHistory.push({role:'user', content:text});
-  if(aiChatHistory.length > AI_MAX_HISTORY){
-    aiChatHistory = aiChatHistory.slice(-AI_MAX_HISTORY);
-  }
-  // Ẩn chips sau lần nhắn đầu
-  var chips = document.getElementById('ai-chips');
-  if(chips) chips.style.display = 'none';
-  // Check API key
-  var apiKey = aiGetApiKey();
-  if(!apiKey){
-    aiCheckApiKey();
-    aiAppendBubble('bot',
-      '⚠️ Chưa cấu hình API Key.\n'
-      + 'Vui lòng nhập API Key Anthropic vào ô phía trên để sử dụng AI.'
-    );
+  // Thứ tự ưu tiên: (1) khớp SKU sản phẩm -> (2) khớp intent -> (3) mặc định
+  var product = chatFindProduct(text);
+  if(product){
+    aiAppendBubble('bot', chatBuildProductAnswer(product));
     return;
   }
-  // Gọi API
-  aiShowTyping();
-  aiCallAPI(apiKey);
-}
-
-function aiCallAPI(apiKey){
-  fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      system: AI_SYSTEM_PROMPT,
-      messages: aiChatHistory
-    })
-  })
-  .then(function(res){ return res.json(); })
-  .then(function(data){
-    aiHideTyping();
-    if(data && data.content && data.content[0] && data.content[0].text){
-      var reply = data.content[0].text;
-      aiChatHistory.push({role:'assistant', content:reply});
-      if(aiChatHistory.length > AI_MAX_HISTORY){
-        aiChatHistory = aiChatHistory.slice(-AI_MAX_HISTORY);
-      }
-      aiAppendBubble('bot', reply);
-    } else if(data && data.error){
-      aiAppendBubble('bot', '❌ Lỗi: ' + (data.error.message || JSON.stringify(data.error)));
-    } else {
-      aiAppendBubble('bot', '❌ Không nhận được phản hồi. Thử lại sau.');
-    }
-  })
-  .catch(function(err){
-    aiHideTyping();
-    aiAppendBubble('bot', '❌ Lỗi kết nối: ' + err.message);
-  });
+  var intent = chatMatchIntent(text);
+  aiAppendBubble('bot', intent ? intent.answer : AI_DEFAULT_ANSWER);
 }
 
 function aiBuildChips(){
   var container = document.getElementById('ai-chips');
   if(!container) return;
   container.innerHTML = '';
-  AI_CHIPS.forEach(function(c){
+  AI_QUICK_REPLIES.forEach(function(c){
     var btn = document.createElement('button');
     btn.className = 'ai-chip';
     btn.textContent = c.label;
-    btn.addEventListener('click', function(){ aiSendChip(c.msg); });
+    btn.addEventListener('click', function(){ aiSendQuickReply(c.intent); });
     container.appendChild(btn);
   });
 }
 
-// Init AI widget
+// Init widget hỗ trợ khách hàng
 (function(){
+  chatLoadData();
   document.getElementById('ai-fab').addEventListener('click', toggleAIChat);
   document.getElementById('ai-x').addEventListener('click', toggleAIChat);
   document.getElementById('ai-btn-send').addEventListener('click', aiSendMessage);
   document.getElementById('ai-inp').addEventListener('keydown', function(e){
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); aiSendMessage(); }
   });
-  document.getElementById('ai-key-save').addEventListener('click', function(){
-    var val = document.getElementById('ai-key-inp').value.trim();
-    if(val){ localStorage.setItem('ai_api_key', val); }
-    aiCheckApiKey();
-    document.getElementById('ai-key-inp').value = '';
-    aiAppendBubble('bot', '✅ API Key đã lưu! Bây giờ bạn có thể hỏi AI.');
-  });
   aiBuildChips();
-  aiCheckApiKey();
 })();
 
 // ===== CT3 SKU LINH HOẠT =====

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "thanh_toan",
+    "keywords": ["thanh toán", "thanh toan", "n+3", "n +3", "cong no", "công nợ", "han tra", "hạn trả", "tra truoc", "trả trước", "cong no toi da", "công nợ tối đa"],
+    "answer": "💰 Điều khoản thanh toán: N+3 (thanh toán trong vòng 3 ngày kể từ ngày trên hóa đơn). Với đơn hàng công nợ vượt hạn hoặc cần điều chỉnh, vui lòng liên hệ trực tiếp NVKD phụ trách để được hỗ trợ cụ thể.\n📞 Gặp NVKD: 0819 548 908"
+  },
+  {
+    "id": "doi_tra",
+    "keywords": ["doi tra", "đổi trả", "doi hang", "đổi hàng", "tra hang", "trả hàng", "hoan tra", "hoàn trả", "bao hanh", "bảo hành", "hang loi", "hàng lỗi", "loi hang", "lỗi sản xuất"],
+    "answer": "🔄 Chính sách đổi/trả hàng áp dụng theo từng trường hợp cụ thể (lỗi sản xuất, sai quy cách, giao sai mã...). Vui lòng liên hệ trực tiếp NVKD phụ trách khu vực kèm hình ảnh/số lô để được hướng dẫn và xử lý nhanh nhất.\n📞 Gặp NVKD: 0819 548 908"
+  },
+  {
+    "id": "ton_kho",
+    "keywords": ["ton kho", "tồn kho", "con hang", "còn hàng", "het hang", "hết hàng", "kiem tra ton", "kiểm tra tồn", "so luong con", "số lượng còn", "hang co san khong", "còn bao nhiêu"],
+    "answer": "📦 Cách tra tồn kho: vào tab 🔲 Gạch (hoặc 🔥 Sale), tìm sản phẩm cần xem → bấm vào sản phẩm → chọn nút 📦 \"Xem tồn kho theo kho/lô\". Hệ thống sẽ hiện số lượng theo từng kho và thời gian giao hàng dự kiến.\nBạn cũng có thể gõ đúng mã sản phẩm ngay tại khung chat này để mình tra nhanh giúp."
+  },
+  {
+    "id": "lien_he_nvkd",
+    "keywords": ["lien he", "liên hệ", "nvkd", "nhan vien kinh doanh", "nhân viên kinh doanh", "gap ai", "gặp ai", "sdt", "số điện thoại", "hotline", "zalo", "ai phu trach", "ai phụ trách"],
+    "answer": "📞 Liên hệ NVKD phụ trách khu vực: Lê Chí Linh – 0819 548 908 (Điện thoại/Zalo). Anh/chị có thể để lại mã sản phẩm và số lượng cần để được báo giá nhanh nhất."
+  },
+  {
+    "id": "hoi_gia",
+    "keywords": ["gia bao nhieu", "giá bao nhiêu", "bao nhieu tien", "bao nhiêu tiền", "bao gia", "báo giá", "gia sao", "giá sao", "gia the nao", "giá thế nào", "gia 1m2", "1m2 gia", "chiet khau", "chiết khấu"],
+    "answer": "Câu hỏi này cần trao đổi trực tiếp với NVKD để có mức giá phù hợp.\n📞 Gặp NVKD: 0819 548 908"
+  },
+  {
+    "id": "chuong_trinh_km",
+    "keywords": ["chuong trinh", "chương trình", "khuyen mai", "khuyến mãi", "sale", "ct1", "ct2", "ct3", "xa kho", "xả kho", "giam gia", "giảm giá", "km dang ap dung", "sku linh hoat", "sku linh hoạt"],
+    "answer": "🎯 Chương trình đang áp dụng:\n🗓️ CT1 – Sale tháng: nhiều mã đang giảm giá\n📦 CT2 – Xả kho: các mã thanh lý\n🎯 CT3 – SKU linh hoạt\nVào tab 🔥 Sale trong app để xem chi tiết từng mã đang áp dụng."
+  }
+]
