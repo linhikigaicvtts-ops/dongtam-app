@@ -2679,6 +2679,8 @@ function onChonKhachHang(){
 
 // ===== TỒN KHO CHI TIẾT THEO KHO + SỐ LÔ =====
 var tonKhoChiTiet={};
+var tonKhoLoaded=false;
+var _tkModalMa=null, _tkModalTen=null;
 var TEN_TIER={nhanh:'🟢 Có hàng ngay',mai:'🟡 Hôm nay chuyển – mai có hàng',cho15:'🔴 Chờ 15 ngày'};
 var TK_CACHE_KEY='dt_tk_v1', TK_CACHE_TTL=30*60*1000;
 function tkLoadingBanner(show){
@@ -2695,9 +2697,11 @@ function fetchTonKhoChiTiet(){
     var cached=JSON.parse(localStorage.getItem(TK_CACHE_KEY)||'{}');
     if(cached.ts && cached.data && (Date.now()-cached.ts)<TK_CACHE_TTL){
       tonKhoChiTiet=cached.data;
+      tonKhoLoaded=true;
       tkLoadingBanner(false);
       if(typeof render==='function') render();
       if(typeof renderSale==='function') renderSale();
+      _refreshTonKhoModalIfOpen();
     }
   }catch(e){}
   // Vẫn fetch GAS để cập nhật mới nhất (chạy nền)
@@ -2710,6 +2714,8 @@ function fetchTonKhoChiTiet(){
       if(typeof render==='function') render();
       if(typeof renderSale==='function') renderSale();
     }
+    tonKhoLoaded=true;
+    _refreshTonKhoModalIfOpen();
     var s=document.getElementById('_tkct_script');
     if(s) s.remove();
   };
@@ -2980,7 +2986,13 @@ function tonKhoBadgeHtml(ma){
   if(tk.tier.cho15>0) parts.push('🔴'+Math.round(tk.tier.cho15).toLocaleString('vi-VN'));
   return '<span style="font-size:10px;color:var(--t2);white-space:nowrap">'+parts.join(' · ')+' '+(tk.dvt||'thùng')+'</span>';
 }
+// Nếu popup tồn kho đang mở đúng mã lúc dữ liệu tải xong -> tự cập nhật lại nội dung
+function _refreshTonKhoModalIfOpen(){
+  var modal=document.getElementById('modal-ton-kho');
+  if(modal && _tkModalMa){ modal.remove(); moTonKho(_tkModalMa, _tkModalTen); }
+}
 function moTonKho(ma, tenSP){
+  _tkModalMa=ma; _tkModalTen=tenSP;
   var tk=timTonKhoTheoQuyen(ma);
   var m2pt=m2PerThungCuaMa(ma);
   var dvt=(tk&&tk.dvt)||'thùng';
@@ -2989,7 +3001,10 @@ function moTonKho(ma, tenSP){
   modal.id='modal-ton-kho';
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
   var body, ghiChu;
-  if(!tk || tk.tong<=0){
+  if(!tonKhoLoaded){
+    body='<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">⏳ Đang tải dữ liệu tồn kho, vui lòng chờ...</p>';
+    ghiChu='';
+  } else if(!tk || tk.tong<=0){
     body='<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">Hết hàng / chưa có dữ liệu tồn kho cho mã này.</p>';
     ghiChu='';
   } else if(khachHang){
@@ -3031,7 +3046,7 @@ function moTonKho(ma, tenSP){
   modal.innerHTML='<div style="background:var(--bg1,#fff);border-radius:14px;max-width:420px;width:100%;max-height:80vh;overflow:auto;padding:16px">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
     +'<p style="font-size:15px;font-weight:700;margin:0">📦 Tồn kho — '+(tenSP||ma)+'</p>'
-    +'<button onclick="document.getElementById(\'modal-ton-kho\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
+    +'<button onclick="_tkModalMa=null;document.getElementById(\'modal-ton-kho\').remove()" style="border:none;background:none;font-size:20px;cursor:pointer;line-height:1">×</button>'
     +'</div>'
     +ghiChu
     +body
