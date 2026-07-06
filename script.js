@@ -92,11 +92,14 @@ function fetchGiaFromSheet(){
               if(giao>0) p.giao=giao;
               if(ns>0)   p.ns=ns;
               if(gs>0)   p.gs=gs;
+              // Tên hóa đơn (dùng khi xuất PDF/Excel để khớp đúng tên trên hóa đơn VAT)
+              if(row.tenHD) p.tenHD=String(row.tenHD).trim();
             } else {
               // Mã MỚI trong Sheet → thêm vào DATA
               DATA.push({
                 ma:ma, kc:String(row.kc||''), cat:String(row.cat||'').toLowerCase(),
                 gio:String(row.gio||''), ten:String(row.ten||ma),
+                tenHD:String(row.tenHD||'').trim(),
                 le:le, nhan:nhan, giao:giao, ns:ns, gs:gs
               });
             }
@@ -2234,7 +2237,7 @@ function addToDon(ma, qty){
   if(exist){ exist.qty = Math.round((exist.qty+qty)*100)/100; }
   else {
     donItems.push({
-      ma:p.ma, ten:p.ten||p.ma, kc:p.kc, cat:p.cat, unit:'m²', loai:'gach',
+      ma:p.ma, ten:p.tenHD||p.ten||p.ma, kc:p.kc, cat:p.cat, unit:'m²', loai:'gach',
       le:p.le||0,
       nhan:p.nhan||0,   // giá nhận kho
       giao:p.giao||0,   // giá đi giao
@@ -3586,7 +3589,7 @@ function xuatExcel(){
     var loaiColor=item.loai==='ngoi'?'#2E7D32':item.loai==='keo'?'#6A1B9A':item.loai==='kinh'?'#0D47A1':'#E65100';
     var loaiBg=item.loai==='ngoi'?'#E8F5E9':item.loai==='keo'?'#F3E5F5':item.loai==='kinh'?'#E3F2FD':'#FFF3E0';
     return {i:i+1,loai:loaiLabel,loaiColor:loaiColor,loaiBg:loaiBg,
-      ma:item.ma,kc:item.kc||'–',unit:item.unit||'m²',qty:item.qty,
+      ma:item.ma,ten:(item.ten&&item.ten!==item.ma)?item.ten:'',kc:item.kc||'–',unit:item.unit||'m²',qty:item.qty,
       thung:thungStr,vien:vienStr,kg:kgStr,
       le:le,thLe:thLe,nhan:nhan,thNhan:thNhan};
   });
@@ -3652,6 +3655,7 @@ function xuatExcel(){
     +'<th class="th" width="3%">#</th>'
     +'<th class="th" width="5%">Loại</th>'
     +'<th class="th" width="14%">Mã SP</th>'
+    +'<th class="th" width="16%">Tên sản phẩm (hóa đơn)</th>'
     +'<th class="th" width="7%">Kích cỡ</th>'
     +'<th class="th" width="8%">Số lượng</th>'
     +'<th class="th" width="9%">Số thùng</th>'
@@ -3669,6 +3673,7 @@ function xuatExcel(){
       +'<td class="td tc"'+ev+'>'+r.i+'</td>'
       +'<td class="td tc" style="background:'+r.loaiBg+';color:'+r.loaiColor+';font-weight:bold;font-size:9pt">'+r.loai+'</td>'
       +'<td class="td bold"'+ev+'>'+r.ma+'</td>'
+      +'<td class="td"'+ev+' style="font-size:9pt">'+(r.ten||'–')+'</td>'
       +'<td class="td tc"'+ev+'>'+r.kc+'</td>'
       +'<td class="td tc"'+ev+'>'+r.qty+' '+r.unit+'</td>'
       +'<td class="td blu"'+ev+'>'+r.thung+'</td>'
@@ -3685,7 +3690,7 @@ function xuatExcel(){
   // Tổng — file gửi khách: KHÔNG hiện lợi nhuận/margin nội bộ
   h+='<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:10px">'
     +'<tr class="tot">'
-    +'<td colspan="9" style="padding:9px 14px;color:#C0232A;font-weight:bold">TỔNG GIÁ TRỊ BÁO GIÁ</td>'
+    +'<td colspan="10" style="padding:9px 14px;color:#C0232A;font-weight:bold">TỔNG GIÁ TRỊ BÁO GIÁ</td>'
     +'<td class="red" style="padding:9px 14px;font-size:12pt">'+tLe.toLocaleString('vi-VN')+' đ</td>'
     +'<td style="padding:9px 8px;color:#1B5E20;font-weight:bold;text-align:right">TỔNG NHẬN KHO</td>'
     +'<td class="nk" style="padding:9px 14px;font-size:11pt">'+tNhan.toLocaleString('vi-VN')+' đ</td>'
@@ -3735,14 +3740,15 @@ function xuatExcel(){
       +'<thead><tr>'
       +'<th class="th" width="4%">#</th>'
       +'<th class="th" width="5%">Loại</th>'
-      +'<th class="th" width="18%">Mã SP</th>'
-      +'<th class="th" width="8%">Kích cỡ</th>'
-      +'<th class="th" width="10%">Số lượng</th>'
-      +'<th class="th" width="11%">Số thùng</th>'
-      +'<th class="th" width="8%">Số viên</th>'
-      +'<th class="th" width="7%">Kg</th>'
-      +'<th class="th" width="14%">Đơn giá ĐL (NK)</th>'
-      +'<th class="th" width="15%">Thành tiền ĐL</th>'
+      +'<th class="th" width="16%">Mã SP</th>'
+      +'<th class="th" width="14%">Tên sản phẩm (hóa đơn)</th>'
+      +'<th class="th" width="7%">Kích cỡ</th>'
+      +'<th class="th" width="9%">Số lượng</th>'
+      +'<th class="th" width="10%">Số thùng</th>'
+      +'<th class="th" width="7%">Số viên</th>'
+      +'<th class="th" width="6%">Kg</th>'
+      +'<th class="th" width="12%">Đơn giá ĐL (NK)</th>'
+      +'<th class="th" width="13%">Thành tiền ĐL</th>'
       +'</tr></thead><tbody>';
 
     rowsData.forEach(function(r){
@@ -3751,6 +3757,7 @@ function xuatExcel(){
         +'<td class="td tc"'+ev+'>'+r.i+'</td>'
         +'<td class="td tc" style="background:'+r.loaiBg+';color:'+r.loaiColor+';font-weight:bold;font-size:9pt">'+r.loai+'</td>'
         +'<td class="td bold"'+ev+'>'+r.ma+'</td>'
+        +'<td class="td"'+ev+' style="font-size:9pt">'+(r.ten||'–')+'</td>'
         +'<td class="td tc"'+ev+'>'+r.kc+'</td>'
         +'<td class="td tc"'+ev+'>'+r.qty+' '+r.unit+'</td>'
         +'<td class="td blu"'+ev+'>'+r.thung+'</td>'
@@ -3764,7 +3771,7 @@ function xuatExcel(){
     h+='</tbody></table>';
     h+='<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:10px">'
       +'<tr class="tot">'
-      +'<td colspan="8" style="padding:9px 14px;color:#1B5E20;font-weight:bold">TỔNG TIỀN ĐẠI LÝ TIẾN PHÁT</td>'
+      +'<td colspan="9" style="padding:9px 14px;color:#1B5E20;font-weight:bold">TỔNG TIỀN ĐẠI LÝ TIẾN PHÁT</td>'
       +'<td style="padding:9px 8px;color:#1B5E20;font-weight:bold;text-align:right;font-size:9pt">Tổng NK:</td>'
       +'<td class="nk" style="padding:9px 14px;font-size:12pt">'+tNhan.toLocaleString('vi-VN')+' đ</td>'
       +'</tr></table>';
@@ -3798,7 +3805,7 @@ function xuatExcelNoiBo(){
     var ln=thLe-thNhan;
     var pct=thLe>0?Math.round(ln/thLe*100)+'%':'-';
     var loaiLabel=item.loai==='ngoi'?'Ngoi':item.loai==='keo'?'Keo':item.loai==='kinh'?'Kinh':'Gach';
-    return {i:i+1,loai:loaiLabel,ma:item.ma,kc:item.kc||'-',unit:item.unit||'m2',qty:item.qty,
+    return {i:i+1,loai:loaiLabel,ma:item.ma,ten:(item.ten&&item.ten!==item.ma)?item.ten:'',kc:item.kc||'-',unit:item.unit||'m2',qty:item.qty,
       le:le,thLe:thLe,nhan:nhan,thNhan:thNhan,ln:ln,pct:pct};
   });
   var tLe=tinhVATvaTongThanhToan(tLeTruocVAT).tong;
@@ -3840,15 +3847,16 @@ function xuatExcelNoiBo(){
     +'<thead><tr>'
     +'<th class="th" width="3%">#</th>'
     +'<th class="th" width="6%">Loai</th>'
-    +'<th class="th" width="16%">Ma SP</th>'
-    +'<th class="th" width="8%">Kich co</th>'
-    +'<th class="th" width="9%">So luong</th>'
-    +'<th class="th" width="11%">Gia le</th>'
-    +'<th class="th" width="12%">T.Tien le</th>'
-    +'<th class="th" width="11%">Gia DL NK</th>'
-    +'<th class="th" width="12%">T.Tien NK</th>'
-    +'<th class="th" width="6%">Margin</th>'
-    +'<th class="th" width="6%">%</th>'
+    +'<th class="th" width="14%">Ma SP</th>'
+    +'<th class="th" width="14%">Ten san pham (hoa don)</th>'
+    +'<th class="th" width="7%">Kich co</th>'
+    +'<th class="th" width="8%">So luong</th>'
+    +'<th class="th" width="10%">Gia le</th>'
+    +'<th class="th" width="11%">T.Tien le</th>'
+    +'<th class="th" width="10%">Gia DL NK</th>'
+    +'<th class="th" width="11%">T.Tien NK</th>'
+    +'<th class="th" width="5%">Margin</th>'
+    +'<th class="th" width="5%">%</th>'
     +'</tr></thead><tbody>';
   rowsData.forEach(function(r){
     var ev=r.i%2===0?' class="ev"':'';
@@ -3856,6 +3864,7 @@ function xuatExcelNoiBo(){
       +'<td class="td tc"'+ev+'>'+r.i+'</td>'
       +'<td class="td tc"'+ev+'>'+r.loai+'</td>'
       +'<td class="td bold"'+ev+'>'+r.ma+'</td>'
+      +'<td class="td"'+ev+' style="font-size:9pt">'+(r.ten||'-')+'</td>'
       +'<td class="td tc"'+ev+'>'+r.kc+'</td>'
       +'<td class="td tc"'+ev+'>'+r.qty+' '+r.unit+'</td>'
       +'<td class="td tr"'+ev+'>'+(r.le>0?r.le.toLocaleString('vi-VN'):'-')+'</td>'
@@ -3870,13 +3879,13 @@ function xuatExcelNoiBo(){
 
   h+='<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:10px">'
     +'<tr class="tot">'
-    +'<td colspan="6" style="padding:9px 14px;color:#C0232A">TONG GIA LE</td>'
+    +'<td colspan="7" style="padding:9px 14px;color:#C0232A">TONG GIA LE</td>'
     +'<td class="red" style="padding:9px 14px;font-size:12pt">'+tLe.toLocaleString('vi-VN')+' d</td>'
     +'<td style="padding:9px 8px;color:#1B5E20;text-align:right">TONG NHAN KHO</td>'
     +'<td class="nk" style="padding:9px 14px;font-size:11pt" colspan="2">'+tNhan.toLocaleString('vi-VN')+' d</td>'
     +'</tr>'
     +'<tr style="background:#F3E5F5">'
-    +'<td colspan="9" class="mg" style="padding:7px 14px">'
+    +'<td colspan="10" class="mg" style="padding:7px 14px">'
     +'Loi nhuan nhan kho: +'+lnNhan.toLocaleString('vi-VN')+'d ('+pN+')</td>'
     +'</tr></table>';
 
@@ -4246,7 +4255,7 @@ function ct3ConfirmDieuKien(){
   if(exist){ exist.qty=Math.round((exist.qty+1)*100)/100; }
   else {
     donItems.push({
-      ma:p.ma, ten:p.ten||p.ma, kc:p.kc, cat:p.cat, unit:'m²', loai:'gach',
+      ma:p.ma, ten:p.tenHD||p.ten||p.ma, kc:p.kc, cat:p.cat, unit:'m²', loai:'gach',
       le:p.le||0,
       nhan:p.nhan||0,
       giao:p.giao||0,
