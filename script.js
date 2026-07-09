@@ -1840,19 +1840,14 @@ function showShareModal(msg){
 // USERS: xác thực qua Apps Script (tab USERS trong Sheet)
 
 var SESSION_KEY = 'dt_sales_auth';
-var SESSION_HOURS = 8; // Tự đăng xuất sau 8 tiếng
+// Phiên đăng nhập KHÔNG tự hết hạn — đăng nhập 1 lần, lần sau mở app vẫn vào thẳng.
+// Chỉ đăng xuất khi người dùng bấm nút Đăng xuất (doLogout).
 
 function checkSession(){
   try{
     var s = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
     if(!s) return false;
-    var obj = JSON.parse(s);
-    if(Date.now() > obj.exp) {
-      localStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(SESSION_KEY);
-      return false;
-    }
-    return obj;
+    return JSON.parse(s);
   } catch(e){ return false; }
 }
 
@@ -1862,11 +1857,12 @@ function saveSession(user){
     name: user.name,
     role: user.role || 'nv',
     tenCty: user.tenCty||'', mst: user.mst||'', diaChi: user.diaChi||'',
-    email: user.email||'', tenKH: user.tenKH||'', khoPhuTrach: user.khoPhuTrach||'', sdt: user.sdt||'',
-    exp: Date.now() + SESSION_HOURS * 3600 * 1000
+    email: user.email||'', tenKH: user.tenKH||'', khoPhuTrach: user.khoPhuTrach||'', sdt: user.sdt||''
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(obj));
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(obj));
+  // Nhớ tài khoản để tự điền sẵn ở lần đăng nhập sau
+  try{ localStorage.setItem('dt_last_user', user.u||''); }catch(e){}
 }
 
 function doLogin(){
@@ -2039,8 +2035,12 @@ window.addEventListener('pageshow',function(e){
   } else {
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app-content').style.display = 'none';
+    // Tự điền sẵn tài khoản lần trước (nếu có) — chỉ cần gõ mật khẩu
+    var lastUser='';
+    try{ lastUser=localStorage.getItem('dt_last_user')||''; }catch(e){}
+    if(lastUser) document.getElementById('inp-user').value=lastUser;
     setTimeout(function(){
-      document.getElementById('inp-user').focus();
+      document.getElementById(lastUser?'inp-pass':'inp-user').focus();
     }, 300);
   }
 })();
@@ -4134,7 +4134,6 @@ function isCT3(ma){
 
 // render card CT3 vào container el
 function renderCT3Card(p, el){
-  var isAdmin=laAdmin();
   var imgs=timAnhMulti(p.ma);
   var imgUrl=(imgStore&&imgStore[p.ma])?imgStore[p.ma]:(imgs.length?imgs[0]:'');
   var isDesktop=(window.innerWidth||0)>=768;
@@ -4148,9 +4147,9 @@ function renderCT3Card(p, el){
   var tkText=tk?tkDot+' Còn '+fmtTkCard(tk.tong,tk.dvt):'';
   var tkColor=tk?(tk.tier&&tk.tier.nhanh>0?'#2E7D32':tk.tier&&tk.tier.mai>0?'#E65100':'#C62828'):'#bbb';
 
-  // Phần giá chỉ Admin thấy — KHÔNG render vào DOM cho non-admin
+  // Phần giá: mọi tài khoản đăng nhập (Admin + nhân viên) đều xem được
   var adminPriceHtml='';
-  if(isAdmin){
+  if(checkSession()){
     var netGia=p.ns||0;
     var dlGia=p.nhan||0;
     var tyleGiam=p.tyle_giam||0;  // % từ sheet (vd: 40 = 40%)
@@ -4158,7 +4157,7 @@ function renderCT3Card(p, el){
     var netTH=p.net_th||0;
     adminPriceHtml=
       '<div style="background:#FFF8E1;border:1px solid #FFD54F;border-radius:6px;padding:6px 8px;margin-top:4px;font-size:10px">'
-      +(netGia>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá NET/m² (Admin)</span><b style="color:#E65100">'+netGia.toLocaleString('vi-VN')+'đ</b></div>':'')
+      +(netGia>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá NET/m²</span><b style="color:#E65100">'+netGia.toLocaleString('vi-VN')+'đ</b></div>':'')
       +(netTH>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá NET/thùng</span><b style="color:#E65100">'+netTH.toLocaleString('vi-VN')+'đ</b></div>':'')
       +(tyleGiam>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Tỷ lệ giảm tối đa</span><b style="color:#C0232A">-'+tyleGiam+'%</b></div>':'')
       +(dlGia>0?'<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#795548">Giá ĐL nhận kho</span><b style="color:#1565C0">'+dlGia.toLocaleString('vi-VN')+'đ/m²</b></div>':'')
