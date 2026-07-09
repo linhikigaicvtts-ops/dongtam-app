@@ -903,8 +903,8 @@ function renderSale(){
     (function(pp){ btnTK.onclick=function(e){ e.stopPropagation(); moTonKho(pp.ma,pp.ten); }; })(p);
     card.appendChild(btnTK);
 
-    // Click card → mở detail
-    card.addEventListener('click',function(){ swTab('tra'); setTimeout(function(){ showDP(p.ma); },80); });
+    // Click card → mở detail (giữ nguyên tab hiện tại, giống CT3)
+    card.addEventListener('click',function(){ showDP(p.ma); });
 
     el.appendChild(card);
   });
