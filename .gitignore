@@ -1,1 +1,6 @@
 .claude/settings.local.json
+
+# Du lieu cong ty - khong duoc len repo public
+*.xlsx
+*.XLSX
+AppsScript_DongTam_v10.js
