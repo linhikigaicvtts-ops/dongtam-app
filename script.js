@@ -6,6 +6,8 @@ const DATA=D1.concat(D2,D3);
 const NGOI_KEO=[{ma:"TITAN001",cat:"ngoi",kc:"300x405x13",ten:"Ngói TITAN",dong_goi:"6v/thùng",unit:"vien",le:35500,nhan:27700,nhan2:27000,giao:28800,giao2:28000,ns:24930,gs:28800},{ma:"ALPHA001",cat:"ngoi",kc:"300x405x14",ten:"Ngói ALPHA",dong_goi:"6v/thùng",unit:"vien",le:46000,nhan:35900,nhan2:35000,giao:37300,giao2:36300,ns:32310,gs:37300},{ma:"NGOI-RIA",cat:"ngoi",kc:"190x320x14",ten:"Ngói rìa",dong_goi:"10v/thùng",unit:"vien",le:42000,nhan:32800,nhan2:31900,giao:34000,giao2:33200,ns:29520,gs:34000},{ma:"CHAN-CUOI-RIA",cat:"ngoi",kc:"190x80x14",ten:"Ngói chặn cuối rìa",dong_goi:"10v/thùng",unit:"vien",le:28000,nhan:21800,nhan2:21300,giao:22700,giao2:22100,ns:19620,gs:22700},{ma:"NOC-CO-GO",cat:"ngoi",kc:"240x300x15",ten:"Ngói nóc có gờ",dong_goi:"10v/thùng",unit:"vien",le:45000,nhan:35100,nhan2:34200,giao:36500,giao2:35600,ns:31590,gs:36500},{ma:"CHAN-CUOI-NOC",cat:"ngoi",kc:"187x182x12",ten:"Ngói chặn cuối nóc",dong_goi:"10v/thùng",unit:"vien",le:40300,nhan:31400,nhan2:30600,giao:32600,giao2:31800,ns:28260,gs:32600},{ma:"CHAC-BA",cat:"ngoi",kc:"280x340x86",ten:"Ngói chạc ba CBK/CBY",dong_goi:"5v/thùng",unit:"vien",le:360000,nhan:280800,nhan2:273600,giao:291600,giao2:284400,ns:252720,gs:291600},{ma:"CHAC-CHU-T",cat:"ngoi",kc:"280x340x86",ten:"Ngói chạc chữ T",dong_goi:"5v/thùng",unit:"vien",le:360000,nhan:280800,nhan2:273600,giao:291600,giao2:284400,ns:252720,gs:291600},{ma:"CHAC-TU",cat:"ngoi",kc:"390x390x120",ten:"Ngói chạc tư",dong_goi:"5v/thùng",unit:"vien",le:460000,nhan:358800,nhan2:349600,giao:372600,giao2:363400,ns:322920,gs:372600},{ma:"KEO-WALL",cat:"keo",kc:"–",ten:"Keo GECKO WALL (tường)",unit:"bao",le:278640,nhan:209000,nhan2:200600,giao:217300,giao2:209000,ns:0,gs:0},{ma:"KEO-FLOOR",cat:"keo",kc:"–",ten:"Keo GECKO FLOOR (sàn)",unit:"bao",le:234360,nhan:175800,nhan2:168700,giao:182800,giao2:175800,ns:0,gs:0},{ma:"KEO-PRO",cat:"keo",kc:"–",ten:"Keo GECKO PRO (cao cấp)",unit:"bao",le:945000,nhan:708800,nhan2:680400,giao:737100,giao2:708800,ns:0,gs:0},{ma:"KEO-SUPER",cat:"keo",kc:"–",ten:"Keo GECKO SUPER (siêu bền)",unit:"bao",le:567000,nhan:425300,nhan2:408200,giao:442300,giao2:425300,ns:0,gs:0},,{ma:"KINH-95001",cat:"kinh",kc:"19x19",ten:"Gạch kính 95001",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:319800,nhan:255800,nhan2:249400,nhan3:239900,giao:265400,giao2:259000,giao3:249400,ns:0,gs:0},{ma:"KINH-95005",cat:"kinh",kc:"19x19",ten:"Gạch kính 95005",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:319800,nhan:255800,nhan2:249400,nhan3:239900,giao:265400,giao2:259000,giao3:249400,ns:0,gs:0},{ma:"KINH-95021",cat:"kinh",kc:"19x19",ten:"Gạch kính 95021",dong_goi:"6v/thùng",unit:"thùng",loai:"kinh",le:325800,nhan:260600,nhan2:254100,nhan3:244400,giao:270400,giao2:263900,giao3:254100,ns:0,gs:0},{ma:"BCR-GRX-S-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 01-04,07,10,13 – 1kg",unit:"bao",le:30900,nhan:23200,nhan2:22200,giao:24100,giao2:23200,ns:0,gs:0},{ma:"BCR-GRX-S-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 01-04,07,10,13 – 5kg",unit:"bao",le:133400,nhan:100100,nhan2:96000,giao:104100,giao2:100100,ns:0,gs:0},{ma:"BCR-GRX-M-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 05,06,11,14 – 1kg",unit:"bao",le:36500,nhan:27400,nhan2:26300,giao:28500,giao2:27400,ns:0,gs:0},{ma:"BCR-GRX-M-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 05,06,11,14 – 5kg",unit:"bao",le:157200,nhan:117900,nhan2:113200,giao:122600,giao2:117900,ns:0,gs:0},{ma:"BCR-GRX-L-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron GROUTEX mã 08,09,12,15 – 1kg",unit:"bao",le:43500,nhan:32600,nhan2:31300,giao:33900,giao2:32600,ns:0,gs:0},{ma:"BCR-GRX-L-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron GROUTEX mã 08,09,12,15 – 5kg",unit:"bao",le:195200,nhan:146400,nhan2:140500,giao:152300,giao2:146400,ns:0,gs:0},{ma:"BCR-KK-S-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 01-04,07,10,13 – 1kg",unit:"bao",le:46300,nhan:34700,nhan2:33300,giao:36100,giao2:34700,ns:0,gs:0},{ma:"BCR-KK-S-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 01-04,07,10,13 – 5kg",unit:"bao",le:200100,nhan:150100,nhan2:144100,giao:156100,giao2:150100,ns:0,gs:0},{ma:"BCR-KK-M-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 05,06,11,14 – 1kg",unit:"bao",le:54800,nhan:41100,nhan2:39500,giao:42700,giao2:41100,ns:0,gs:0},{ma:"BCR-KK-M-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 05,06,11,14 – 5kg",unit:"bao",le:235900,nhan:176900,nhan2:169800,giao:184000,giao2:176900,ns:0,gs:0},{ma:"BCR-KK-L-1KG",cat:"keo",kc:"1kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 08,09,12,15 – 1kg",unit:"bao",le:65200,nhan:48900,nhan2:46900,giao:50900,giao2:48900,ns:0,gs:0},{ma:"BCR-KK-L-5KG",cat:"keo",kc:"5kg",ten:"Bột chà ron Kháng khuẩn GROUTEX mã 08,09,12,15 – 5kg",unit:"bao",le:292800,nhan:219600,nhan2:210800,giao:228400,giao2:219600,ns:0,gs:0}];
 
 var curF='all', curSF='all', curP_ma=null, curSize='all', curPage=0;
+// Khóa bí mật gắn theo mọi request GAS — chặn người ngoài gọi thẳng link lấy dữ liệu (khách hàng/tồn kho/giá)
+var APP_KEY='QDy3MCObF1FLdoBexB9XO3dECy64';
 var curNgoiMa=null, curKeoMa=null;
 var donItems=[];
 // Khai báo sớm (trước khi render() có thể được gọi lúc khởi động trang qua
@@ -187,7 +189,7 @@ function fetchGiaFromSheet(){
     if(old) old.remove();
     var s=document.createElement('script');
     s.id='_gia_script_'+loai;
-    s.src=APPS_URL+'?action=getGia&loai='+loai+'&callback=_onGia_'+loai;
+    s.src=APPS_URL+'?action=getGia&loai='+loai+'&k='+encodeURIComponent(APP_KEY)+'&callback=_onGia_'+loai;
     s.onerror=function(){
       console.log('⚠️ Không tải được giá '+loai+' từ Sheet — dùng giá trong app');
       s.remove();
@@ -233,7 +235,7 @@ function fetchImagesFromSheet(){
 
   var s=document.createElement('script');
   s.id='_img_script';
-  s.src=APPS_URL+'?action=getImages&callback=_onImgData';
+  s.src=APPS_URL+'?action=getImages&k='+encodeURIComponent(APP_KEY)+'&callback=_onImgData';
   s.onerror=function(){
     console.log('⚠️ Không kết nối được Sheet – dùng cache localStorage');
     s.remove();
@@ -994,7 +996,7 @@ function fetchCT(loai){
   };
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var s=document.createElement('script');
-  s.src=APPS_URL+'?action=getCT&loai='+loai+'&callback='+cbName;
+  s.src=APPS_URL+'?action=getCT&loai='+loai+'&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){
     document.getElementById('slist').innerHTML='<div style="padding:40px;text-align:center;color:red">❌ Không tải được dữ liệu. Vui lòng thử lại.</div>';
   };
@@ -1912,6 +1914,7 @@ function doLogin(){
   var url = APPS_URL + '?action=login'
     + '&username=' + encodeURIComponent(u)
     + '&password=' + encodeURIComponent(pw)
+    + '&k=' + encodeURIComponent(APP_KEY)
     + '&callback=' + encodeURIComponent(cbName);
   s.src = url;
   document.head.appendChild(s);
@@ -1980,7 +1983,7 @@ function gasWarmUp(){
   if(old) old.remove();
   var s=document.createElement('script');
   s.id='_warmup_script';
-  s.src='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec?action=ping&callback=_onGasWarmUp';
+  s.src='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec?action=ping&k='+encodeURIComponent(APP_KEY)+'&callback=_onGasWarmUp';
   window._onGasWarmUp=function(){ s.remove(); };
   s.onerror=function(){ s.remove(); };
   document.head.appendChild(s);
@@ -2644,7 +2647,7 @@ function guiDonHang(){
   // Gọi Apps Script qua JSONP để biết chắc đơn đã lưu thành công, thay vì
   // no-cors (không đọc được response → trước đây luôn báo "thành công" dù
   // request có thể đã lỗi action).
-  var url=APPS_URL+'?action=luuDon&data='+encoded+'&callback='+encodeURIComponent(cbName);
+  var url=APPS_URL+'?action=luuDon&data='+encoded+'&k='+encodeURIComponent(APP_KEY)+'&callback='+encodeURIComponent(cbName);
   s.src=url;
   s.onerror=function(){ clearTimeout(t); ketThucGuiDon(false); };
   document.head.appendChild(s);
@@ -2670,7 +2673,7 @@ function fetchKhachHangFromSheet(){
   if(old) old.remove();
   var s=document.createElement('script');
   s.id='_kh_script';
-  s.src=APPS_URL+'?action=getKhachHang&callback='+cbName;
+  s.src=APPS_URL+'?action=getKhachHang&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){ s.remove(); };
   document.head.appendChild(s);
 }
@@ -2733,7 +2736,7 @@ function fetchTonKhoChiTiet(){
   if(old) old.remove();
   var s=document.createElement('script');
   s.id='_tkct_script';
-  s.src=APPS_URL+'?action=getTonKhoChiTiet&callback='+cbName;
+  s.src=APPS_URL+'?action=getTonKhoChiTiet&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){ tkLoadingBanner(false); s.remove(); };
   document.head.appendChild(s);
 }
@@ -2752,7 +2755,7 @@ function fetchTrongLuong(){
   if(old) old.remove();
   var s=document.createElement('script');
   s.id='_tl_script';
-  s.src=APPS_URL+'?action=getTrongLuong&callback='+cbName;
+  s.src=APPS_URL+'?action=getTrongLuong&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){ s.remove(); };
   document.head.appendChild(s);
 }
@@ -2779,7 +2782,7 @@ function fetchThuocTinhSP(){
   if(old) old.remove();
   var s=document.createElement('script');
   s.id='_ttsp_script';
-  s.src=APPS_URL+'?action=getThuocTinhSP&callback='+cbName;
+  s.src=APPS_URL+'?action=getThuocTinhSP&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){ s.remove(); };
   document.head.appendChild(s);
 }
@@ -3138,6 +3141,7 @@ function luuTaiKhoan(){
     +'&password='+encodeURIComponent(pw)
     +'&name='+encodeURIComponent(name)
     +'&role='+encodeURIComponent(role)
+    +'&k='+encodeURIComponent(APP_KEY)
     +'&callback='+encodeURIComponent(cbName);
   s.src=url;
   s.onerror=function(){ clearTimeout(t); msgEl.style.color='#C0232A'; msgEl.textContent='❌ Lỗi kết nối.'; };
@@ -3185,7 +3189,7 @@ function moLichSuDon(){
     else { renderLichSuDonError(); }
   };
   s.src=APPS_URL+'?action=getDonHang&username='+encodeURIComponent(sess.user||'')
-    +'&role='+encodeURIComponent(sess.role||'nv')+'&callback='+cbName;
+    +'&role='+encodeURIComponent(sess.role||'nv')+'&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   s.onerror=function(){ clearTimeout(t); renderLichSuDonError(); };
   document.head.appendChild(s);
 }
@@ -4221,7 +4225,7 @@ function xinDuyetGiaCT3(ma){
   window[cbName]=function(){};
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var s=document.createElement('script');
-  s.src=APPS_URL+'?action=logCT3Request&ma='+encodeURIComponent(ma)+'&nguoi='+encodeURIComponent(nguoi)+'&ts='+encodeURIComponent(ts)+'&callback='+cbName;
+  s.src=APPS_URL+'?action=logCT3Request&ma='+encodeURIComponent(ma)+'&nguoi='+encodeURIComponent(nguoi)+'&ts='+encodeURIComponent(ts)+'&k='+encodeURIComponent(APP_KEY)+'&callback='+cbName;
   document.head.appendChild(s);
   setTimeout(function(){ s.remove(); delete window[cbName]; },8000);
 }
