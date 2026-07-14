@@ -188,23 +188,41 @@ function fetchGiaFromSheet(){
           }
         }
         else if(loai==='kinh'){
-          rows.forEach(function(row){
-            var ma = String(row.ma||'').trim();
-            var p = KINH.find(function(x){return x.ma===ma;});
-            if(p){
-              function pgK(v){return parseFloat(String(v||"0").replace(/\./g,"").replace(/,/g,"."))||0;}
-              var _le=pgK(row.le),_nhan=pgK(row.nhan),_nhan2=pgK(row.nhan2),_nhan3=pgK(row.nhan3);
-              var _giao=pgK(row.giao),_giao2=pgK(row.giao2),_giao3=pgK(row.giao3);
-              if(_le>0)    p.le=_le;
-              if(_nhan>0)  p.nhan=_nhan;
-              if(_nhan2>0) p.nhan2=_nhan2;
-              if(_nhan3>0) p.nhan3=_nhan3;
-              if(_giao>0)  p.giao=_giao;
-              if(_giao2>0) p.giao2=_giao2;
-              if(_giao3>0) p.giao3=_giao3;
-            }
-          });
-          console.log('✅ Cập nhật giá kính từ Sheet: '+rows.length+' mã');
+          function pgK(v){return parseFloat(String(v||"0").replace(/\./g,"").replace(/,/g,"."))||0;}
+          // Cấu trúc MỚI: mã = Mã SAP (số dài)
+          var newK = rows.filter(function(r){ return /^\d{6,}$/.test(String(r.ma||'').trim()); });
+          if(newK.length>=1){
+            KINH.length=0;
+            newK.forEach(function(row){
+              KINH.push({
+                ma:String(row.ma||'').trim(), ten:String(row.ten||'').trim(),
+                tenHD:String(row.tenHD||'').trim(),
+                kc:String(row.kc||''), dong_goi:String(row.dong_goi||'6v/thùng'),
+                unit:'thùng', cat:'kinh', loai:'kinh', _new:true,
+                le:pgK(row.le), nhan:pgK(row.nhan), nhan2:pgK(row.nhan2), nhan3:pgK(row.nhan3),
+                giao:pgK(row.giao), giao2:pgK(row.giao2), giao3:pgK(row.giao3),
+                ns:0, gs:0
+              });
+            });
+            console.log('✅ Kính (cấu trúc mới): '+KINH.length+' mã');
+          } else {
+            rows.forEach(function(row){
+              var ma = String(row.ma||'').trim();
+              var p = KINH.find(function(x){return x.ma===ma;});
+              if(p){
+                var _le=pgK(row.le),_nhan=pgK(row.nhan),_nhan2=pgK(row.nhan2),_nhan3=pgK(row.nhan3);
+                var _giao=pgK(row.giao),_giao2=pgK(row.giao2),_giao3=pgK(row.giao3);
+                if(_le>0)    p.le=_le;
+                if(_nhan>0)  p.nhan=_nhan;
+                if(_nhan2>0) p.nhan2=_nhan2;
+                if(_nhan3>0) p.nhan3=_nhan3;
+                if(_giao>0)  p.giao=_giao;
+                if(_giao2>0) p.giao2=_giao2;
+                if(_giao3>0) p.giao3=_giao3;
+              }
+            });
+            console.log('✅ Cập nhật giá kính từ Sheet: '+rows.length+' mã');
+          }
         }
         
         loaded++;
