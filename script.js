@@ -612,6 +612,22 @@ function buildFilterSide(){
     +'<button id="fs-clear" onclick="fsClear()">Xóa hết bộ lọc</button>';
   el.innerHTML=h;
 }
+// Các panel cố định (sidebar kích cỡ, bộ lọc, giỏ hàng) bám đúng mép dưới header —
+// header có thể cao hơn 57px khi tên công ty xuống 2 dòng, tránh sidebar đè lên header
+function capNhatTopPanels(){
+  if((window.innerWidth||0)<768) return;
+  var tb=document.querySelector('.topbar');
+  if(!tb) return;
+  var h=Math.max(tb.offsetHeight,57);
+  ['size-sidebar','filter-side','tab-don'].forEach(function(id){
+    var el=document.getElementById(id);
+    // setProperty important để thắng quy tắc top:57px !important trong CSS
+    if(el) el.style.setProperty('top', h+'px', 'important');
+  });
+}
+window.addEventListener('resize',capNhatTopPanels);
+setTimeout(capNhatTopPanels,300);
+
 // Hiện/ẩn bộ lọc dọc: chỉ desktop rộng + đang ở tab Gạch
 function capNhatFilterSide(){
   var el=document.getElementById('filter-side');

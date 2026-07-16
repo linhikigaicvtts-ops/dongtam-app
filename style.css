@@ -181,25 +181,38 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Padding top cho tab content (vì không còn bottom-nav ăn space) */
   #app-content{padding-bottom:0}
 
-  /* Size sidebar: cố định bên trái (mặc định left:0) */
+  /* Size sidebar: cố định bên trái, rộng 230px, lưới 2 cột cho dễ bấm */
   #size-sidebar{
     position:fixed !important;
     left:0 !important;top:57px !important;bottom:56px !important;
-    width:85px !important;
+    width:230px !important;
     overflow-y:auto !important;
     background:var(--bg1) !important;
     border-right:1px solid var(--bd) !important;
-    z-index:70;
+    z-index:60;              /* dưới topbar (z:100) — không đè lên header */
     max-height:none !important;
-    transition:left .2s;
+    padding:10px !important;
+    display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;
+    scroll-behavior:smooth;
   }
-  /* Khi dp mở: size-sidebar dịch sang phải 320px */
-  body.dp-open #size-sidebar{left:320px !important}
+  #size-sidebar .sz-item{
+    flex:0 0 calc(50% - 4px);
+    border:1.5px solid var(--bd);border-bottom:1.5px solid var(--bd);
+    border-left:1.5px solid var(--bd);
+    border-radius:10px;
+    padding:11px 4px;font-size:12.5px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s ease;
+  }
+  #size-sidebar .sz-item:hover{border-color:var(--red);color:var(--red);background:#FFF5F5;transform:translateY(-1px)}
+  #size-sidebar .sz-item.on{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 3px 10px rgba(192,35,42,.3)}
+  #size-sidebar>#loc-sidebar{flex-basis:100%}
+  /* Popup chi tiết là modal giữa màn hình — sidebar đứng yên, không dịch chuyển */
+  body.dp-open #size-sidebar{left:0 !important}
 
-  /* Tab Tra giá: mặc định margin-left 85px (chừa size-sidebar) */
-  #tab-tra{margin-left:85px !important}
-  /* Popup chi tiết giờ là modal giữa màn hình — không cần đẩy nội dung nữa */
-  body.dp-open #tab-tra{margin-left:85px !important}
+  /* Tab Tra giá: chừa 230px cho size-sidebar */
+  #tab-tra{margin-left:230px !important}
+  body.dp-open #tab-tra{margin-left:230px !important}
   body.dp-open #tab-sale{margin-left:0 !important}
 
   /* Product grid: KHÔNG cần margin-left vì tab-tra đã có margin-left */
