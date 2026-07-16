@@ -4558,8 +4558,10 @@ function ct3ConfirmDieuKien(){
       le:p.le||0,
       nhan:p.nhan||0,
       giao:p.giao||0,
-      ns:p.ns||0,
-      gs:p.gs||0,
+      // CT3: KHÔNG mang giá NET/giảm vào giỏ — giỏ hàng tính theo giá bình thường,
+      // giá chương trình do quản lý báo riêng cho đại lý sau khi duyệt.
+      ns:0,
+      gs:0,
       qty:1,
       ct3_consent:{ts:ts, nguoi:sess?sess.name:'Khách', user:sess?sess.user:''}
     });
