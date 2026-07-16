@@ -5,7 +5,15 @@
       "name": "DongTam App",
       "runtimeExecutable": "powershell",
       "runtimeArgs": ["-ExecutionPolicy", "Bypass", "-File", "D:\\Dự Án Web App Đồng Tâm\\serve.ps1"],
-      "port": 3456
+      "port": 3456,
+      "autoPort": true
+    },
+    {
+      "name": "DongTam 3D Agent",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["D:\\Dự Án Web App Đồng Tâm\\dongtam-agent\\server\\index.js"],
+      "port": 4000,
+      "autoPort": true
     }
   ]
 }

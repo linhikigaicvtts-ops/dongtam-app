@@ -2319,14 +2319,15 @@ function showApp(name){
   document.body.classList.remove('guest-mode');
   var bnDon=document.getElementById('bn-don'); if(bnDon) bnDon.style.display='';
   var bnSale=document.getElementById('bn-sale'); if(bnSale) bnSale.style.display='';
-  var btnTK = document.querySelector('.topbar button[type="button"]');
-  if(btnTK && btnTK.textContent.indexOf('Đăng nhập')>=0){
-    btnTK.innerHTML = '👤 Tài khoản ▾';
+  var btnTK = document.getElementById('btn-taikhoan-menu');
+  if(btnTK){
+    btnTK.innerHTML = '<span id="acct-avatar" class="acct-avatar">👤</span><span class="acct-chevron">▾</span>';
     btnTK.onclick = function(){ toggleMenuTaiKhoan(); };
   }
   // Hiện tên user trên header
   var canh = document.getElementById('ca-nhan-ten');
   if(canh) canh.textContent = name;
+  capNhatAcctAvatar(name);
   // Chỉ admin mới thấy nút Quản lý tài khoản
   var sessChk=checkSession();
   var btnQLTK=document.getElementById('btn-quanly-taikhoan');
@@ -2453,9 +2454,9 @@ function showGuestApp(){
   // Header: hiện "Khách lẻ" + nút Đăng nhập thay cho menu Tài khoản
   var canh = document.getElementById('ca-nhan-ten');
   if(canh) canh.textContent = 'Khách lẻ · Giá bán lẻ';
-  var btnTK = document.querySelector('[onclick="toggleMenuTaiKhoan()"]');
+  var btnTK = document.getElementById('btn-taikhoan-menu');
   if(btnTK){
-    btnTK.textContent = '🔐 Đăng nhập';
+    btnTK.innerHTML = '<span class="acct-avatar">🔐</span><span style="font-size:12px;font-weight:700;color:#fff;padding-right:2px">Đăng nhập</span>';
     btnTK.onclick = showLoginScreen;
   }
   // Ẩn tab Đơn hàng + Sale (nghiệp vụ nội bộ/đại lý)
@@ -3506,16 +3507,31 @@ function moTonKho(ma, tenSP){
 
 function toggleMenuTaiKhoan(){
   var m=document.getElementById('menu-taikhoan');
-  if(!m) return;
-  m.style.display=(m.style.display==='none'||!m.style.display)?'block':'none';
+  var wrap=document.getElementById('acct-wrap');
+  if(!m||!wrap) return;
+  var open=!m.classList.contains('open');
+  m.classList.toggle('open',open);
+  wrap.classList.toggle('open',open);
 }
 document.addEventListener('click',function(e){
+  var wrap=document.getElementById('acct-wrap');
   var m=document.getElementById('menu-taikhoan');
-  if(!m || m.style.display==='none') return;
-  if(!m.contains(e.target) && e.target.textContent.indexOf('Tài khoản')<0){
-    m.style.display='none';
+  if(!wrap||!m||!m.classList.contains('open')) return;
+  if(!wrap.contains(e.target)){
+    m.classList.remove('open');
+    wrap.classList.remove('open');
   }
 });
+// Chữ cái đầu tên → avatar tròn trên header (kiểu Gmail/Notion)
+function capNhatAcctAvatar(text){
+  var av=document.getElementById('acct-avatar');
+  if(!av) return;
+  var clean=String(text||'').replace(/^Khách lẻ.*$/,'').trim();
+  if(!clean){ av.textContent='👤'; return; }
+  var chars=clean.split(/\s+/).filter(Boolean);
+  var initials=(chars[0]?chars[0][0]:'')+(chars.length>1?chars[chars.length-1][0]:'');
+  av.textContent=initials.toUpperCase()||'👤';
+}
 
 // ===== QUẢN LÝ TÀI KHOẢN (chỉ admin) =====
 function moQuanLyTaiKhoan(){

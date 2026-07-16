@@ -41,23 +41,32 @@
 <div id="app-content">
 <div class="wrap" style="padding:0">
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div style="font-size:20px;font-weight:900;font-style:italic;color:#fff;letter-spacing:0.5px;line-height:1">DT</div>
-    <div>
-      <div class="topbar-title">Đồng Tâm KV23</div>
-      <div style="display:flex;align-items:center;gap:6px;margin-top:2px;position:relative">
-        <span id="ca-nhan-ten" class="topbar-sub"></span>
-        <button type="button" onclick="toggleMenuTaiKhoan()" style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:2px 7px;cursor:pointer;font-family:var(--f)">👤 Tài khoản ▾</button>
-      <div id="menu-taikhoan" style="display:none;position:absolute;top:24px;left:0;z-index:200;background:var(--bg1,#fff);border:1px solid var(--bd,#ddd);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:170px;overflow:hidden">
-        <button type="button" onclick="toggleMenuTaiKhoan();moLichSuDon()" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">🕘 Lịch sử đơn hàng</button>
-        <button type="button" id="btn-quanly-taikhoan" onclick="toggleMenuTaiKhoan();moQuanLyTaiKhoan()" style="display:none;width:100%;text-align:left;padding:10px 12px;border:none;border-top:1px solid var(--bd,#eee);background:none;font-size:12px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f)">👤 Quản lý tài khoản</button>
-        <button type="button" onclick="toggleMenuTaiKhoan();doLogout()" style="display:block;width:100%;text-align:left;padding:10px 12px;border:none;border-top:1px solid var(--bd,#eee);background:none;font-size:12px;font-weight:600;color:#C0232A;cursor:pointer;font-family:var(--f)">🚪 Đăng xuất</button>
-      </div>
+  <div style="display:flex;align-items:center;gap:10px;min-width:0">
+    <div style="font-size:20px;font-weight:900;font-style:italic;color:#fff;letter-spacing:0.5px;line-height:1;flex-shrink:0">DT</div>
+    <div style="min-width:0">
+      <div class="topbar-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Đồng Tâm KV23</div>
+      <span id="ca-nhan-ten" class="topbar-sub" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
     </div>
-  </div>
   </div>
   <div class="topbar-right">
     <span id="gia-source-badge" onclick="fetchGiaFromSheet()">⏳</span>
+    <div id="acct-wrap" style="position:relative;flex-shrink:0">
+      <button type="button" id="btn-taikhoan-menu" onclick="toggleMenuTaiKhoan()" class="acct-pill">
+        <span id="acct-avatar" class="acct-avatar">👤</span>
+        <span class="acct-chevron">▾</span>
+      </button>
+      <div id="menu-taikhoan" class="acct-menu">
+        <button type="button" onclick="toggleMenuTaiKhoan();moLichSuDon()" class="acct-menu-item">
+          <span class="acct-menu-icon">🕘</span> Lịch sử đơn hàng
+        </button>
+        <button type="button" id="btn-quanly-taikhoan" onclick="toggleMenuTaiKhoan();moQuanLyTaiKhoan()" class="acct-menu-item" style="display:none">
+          <span class="acct-menu-icon">👤</span> Quản lý tài khoản
+        </button>
+        <button type="button" onclick="toggleMenuTaiKhoan();doLogout()" class="acct-menu-item acct-menu-danger">
+          <span class="acct-menu-icon">🚪</span> Đăng xuất
+        </button>
+      </div>
+    </div>
   </div>
 </div></div>
 <div id="thongtin-khachhang" style="display:none;background:#FFF8F8;border-bottom:1px solid #F5D0D0;padding:8px 14px;font-size:11px;color:#8B1A1A"></div>
