@@ -170,7 +170,7 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   }
 
   /* Product list: 2 cột */
-  #plist{display:grid !important;grid-template-columns:repeat(2,1fr);gap:8px}
+  #plist{display:grid !important;grid-template-columns:repeat(2,1fr);gap:12px}
 
   /* Sale grid: 2 cột */
   #slist.sale-grid{grid-template-columns:repeat(2,1fr) !important}
@@ -370,7 +370,7 @@ input::placeholder{color:var(--t3)}
 /* padding-bottom đủ để nội dung cuối danh sách không bị thanh bottom-nav
    (cố định, có nút tròn nổi lên -14px) che mất */
 .tc{display:none;padding-bottom:110px;box-sizing:border-box}.tc.on{display:block}
-.tab-wrap{padding:12px 14px}
+.tab-wrap{padding:16px 18px}
 
 /* ===== SEARCH BAR (Tab Tra mã) ===== */
 .search-wrap{
@@ -442,16 +442,16 @@ input::placeholder{color:var(--t3)}
 /* ===== PRODUCT CARDS ===== */
 .mk{
   background:var(--bg1);border:1px solid var(--bd);
-  border-radius:var(--r);padding:12px 14px;
-  margin-bottom:8px;cursor:pointer;
+  border-radius:var(--r);padding:10px 12px;
+  margin-bottom:0;cursor:pointer;
   display:flex;justify-content:space-between;align-items:center;
 }
 .mk:active{background:#FFF5F5;border-color:var(--red)}
 /* Card gạch kính - layout dọc */
 .mk-kinh{
   background:var(--bg1);border:1px solid var(--bd);
-  border-radius:var(--r);padding:12px 14px 16px;
-  margin-bottom:16px;
+  border-radius:var(--r);padding:10px 12px 14px;
+  margin-bottom:0;
   display:block;
   overflow:visible;
 }
