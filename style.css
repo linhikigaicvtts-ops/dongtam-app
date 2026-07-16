@@ -783,3 +783,13 @@ input::placeholder{color:var(--t3)}
 .acct-menu-danger{color:#C0232A}
 .acct-menu-danger:hover{background:#FDECEA}
 .acct-menu-sep{height:1px;background:var(--bd,#eee);margin:5px 4px}
+
+/* ===== KHÁCH LẺ: ẩn giỏ hàng bên phải — chỉ hiện khi đăng nhập ===== */
+@media(min-width:768px){
+  body.guest-mode #tab-don{display:none !important}
+  body.guest-mode .tc{margin-right:0}
+  body.guest-mode #thongtin-khachhang{margin-right:0}
+  body.guest-mode nav.bottom-nav{right:0 !important}
+  body.guest-mode #filter-side{right:0}
+  body.guest-mode.fs-on #tab-tra{margin-right:212px !important}
+}
