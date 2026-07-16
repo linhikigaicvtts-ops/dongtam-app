@@ -349,6 +349,7 @@ function swTab(t){
   document.querySelectorAll('.tb').forEach(function(b,i){
     b.classList.toggle('on',['tra','sale','ngoi','keo','kinh','don'][i]===t);
   });
+  capNhatFilterSide();
   if(t==='sale')  { window._sf2=window._sf2||'ct1'; renderSale(); }
   if(t==='ngoi')  renderNgoi();
   if(t==='keo')   renderKeo();
@@ -530,10 +531,103 @@ function toggleSortTon(){
   showToast(curSortTon?'📦 Đang xếp theo tồn kho nhiều nhất':'Đã về thứ tự mặc định');
 }
 
+// ===== BỘ LỌC DỌC DESKTOP (tab Gạch) =====
+var curSortGia=false;      // sắp xếp giá lẻ thấp → cao
+var curLocGia='';          // '', lt250, 250_350, 350_500, gt500
+var curLocCT={cl:false,sale:false,ct3:false};
+
+function khopLocGia(p){
+  if(!curLocGia) return true;
+  var le=p.le||0;
+  if(curLocGia==='lt250')   return le>0&&le<250000;
+  if(curLocGia==='250_350') return le>=250000&&le<=350000;
+  if(curLocGia==='350_500') return le>350000&&le<=500000;
+  if(curLocGia==='gt500')   return le>500000;
+  return true;
+}
+function khopLocCT(p){
+  if(!curLocCT.cl&&!curLocCT.sale&&!curLocCT.ct3) return true;
+  if(curLocCT.cl && p.gio==='★') return true;
+  if(curLocCT.sale && p._fromCT) return true;
+  if(curLocCT.ct3 && typeof isCT3==='function' && isCT3(p.ma)) return true;
+  return false;
+}
+function fsApply(){ curPage=0; render(); }
+function fsSetSort(v){ curSortGia=(v==='gia'); fsApply(); }
+function fsSetGia(v){ curLocGia=v; fsApply(); }
+function fsToggleCT(k){ curLocCT[k]=!curLocCT[k]; fsApply(); }
+function fsSetAttr(key,val){
+  locNangCao[key]=val;
+  if(typeof capNhatBadgeLocNangCao==='function') capNhatBadgeLocNangCao();
+  fsApply();
+}
+function fsClear(){
+  curSortGia=false; curLocGia=''; curLocCT={cl:false,sale:false,ct3:false};
+  if(typeof LOC_NANG_CAO_FIELDS!=='undefined') LOC_NANG_CAO_FIELDS.forEach(function(f){ locNangCao[f.key]=''; });
+  if(typeof capNhatBadgeLocNangCao==='function') capNhatBadgeLocNangCao();
+  buildFilterSide();
+  fsApply();
+}
+function buildFilterSide(){
+  var el=document.getElementById('filter-side');
+  if(!el) return;
+  var h='';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center">'
+    +'<span style="font-size:14px;font-weight:800">Bộ lọc</span></div>';
+  // Sắp xếp
+  h+='<div class="fs-hdr">Sắp xếp</div>'
+    +'<label class="fs-row"><input type="radio" name="fs-sort" '+(!curSortGia?'checked':'')+' onchange="fsSetSort(\'\')"/> Mặc định</label>'
+    +'<label class="fs-row"><input type="radio" name="fs-sort" '+(curSortGia?'checked':'')+' onchange="fsSetSort(\'gia\')"/> Giá thấp → cao</label>';
+  // Giá lẻ
+  var giaOpts=[['','Tất cả'],['lt250','Dưới 250.000'],['250_350','250.000 – 350.000'],['350_500','350.000 – 500.000'],['gt500','Trên 500.000']];
+  h+='<div class="fs-hdr">Giá lẻ (đ/m²)</div>';
+  giaOpts.forEach(function(o){
+    h+='<label class="fs-row"><input type="radio" name="fs-gia" '+(curLocGia===o[0]?'checked':'')+' onchange="fsSetGia(\''+o[0]+'\')"/> '+o[1]+'</label>';
+  });
+  // Chương trình
+  h+='<div class="fs-hdr">Chương trình</div>'
+    +'<label class="fs-row"><input type="checkbox" '+(curLocCT.cl?'checked':'')+' onchange="fsToggleCT(\'cl\')"/> ★ Chiến lược</label>'
+    +'<label class="fs-row"><input type="checkbox" '+(curLocCT.sale?'checked':'')+' onchange="fsToggleCT(\'sale\')"/> 🔥 Đang Sale (CT1/CT2)</label>'
+    +'<label class="fs-row"><input type="checkbox" '+(curLocCT.ct3?'checked':'')+' onchange="fsToggleCT(\'ct3\')"/> 🎯 SKU linh hoạt (CT3)</label>';
+  // Thuộc tính (Màu / Công năng / Tính năng / Hoa văn / Men) — dropdown như lọc nâng cao
+  if(typeof LOC_NANG_CAO_FIELDS!=='undefined' && typeof thuocTinhMap!=='undefined' && Object.keys(thuocTinhMap).length){
+    var giaTri={};
+    LOC_NANG_CAO_FIELDS.forEach(function(f){ giaTri[f.key]={}; });
+    Object.keys(thuocTinhMap).forEach(function(ma){
+      var t=thuocTinhMap[ma];
+      LOC_NANG_CAO_FIELDS.forEach(function(f){ if(t[f.key]) giaTri[f.key][t[f.key]]=true; });
+    });
+    h+='<div class="fs-hdr">Thuộc tính</div>';
+    LOC_NANG_CAO_FIELDS.forEach(function(f){
+      var opts=Object.keys(giaTri[f.key]).sort();
+      if(!opts.length) return;
+      h+='<span class="fs-lbl">'+f.label+'</span>'
+        +'<select onchange="fsSetAttr(\''+f.key+'\',this.value)">'
+        +'<option value="">Tất cả</option>'
+        +opts.map(function(o){ return '<option value="'+o.replace(/"/g,'&quot;')+'"'+(locNangCao[f.key]===o?' selected':'')+'>'+o+'</option>'; }).join('')
+        +'</select>';
+    });
+  }
+  h+='<div id="fs-count"></div>'
+    +'<button id="fs-clear" onclick="fsClear()">Xóa hết bộ lọc</button>';
+  el.innerHTML=h;
+}
+// Hiện/ẩn bộ lọc dọc: chỉ desktop rộng + đang ở tab Gạch
+function capNhatFilterSide(){
+  var el=document.getElementById('filter-side');
+  if(!el) return;
+  var tra=document.getElementById('tab-tra');
+  var show=!!(tra&&tra.classList.contains('on')) && (window.innerWidth||0)>=1200 && curF!=='kinh';
+  el.style.display=show?'block':'none';
+  document.body.classList.toggle('fs-on',show);
+  if(show && !el.innerHTML) buildFilterSide();
+}
+
 function render(){
   var q=document.getElementById('sq').value.trim().toUpperCase();
   // Nếu filter gạch kính → hiển thị trong tab Gạch cùng với nút thêm vào đơn
   if(curF==='kinh'){
+    capNhatFilterSide();
     renderKinhInGach();
     return;
   }
@@ -544,10 +638,19 @@ function render(){
   if(curSize&&curSize!=='all') list=list.filter(function(p){return p.kc===curSize||p.kc.toLowerCase()===curSize.toLowerCase();});
   if(hasLocNangCao()) list=list.filter(function(p){return khopLocNangCao(p.ma);});
   if(q) list=list.filter(function(p){return p.ma.toUpperCase().includes(q)||p.kc.includes(q);});
+  // Bộ lọc dọc desktop: khoảng giá lẻ + chương trình
+  if(curLocGia) list=list.filter(khopLocGia);
+  if(curLocCT.cl||curLocCT.sale||curLocCT.ct3) list=list.filter(khopLocCT);
   // Sắp xếp theo tồn kho nhiều nhất (nút 📦 Tồn nhiều cạnh bộ lọc)
   if(curSortTon){
     list=list.slice().sort(function(a,b){ return tonKhoTongCuaMa(b.ma)-tonKhoTongCuaMa(a.ma); });
+  } else if(curSortGia){
+    list=list.slice().sort(function(a,b){ return (a.le||1e12)-(b.le||1e12); });
   }
+  // Cập nhật bộ đếm trên bộ lọc dọc
+  var fsc=document.getElementById('fs-count');
+  if(fsc) fsc.textContent='Đang hiện '+list.length+' / '+DATA.length+' mã';
+  capNhatFilterSide();
   var totalItems=list.length;
   var totalPages=Math.max(1,Math.ceil(totalItems/20));
   if(curPage>=totalPages) curPage=totalPages-1;
@@ -3092,7 +3195,7 @@ function fetchThuocTinhSP(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var cbName='_onThuocTinhSP';
   window[cbName]=function(res){
-    if(res && res.status==='ok' && res.data){ thuocTinhMap=res.data; buildLocSidebar(); }
+    if(res && res.status==='ok' && res.data){ thuocTinhMap=res.data; buildLocSidebar(); buildFilterSide(); }
     var s=document.getElementById('_ttsp_script');
     if(s) s.remove();
   };

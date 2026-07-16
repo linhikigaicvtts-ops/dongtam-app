@@ -690,3 +690,23 @@ input::placeholder{color:var(--t3)}
   #rp-hdr{border-radius:0}
   #rp-fab{bottom:80px;left:12px;width:46px;height:46px;font-size:19px}
 }
+
+/* ===== BỘ LỌC DỌC DESKTOP (tab Gạch) — giữa lưới SP và giỏ hàng ===== */
+#filter-side{display:none}
+@media(min-width:1200px){
+  #filter-side{
+    position:fixed;right:320px;top:57px;bottom:0;width:212px;
+    overflow-y:auto;background:var(--bg1);border-left:1px solid var(--bd);
+    padding:12px 14px 20px;z-index:75;
+  }
+  /* Tab Gạch chừa chỗ cho bộ lọc + giỏ hàng */
+  body.fs-on #tab-tra{margin-right:532px !important}
+  #filter-side .fs-hdr{font-size:12px;font-weight:700;color:var(--t2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.3px}
+  #filter-side .fs-hdr:first-child{margin-top:0}
+  #filter-side label.fs-row{display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--t1);margin:6px 0;cursor:pointer}
+  #filter-side label.fs-row input{accent-color:#C0232A}
+  #filter-side select{width:100%;font-size:12px;padding:8px;border:1.5px solid var(--bd2);border-radius:8px;background:var(--bg1);color:var(--t1);font-family:var(--f);margin-bottom:8px}
+  #filter-side .fs-lbl{font-size:11.5px;font-weight:700;color:var(--t2);display:block;margin-bottom:3px}
+  #fs-count{background:#FDECEA;color:#C0232A;border-radius:8px;padding:7px;text-align:center;font-size:12px;font-weight:700;margin-top:12px}
+  #fs-clear{width:100%;margin-top:8px;padding:8px;border:1px solid var(--bd2);border-radius:8px;background:none;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)}
+}
