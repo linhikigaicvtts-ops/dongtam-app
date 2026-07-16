@@ -511,6 +511,25 @@ function mergeCTintoDATA(){
   CT2_DATA.forEach(function(c){ apCT(c,'CT2'); });
 }
 
+// ===== Sắp xếp theo tồn kho (tab Gạch) =====
+var curSortTon=false;
+function tonKhoTongCuaMa(ma){
+  var tk=(typeof timTonKhoTheoQuyen==='function')?timTonKhoTheoQuyen(ma):null;
+  return (tk&&tk.tong)?tk.tong:0;
+}
+function toggleSortTon(){
+  curSortTon=!curSortTon;
+  var b=document.getElementById('btn-sort-ton');
+  if(b){
+    b.style.background=curSortTon?'var(--red)':'var(--bg1)';
+    b.style.color=curSortTon?'#fff':'var(--t1)';
+    b.style.borderColor=curSortTon?'var(--red)':'var(--bd2)';
+  }
+  curPage=0;
+  render();
+  showToast(curSortTon?'📦 Đang xếp theo tồn kho nhiều nhất':'Đã về thứ tự mặc định');
+}
+
 function render(){
   var q=document.getElementById('sq').value.trim().toUpperCase();
   // Nếu filter gạch kính → hiển thị trong tab Gạch cùng với nút thêm vào đơn
@@ -525,6 +544,10 @@ function render(){
   if(curSize&&curSize!=='all') list=list.filter(function(p){return p.kc===curSize||p.kc.toLowerCase()===curSize.toLowerCase();});
   if(hasLocNangCao()) list=list.filter(function(p){return khopLocNangCao(p.ma);});
   if(q) list=list.filter(function(p){return p.ma.toUpperCase().includes(q)||p.kc.includes(q);});
+  // Sắp xếp theo tồn kho nhiều nhất (nút 📦 Tồn nhiều cạnh bộ lọc)
+  if(curSortTon){
+    list=list.slice().sort(function(a,b){ return tonKhoTongCuaMa(b.ma)-tonKhoTongCuaMa(a.ma); });
+  }
   var totalItems=list.length;
   var totalPages=Math.max(1,Math.ceil(totalItems/20));
   if(curPage>=totalPages) curPage=totalPages-1;
