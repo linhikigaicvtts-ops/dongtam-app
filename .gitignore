@@ -4,3 +4,8 @@
 *.xlsx
 *.XLSX
 AppsScript_DongTam_v10.js
+Apps Script v11*.txt
+
+# Cac du an rieng khac nam chung thu muc lam viec - khong thuoc repo web ban hang nay
+congno-agent/
+dongtam-agent/
