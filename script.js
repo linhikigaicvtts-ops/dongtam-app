@@ -736,7 +736,8 @@ function showDP(ma){
   document.getElementById('dp').style.display='block';
   var isDesk=(window.innerWidth||document.documentElement.clientWidth||0)>=768;
   if(isDesk) document.body.classList.add('dp-open');
-  else { var bd=document.getElementById('dp-backdrop'); if(bd) bd.classList.add('on'); }
+  // Modal giữa màn hình (desktop) lẫn bottom-sheet (mobile) đều cần nền mờ phía sau
+  var bd=document.getElementById('dp-backdrop'); if(bd) bd.classList.add('on');
   if(document.getElementById('dp-scroll')) document.getElementById('dp-scroll').scrollTop=0;
   calcM();
   // Reset qty input về m² mặc định

@@ -198,37 +198,40 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
 
   /* Tab Tra giá: mặc định margin-left 85px (chừa size-sidebar) */
   #tab-tra{margin-left:85px !important}
-  /* Khi dp mở: đẩy thêm 320px */
-  body.dp-open #tab-tra{margin-left:405px !important}
-
-  /* Tab Sale: khi dp mở đẩy sang phải 320px */
-  body.dp-open #tab-sale{margin-left:320px !important}
+  /* Popup chi tiết giờ là modal giữa màn hình — không cần đẩy nội dung nữa */
+  body.dp-open #tab-tra{margin-left:85px !important}
+  body.dp-open #tab-sale{margin-left:0 !important}
 
   /* Product grid: KHÔNG cần margin-left vì tab-tra đã có margin-left */
   #size-sidebar + div{margin-left:0 !important}
 
-  /* Detail panel: trên desktop hiện ở right panel thay vì inline card */
-  #dp-backdrop{display:none !important}
+  /* Detail popup desktop: modal lớn giữa màn hình, 2 cột (giống giỏ hàng) */
+  #dp-backdrop{z-index:9000}
   #dp-drag{display:none !important}
   .dp{
     display:none;
     position:fixed !important;
-    left:0 !important;right:auto !important;top:57px !important;bottom:56px !important;
-    width:320px !important;height:auto !important;
+    left:50% !important;top:50% !important;right:auto !important;bottom:auto !important;
+    transform:translate(-50%,-50%);
+    width:min(940px,94vw) !important;height:auto !important;
+    max-height:92vh !important;
     margin:0 !important;
-    border-radius:0 !important;
-    border:none !important;border-top:none !important;
-    border-right:1px solid var(--bd) !important;
-    max-height:none !important;
+    border-radius:14px !important;
+    border:1.5px solid var(--bd) !important;
     overflow:hidden !important;
     flex-direction:column !important;
-    z-index:85 !important;
+    z-index:9001 !important;
     background:var(--bg1) !important;
-    box-shadow:none !important;
+    box-shadow:0 12px 48px rgba(0,0,0,.25) !important;
   }
   .dp[style*="display:block"],.dp[style*="display: block"]{display:flex !important}
-  #dp-scroll{flex:1;overflow-y:auto;padding:12px 12px 0}
-  #dp-footer{flex-shrink:0;padding:10px 12px;border-top:1px solid var(--bd);background:var(--bg1)}
+  /* Nội dung chia 2 cột: ảnh + giá bên trái, máy tính/lên đơn bên phải */
+  #dp-scroll{
+    flex:1;overflow-y:auto;padding:18px 20px 10px;
+    column-count:2;column-gap:22px;
+  }
+  #dp-scroll>*{break-inside:avoid;-webkit-column-break-inside:avoid}
+  #dp-footer{flex-shrink:0;padding:12px 20px;border-top:1px solid var(--bd);background:var(--bg1)}
   /* Khi dp hiện → ẩn tab-don (cart) phía dưới */
   #tab-don{transition:opacity .15s}
 }
