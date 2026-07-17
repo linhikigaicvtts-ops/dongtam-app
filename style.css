@@ -519,7 +519,7 @@ input::placeholder{color:var(--t3)}
 .pr-save{background:#F0FFF4;border-radius:8px;padding:8px 12px;font-size:12px;color:#1B6634;font-weight:600;text-align:center;margin-bottom:10px}
 
 /* ===== SALE TAB GRID ===== */
-.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px}
+.sale-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 18px}
 .sale-card{background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
 .sale-card:active{border-color:var(--red)}
 .sale-img-wrap{aspect-ratio:1;background:var(--bg2);overflow:hidden;position:relative}

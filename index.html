@@ -328,10 +328,12 @@
     </div>
     <button onclick="moTonKho(curNgoiMa)" style="width:100%;margin-top:6px;font-size:12px;padding:8px;border-radius:var(--r8);border:1.5px solid #C0232A;background:none;color:#C0232A;font-weight:700;font-family:var(--f);cursor:pointer">📦 Xem tồn kho theo kho/lô</button>
   </div>
-  <div class="sec-hdr">A. NGÓI LỢP</div>
-  <div id="ngoi-list-A"></div>
-  <div class="sec-hdr" style="margin-top:8px">B. PHỤ KIỆN THEO MÀU ĐANG CHỌN</div>
-  <div id="ngoi-list-B"></div>
+  <div class="tab-wrap">
+    <div class="sec-hdr">A. NGÓI LỢP</div>
+    <div id="ngoi-list-A"></div>
+    <div class="sec-hdr" style="margin-top:8px">B. PHỤ KIỆN THEO MÀU ĐANG CHỌN</div>
+    <div id="ngoi-list-B"></div>
+  </div>
 </div>
 
 <!-- TAB 4: Keo -->
@@ -340,7 +342,7 @@
     <button id="sub-keo-btn" onclick="swSubKeo('keo')" style="width:100%;padding:9px;border-radius:10px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:12px;cursor:pointer;font-family:var(--f)">🧱 Keo & Bột chà ron</button>
 
   </div>
-  <div id="sub-keo-content">
+  <div id="sub-keo-content" class="tab-wrap">
   <p style="font-size:13px;color:var(--t2);margin-bottom:10px">Keo dán gạch GECKO Đồng Tâm · Giá <b>đồng/bao</b></p>
   <div id="keo-detail" style="display:none;background:var(--bg1);border:2px solid #7B1FA2;border-radius:var(--r12);padding:14px;margin-bottom:12px">
     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
