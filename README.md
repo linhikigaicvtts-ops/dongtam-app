@@ -9,13 +9,12 @@
 - **SĐT:** 0819 548 908
 
 ## Login (v11 – đã sửa bảo mật)
-- linh / [REDACTED] (admin)
-- nhanvien1 / [REDACTED]
-- nhanvien2 / [REDACTED]
-- Mật khẩu **không còn** lưu plaintext trong index.html. Lần đầu chạy
-  Apps Script v11, tab "Users" sẽ tự tạo trong Sheet với password đã hash
-  SHA-256 (giữ đúng 3 tài khoản trên). Đổi mật khẩu: sửa ô PasswordHash
-  bằng kết quả hàm `sha256('mật khẩu mới')` chạy thử trong Apps Script editor.
+- 3 tài khoản: 1 admin + 2 nhân viên. **Mật khẩu KHÔNG ghi ở đây** — xem
+  trực tiếp tab "Users" trong Sheet (cột "Mật khẩu (xem để nhớ)", chỉ admin
+  truy cập được Sheet).
+- Mật khẩu **không** lưu plaintext trong index.html/script.js. Tab "Users"
+  lưu password đã hash SHA-256. Đổi mật khẩu: dùng màn "Quản lý tài khoản"
+  trong app (admin), hoặc sửa trực tiếp ô "Mật khẩu (xem để nhớ)" trong Sheet.
 
 ## Cấu trúc Sheet TEST
 | Tab | Nội dung |
