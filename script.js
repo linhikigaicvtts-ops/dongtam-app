@@ -62,6 +62,78 @@ function timAnhMulti(ma){
 
 // Fetch bảng giá từ Google Sheet (JSONP)
 // Gọi khi app mở — cập nhật DATA từ Sheet, không cần sửa code
+// Áp giá gạch từ kết quả action=getGia(loai=gach) HOẶC phần "gach" của
+// action=getAll vào mảng DATA - tách riêng để dùng chung cho cả 2 đường gọi.
+function applyGiaGach(res){
+  if(!res||!res.data||!res.data.length) return;
+  var rows = res.data;
+  rows.forEach(function(row){
+    var ma = String(row.ma||'').trim();
+    if(!ma) return;
+    function pg(v){return parseFloat(String(v||'0').replace(/\./g,'').replace(/,/g,'.'))||0;}
+    var le=pg(row.le), nhan=pg(row.nhan), giao=pg(row.giao);
+    var nsSheet=pg(row.ns), nsCT1=pg(row.ns_ct1);
+    var ns = nsSheet>0 ? nsSheet : nsCT1>0 ? Math.round(nsCT1*0.95) : Math.round(nhan*0.95);
+    var gs = pg(row.gs)||giao;
+
+    // Tìm trong DATA hiện tại
+    var p = DATA.find(function(x){return x.ma===ma;});
+    if(p){
+      // Mã đã có → chỉ cập nhật nếu giá > 0 (tránh ghi đè bằng 0 khi Sheet lỗi)
+      if(le>0)   p.le=le;
+      if(nhan>0) p.nhan=nhan;
+      if(giao>0) p.giao=giao;
+      if(ns>0)   p.ns=ns;
+      if(gs>0)   p.gs=gs;
+      // Tên hóa đơn (dùng khi xuất PDF/Excel để khớp đúng tên trên hóa đơn VAT)
+      if(row.tenHD) p.tenHD=String(row.tenHD).trim();
+    } else {
+      // Mã MỚI trong Sheet → thêm vào DATA
+      DATA.push({
+        ma:ma, kc:String(row.kc||'').trim().replace(/X/g,'x'), cat:String(row.cat||'').toLowerCase(),
+        gio:String(row.gio||''), ten:String(row.ten||ma),
+        tenHD:String(row.tenHD||'').trim(),
+        le:le, nhan:nhan, giao:giao, ns:ns, gs:gs
+      });
+    }
+  });
+  console.log('✅ Cập nhật giá gạch từ Sheet: '+rows.length+' mã (bao gồm mã mới)');
+}
+
+// Gọi 1 lần duy nhất (action=getAll) thay vì 5 lần riêng (giá gạch, ảnh,
+// thuộc tính SP, CT1, CT2) khi mở app - mỗi lần gọi Apps Script rời rạc có
+// phí khởi động ~2-5s không đổi được dù code nhanh hay chậm, gộp lại giúp
+// chỉ tốn phí đó 1 lần. Nếu API gộp lỗi, tự động rơi về gọi riêng lẻ như cũ.
+function fetchAllFromSheet(){
+  var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
+  var old=document.getElementById('_all_script');
+  if(old) old.remove();
+  window._onGetAll = function(res){
+    var s=document.getElementById('_all_script');
+    if(s) s.remove();
+    if(!res || res.status!=='ok'){
+      console.log('⚠️ getAll lỗi, rơi về gọi riêng lẻ:', res && res.msg);
+      fetchGiaFromSheet(); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+      return;
+    }
+    try{ applyGiaGach(res.gach); }catch(e){ console.log('Lỗi áp giá gạch (getAll):', e); }
+    try{ applyImagesData(res.images); }catch(e){ console.log('Lỗi áp ảnh (getAll):', e); }
+    try{ applyThuocTinhData(res.thuocTinh); }catch(e){ console.log('Lỗi áp thuộc tính SP (getAll):', e); }
+    try{ applyCTResult('ct1', res.ct1); }catch(e){ console.log('Lỗi áp CT1 (getAll):', e); }
+    try{ applyCTResult('ct2', res.ct2); }catch(e){ console.log('Lỗi áp CT2 (getAll):', e); }
+  };
+  var s=document.createElement('script');
+  s.id='_all_script';
+  var _tok=authTok();
+  s.src=APPS_URL+'?action=getAll&k='+encodeURIComponent(APP_KEY)+'&t='+encodeURIComponent(_tok)+(_tok?'':'&g=1')+'&callback=_onGetAll';
+  s.onerror=function(){
+    console.log('⚠️ Không tải được dữ liệu gộp — rơi về gọi riêng lẻ');
+    s.remove();
+    fetchGiaFromSheet(); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+  };
+  document.head.appendChild(s);
+}
+
 function fetchGiaFromSheet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var loais = ['gach','ngoi','keo','kinh'];
@@ -72,40 +144,9 @@ function fetchGiaFromSheet(){
       try{
         if(!res||!res.data||!res.data.length) return;
         var rows = res.data;
-        
-        if(loai==='gach'){
-          // Cập nhật giá vào DATA array
-          rows.forEach(function(row){
-            var ma = String(row.ma||'').trim();
-            if(!ma) return;
-            function pg(v){return parseFloat(String(v||'0').replace(/\./g,'').replace(/,/g,'.'))||0;}
-            var le=pg(row.le), nhan=pg(row.nhan), giao=pg(row.giao);
-            var nsSheet=pg(row.ns), nsCT1=pg(row.ns_ct1);
-            var ns = nsSheet>0 ? nsSheet : nsCT1>0 ? Math.round(nsCT1*0.95) : Math.round(nhan*0.95);
-            var gs = pg(row.gs)||giao;
 
-            // Tìm trong DATA hiện tại
-            var p = DATA.find(function(x){return x.ma===ma;});
-            if(p){
-              // Mã đã có → chỉ cập nhật nếu giá > 0 (tránh ghi đè bằng 0 khi Sheet lỗi)
-              if(le>0)   p.le=le;
-              if(nhan>0) p.nhan=nhan;
-              if(giao>0) p.giao=giao;
-              if(ns>0)   p.ns=ns;
-              if(gs>0)   p.gs=gs;
-              // Tên hóa đơn (dùng khi xuất PDF/Excel để khớp đúng tên trên hóa đơn VAT)
-              if(row.tenHD) p.tenHD=String(row.tenHD).trim();
-            } else {
-              // Mã MỚI trong Sheet → thêm vào DATA
-              DATA.push({
-                ma:ma, kc:String(row.kc||'').trim().replace(/X/g,'x'), cat:String(row.cat||'').toLowerCase(),
-                gio:String(row.gio||''), ten:String(row.ten||ma),
-                tenHD:String(row.tenHD||'').trim(),
-                le:le, nhan:nhan, giao:giao, ns:ns, gs:gs
-              });
-            }
-          });
-          console.log('✅ Cập nhật giá gạch từ Sheet: '+rows.length+' mã (bao gồm mã mới)');
+        if(loai==='gach'){
+          applyGiaGach(res);
         }
         else if(loai==='ngoi'){
           function pg2(v){return parseFloat(String(v||'0').replace(/\./g,'').replace(/,/g,'.'))||0;}
@@ -258,30 +299,36 @@ function fetchGiaFromSheet(){
 
 
 // Fetch ảnh từ Google Sheet khi đăng nhập (dùng script tag để tránh CORS)
+// Áp dữ liệu ảnh (từ action=getImages hoặc phần "images" của getAll) vào
+// imgStore/imgStoreMulti - tách riêng để dùng chung cho cả 2 đường gọi.
+function applyImagesData(data){
+  try{
+    if(data && data.images){
+      var map=data.images, count=0;
+      Object.keys(map).forEach(function(ma){
+        if(map[ma]){ imgStore[ma]=map[ma]; count++; }
+      });
+      // Build multi: data.imagesMulti[ma] = [url1,url2,...]
+      if(data.imagesMulti){
+        Object.keys(data.imagesMulti).forEach(function(ma){
+          imgStoreMulti[ma]=data.imagesMulti[ma];
+        });
+        try{ localStorage.setItem('dt_imgs_multi', JSON.stringify(imgStoreMulti)); }catch(e){}
+      }
+      try{ localStorage.setItem('dt_imgs', JSON.stringify(imgStore)); }catch(e){}
+      if(curP_ma) loadImg(curP_ma);
+      renderSale(); // refresh ảnh trong sale grid
+      console.log('✅ Đã tải '+count+' ảnh từ Sheet');
+    }
+  }catch(e){ console.log('Lỗi parse ảnh:', e); }
+}
+
 function fetchImagesFromSheet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
 
   // Dùng JSONP: inject script tag để bypass CORS
   window._onImgData = function(data){
-    try{
-      if(data && data.images){
-        var map=data.images, count=0;
-        Object.keys(map).forEach(function(ma){
-          if(map[ma]){ imgStore[ma]=map[ma]; count++; }
-        });
-        // Build multi: data.imagesMulti[ma] = [url1,url2,...]
-        if(data.imagesMulti){
-          Object.keys(data.imagesMulti).forEach(function(ma){
-            imgStoreMulti[ma]=data.imagesMulti[ma];
-          });
-          try{ localStorage.setItem('dt_imgs_multi', JSON.stringify(imgStoreMulti)); }catch(e){}
-        }
-        try{ localStorage.setItem('dt_imgs', JSON.stringify(imgStore)); }catch(e){}
-        if(curP_ma) loadImg(curP_ma);
-        renderSale(); // refresh ảnh trong sale grid
-        console.log('✅ Đã tải '+count+' ảnh từ Sheet');
-      }
-    }catch(e){ console.log('Lỗi parse ảnh:', e); }
+    applyImagesData(data);
     // Xóa script tag sau khi xong
     var old=document.getElementById('_img_script');
     if(old) old.remove();
@@ -1138,71 +1185,75 @@ function setSF2(v){
 }
 
 // Fetch data CT1 / CT2 / CT3 từ Apps Script
+// Áp kết quả CT1/CT2/CT3 (từ action=getCT hoặc phần "ct1"/"ct2" của
+// getAll) - tách riêng để dùng chung cho cả 2 đường gọi.
+function applyCTResult(loai, res){
+  if(res && res.status==='ok' && res.data){
+    var mapped;
+
+    if(loai==='ct3'){
+      // GAS trả về: ma (đã strip prefix), tenNM, kc, ns (NET/m²), net_th, tyle_giam
+      // Tra thêm le/nhan/giao từ DATA chính để hiển thị đủ thông tin
+      mapped = res.data.map(function(r){
+        var maApp = r.ma || '';
+        var baseP = (typeof DATA!=='undefined'?DATA:[]).find(function(x){ return x.ma===maApp; });
+        return {
+          ma: maApp,
+          tenNM: r.tenNM || '',
+          kc: r.kc || (baseP?baseP.kc:''),
+          cat: r.cat || (baseP?baseP.cat:'porcelain'),
+          le:   baseP ? (baseP.le||0)   : 0,
+          nhan: baseP ? (baseP.nhan||0) : 0,
+          giao: baseP ? (baseP.giao||0) : 0,
+          ns:   pg(r.ns || 0),           // Giá NET/m² — Admin only
+          gs:   0,
+          net_th: pg(r.net_th || 0),     // Giá NET/thùng
+          tyle_giam: parseFloat(r.tyle_giam || 0),  // % giảm tối đa
+          loai_sale: 'ct3'
+        };
+      }).filter(function(p){ return p.ma && p.ma.length>1; });
+      CT3_DATA=mapped; ct3Loaded=true;
+    } else {
+      // CT1/CT2: mapping như cũ
+      mapped = res.data.map(function(r){
+        return {
+          ma: r.ma || r['Mã sản phẩm'] || r['Mã SP'] || '',
+          kc: (r.kc || r['Kích cỡ (mm)'] || r['Kích cỡ'] || '').replace(/mm/i,'').trim().replace(/X/g,'x'),
+          cat: (r.cat || r['Loại'] || r['Ngành hàng'] || '').toLowerCase().indexOf('por')>=0?'porcelain':'ceramic',
+          le:  pg(r.le  || r['Giá lẻ (đ/m²)']  || r['Giá lẻ']),
+          nhan:pg(r.nhan|| r['Giá ĐL Nhận kho'] || r['Giá nhận kho (đ/m²)']),
+          giao:pg(r.giao|| r['Giá ĐL Đi giao']  || r['Giá giao hàng (đ/m²)']),
+          ns:  pg(r.ns  || r.nk || r['Giá NET'] || r['Giá NS'] || r['Giá Sale Nhận kho'] || 0),
+          gs:  pg(r.gs  || r.gh || r['Giá Sale Đi giao'] || 0),
+          // nk/gh: giá sale nhận kho/giao — GAS trả trong key nhan/giao;
+          // renderSale + mergeCTintoDATA đọc nk/gh (trước dựa vào data nhúng)
+          nk:  pg(r.nk || r.nhan || r['Giá ĐL Nhận kho'] || 0),
+          gh:  pg(r.gh || r.giao || r['Giá ĐL Đi giao'] || 0),
+          ct150nk: pg(r.ct150nk || 0),
+          ct150gh: pg(r.ct150gh || 0),
+          nhan_kv: pg(r['Giá không vét kho nhận (đ/m²)'] || 0),
+          giao_kv: pg(r['Giá không vét kho giao (đ/m²)'] || 0),
+          ct: r.ct || r['Chương trình'] || loai.toUpperCase(),
+          tu_ngay: r.tu_ngay || r['Từ ngày'] || '',
+          den_ngay: r.den_ngay || r['Đến ngày'] || '',
+          loai_sale: loai
+        };
+      }).filter(function(p){ return p.ma && p.ma.length>1; });
+      if(loai==='ct1'){ CT1_DATA=mapped; ct1Loaded=true; }
+      else if(loai==='ct2'){ CT2_DATA=mapped; ct2Loaded=true; }
+      // Gắn giá sale mới tải vào catalog chính (badge + giá sale ở tab Gạch)
+      mergeCTintoDATA(); render();
+    }
+  }
+  renderSale();
+}
+
 function fetchCT(loai){
   var el=document.getElementById('slist');
   el.innerHTML='<div style="padding:40px;text-align:center;color:var(--t2)">⏳ Đang tải dữ liệu '+loai.toUpperCase()+'...</div>';
   document.getElementById('scount').textContent='Đang tải...';
   var cbName='_onCT_'+loai;
-  window[cbName]=function(res){
-    if(res && res.status==='ok' && res.data){
-      var mapped;
-
-      if(loai==='ct3'){
-        // GAS trả về: ma (đã strip prefix), tenNM, kc, ns (NET/m²), net_th, tyle_giam
-        // Tra thêm le/nhan/giao từ DATA chính để hiển thị đủ thông tin
-        mapped = res.data.map(function(r){
-          var maApp = r.ma || '';
-          var baseP = (typeof DATA!=='undefined'?DATA:[]).find(function(x){ return x.ma===maApp; });
-          return {
-            ma: maApp,
-            tenNM: r.tenNM || '',
-            kc: r.kc || (baseP?baseP.kc:''),
-            cat: r.cat || (baseP?baseP.cat:'porcelain'),
-            le:   baseP ? (baseP.le||0)   : 0,
-            nhan: baseP ? (baseP.nhan||0) : 0,
-            giao: baseP ? (baseP.giao||0) : 0,
-            ns:   pg(r.ns || 0),           // Giá NET/m² — Admin only
-            gs:   0,
-            net_th: pg(r.net_th || 0),     // Giá NET/thùng
-            tyle_giam: parseFloat(r.tyle_giam || 0),  // % giảm tối đa
-            loai_sale: 'ct3'
-          };
-        }).filter(function(p){ return p.ma && p.ma.length>1; });
-        CT3_DATA=mapped; ct3Loaded=true;
-      } else {
-        // CT1/CT2: mapping như cũ
-        mapped = res.data.map(function(r){
-          return {
-            ma: r.ma || r['Mã sản phẩm'] || r['Mã SP'] || '',
-            kc: (r.kc || r['Kích cỡ (mm)'] || r['Kích cỡ'] || '').replace(/mm/i,'').trim().replace(/X/g,'x'),
-            cat: (r.cat || r['Loại'] || r['Ngành hàng'] || '').toLowerCase().indexOf('por')>=0?'porcelain':'ceramic',
-            le:  pg(r.le  || r['Giá lẻ (đ/m²)']  || r['Giá lẻ']),
-            nhan:pg(r.nhan|| r['Giá ĐL Nhận kho'] || r['Giá nhận kho (đ/m²)']),
-            giao:pg(r.giao|| r['Giá ĐL Đi giao']  || r['Giá giao hàng (đ/m²)']),
-            ns:  pg(r.ns  || r.nk || r['Giá NET'] || r['Giá NS'] || r['Giá Sale Nhận kho'] || 0),
-            gs:  pg(r.gs  || r.gh || r['Giá Sale Đi giao'] || 0),
-            // nk/gh: giá sale nhận kho/giao — GAS trả trong key nhan/giao;
-            // renderSale + mergeCTintoDATA đọc nk/gh (trước dựa vào data nhúng)
-            nk:  pg(r.nk || r.nhan || r['Giá ĐL Nhận kho'] || 0),
-            gh:  pg(r.gh || r.giao || r['Giá ĐL Đi giao'] || 0),
-            ct150nk: pg(r.ct150nk || 0),
-            ct150gh: pg(r.ct150gh || 0),
-            nhan_kv: pg(r['Giá không vét kho nhận (đ/m²)'] || 0),
-            giao_kv: pg(r['Giá không vét kho giao (đ/m²)'] || 0),
-            ct: r.ct || r['Chương trình'] || loai.toUpperCase(),
-            tu_ngay: r.tu_ngay || r['Từ ngày'] || '',
-            den_ngay: r.den_ngay || r['Đến ngày'] || '',
-            loai_sale: loai
-          };
-        }).filter(function(p){ return p.ma && p.ma.length>1; });
-        if(loai==='ct1'){ CT1_DATA=mapped; ct1Loaded=true; }
-        else if(loai==='ct2'){ CT2_DATA=mapped; ct2Loaded=true; }
-        // Gắn giá sale mới tải vào catalog chính (badge + giá sale ở tab Gạch)
-        mergeCTintoDATA(); render();
-      }
-    }
-    renderSale();
-  };
+  window[cbName]=function(res){ applyCTResult(loai, res); };
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var s=document.createElement('script');
   s.src=APPS_URL+'?action=getCT&loai='+loai+'&k='+encodeURIComponent(APP_KEY)+'&t='+encodeURIComponent(authTok())+'&callback='+cbName;
@@ -2355,25 +2406,17 @@ function showApp(name){
   renderDon();
   // Init app
   render();
-  // Tải ảnh từ Google Sheet (chạy nền)
-  fetchImagesFromSheet();
-  // Render ngay với giá có sẵn trong app
-  render();
   renderSale();
-  // Sau đó tải giá mới từ Sheet (chạy nền)
-  fetchGiaFromSheet();
+  // Tải giá gạch + ảnh + thuộc tính SP + CT1 + CT2 trong 1 lần gọi duy nhất
+  // (thay vì 5 lần riêng) - giảm phí khởi động Apps Script khi mở app.
+  fetchAllFromSheet();
   setTimeout(function(){ mergeCTintoDATA(); render(); }, 100);
-  // Tải giá sale CT1/CT2 thật từ Sheet (data nhúng trong code đã xóa giá — chỉ còn giá lẻ)
-  fetchCT('ct1');
-  fetchCT('ct2');
   // Tải danh sách khách hàng cũ để gợi ý tự động (chạy nền)
   fetchKhachHangFromSheet();
   // Tải tồn kho chi tiết theo kho + số lô (chạy nền)
   fetchTonKhoChiTiet();
   // Tải trọng lượng chính xác theo mã SAP (chạy nền)
   fetchTrongLuong();
-  // Tải thuộc tính sản phẩm (Màu/Công năng/Tính năng/Hoa văn/Men) để lọc nâng cao
-  fetchThuocTinhSP();
   // Warm-up GAS: ping nhẹ ngay sau login để GAS "thức" sẵn cho các request sau
   gasWarmUp();
   // Áp dụng phân quyền hiển thị lợi nhuận (chỉ Admin thấy)
@@ -2461,9 +2504,7 @@ function showGuestApp(){
   var bnSale=document.getElementById('bn-sale'); if(bnSale) bnSale.style.display='none';
   // Render catalog với giá lẻ + tải giá lẻ mới nhất từ Sheet (server tự giấu giá ĐL khi không có token)
   render();
-  fetchGiaFromSheet();
-  fetchImagesFromSheet();
-  fetchThuocTinhSP();
+  fetchAllFromSheet();
 }
 
 function showLoginScreen(){
@@ -3205,11 +3246,16 @@ function kgPerVienCuaMa(ma){
 }
 
 // ===== LỌC NÂNG CAO: Màu, Công năng, Tính năng, Hoa văn, Men =====
+// Áp thuộc tính SP (từ action=getThuocTinhSP hoặc phần "thuocTinh" của
+// getAll) - tách riêng để dùng chung cho cả 2 đường gọi.
+function applyThuocTinhData(res){
+  if(res && res.status==='ok' && res.data){ thuocTinhMap=res.data; buildLocSidebar(); buildFilterSide(); }
+}
 function fetchThuocTinhSP(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var cbName='_onThuocTinhSP';
   window[cbName]=function(res){
-    if(res && res.status==='ok' && res.data){ thuocTinhMap=res.data; buildLocSidebar(); buildFilterSide(); }
+    applyThuocTinhData(res);
     var s=document.getElementById('_ttsp_script');
     if(s) s.remove();
   };
