@@ -108,12 +108,15 @@ function fetchAllFromSheet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var old=document.getElementById('_all_script');
   if(old) old.remove();
+  // getAll (GAS) chỉ gộp gạch/ảnh/thuộc tính SP/CT1/CT2 - Ngói/Keo/Kính
+  // vẫn phải gọi riêng qua fetchGiaFromSheet (không nằm trong getAll).
+  fetchGiaFromSheet(['ngoi','keo','kinh']);
   window._onGetAll = function(res){
     var s=document.getElementById('_all_script');
     if(s) s.remove();
     if(!res || res.status!=='ok'){
       console.log('⚠️ getAll lỗi, rơi về gọi riêng lẻ:', res && res.msg);
-      fetchGiaFromSheet(); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+      fetchGiaFromSheet(['gach']); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
       return;
     }
     try{ applyGiaGach(res.gach); }catch(e){ console.log('Lỗi áp giá gạch (getAll):', e); }
@@ -129,14 +132,14 @@ function fetchAllFromSheet(){
   s.onerror=function(){
     console.log('⚠️ Không tải được dữ liệu gộp — rơi về gọi riêng lẻ');
     s.remove();
-    fetchGiaFromSheet(); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+    fetchGiaFromSheet(['gach']); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
   };
   document.head.appendChild(s);
 }
 
-function fetchGiaFromSheet(){
+function fetchGiaFromSheet(loaisOverride){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
-  var loais = ['gach','ngoi','keo','kinh'];
+  var loais = loaisOverride || ['gach','ngoi','keo','kinh'];
   var loaded = 0;
 
   loais.forEach(function(loai){
