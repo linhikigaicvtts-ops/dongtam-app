@@ -5000,21 +5000,6 @@ function ct3BadgeHtml(ma){
 
 
 (function(){
-  function fmt(n){ return (Math.round(n)||0).toLocaleString('vi-VN')+'đ'; }
-  function renderQuickCart(){
-    var q=document.getElementById('cart-quick'); if(!q) return;
-    var items=(typeof donItems!=='undefined')?donItems:[];
-    if(!items.length){ q.innerHTML='<div class="qc-empty">🛒<br>Chưa có sản phẩm<br><span style="font-size:11px">Thêm SP khi xem chi tiết</span></div>'; return; }
-    var totalLe=0,n=0,rows='';
-    items.forEach(function(it){
-      var le=(it.le||0)*(it.qty||0); totalLe+=le; n+=(it.qty||0);
-      rows+='<div class="qc-row"><div class="qc-ma">'+(it.ten||it.ma)+'</div><div class="qc-meta">'+(it.kc||'')+' · x'+it.qty+'</div><div class="qc-price">'+fmt(le)+'</div></div>';
-    });
-    q.innerHTML='<div class="qc-head"><span>🛒 Đã thêm</span><span class="qc-badge">'+n+'</span></div>'
-      +'<div class="qc-list">'+rows+'</div>'
-      +'<div class="qc-total"><span>Tổng lẻ</span><b>'+fmt(totalLe)+'</b></div>'
-      +'<button class="qc-open" onclick="openDonModal()">📋 Mở đơn hàng đầy đủ</button>';
-  }
   function openDonModal(){
     if(typeof renderDon==='function') renderDon();
     if(typeof apDungPhanQuyenLoi==='function') apDungPhanQuyenLoi();
@@ -5025,7 +5010,6 @@ function ct3BadgeHtml(ma){
     document.getElementById('don-modal').classList.remove('on');
     document.getElementById('don-modal-bg').classList.remove('on');
   }
-  window.renderQuickCart=renderQuickCart;
   window.openDonModal=openDonModal;
   window.closeDonModal=closeDonModal;
 
@@ -5050,39 +5034,22 @@ function ct3BadgeHtml(ma){
       var fields=left.querySelector('div[style*="flex-direction:column"]');
       if(fields) fields.classList.add('dm-fields');
     }
-    if(!document.getElementById('cart-quick')){
-      var q=document.createElement('div'); q.id='cart-quick'; tabDon.appendChild(q);
-    }
-    // Monkey-patch: cap nhat panel nhanh moi khi don thay doi
-    if(typeof window.updateDonBadge==='function' && !window.updateDonBadge._qc){
-      var _u=window.updateDonBadge;
-      window.updateDonBadge=function(){ var r=_u.apply(this,arguments); renderQuickCart(); return r; };
-      window.updateDonBadge._qc=true;
-    }
-    if(typeof window.renderDon==='function' && !window.renderDon._qc){
-      var _r=window.renderDon;
-      window.renderDon=function(){ var r=_r.apply(this,arguments); renderQuickCart(); return r; };
-      window.renderDon._qc=true;
-    }
-    // Monkey-patch swTab: mobile -> mo popup; desktop -> panel luon hien
+    // swTab('don') luôn mở popup đơn hàng đầy đủ (không còn panel cố định bên phải)
     if(typeof window.swTab==='function' && !window.swTab._qc){
       var _s=window.swTab;
       window.swTab=function(t){
         if(t==='don'){
-          if(typeof renderDon==='function') renderDon();
-          renderQuickCart();
           ['timkiem','danhmuc','don','sale'].forEach(function(x){
             var b=document.getElementById('sn-'+x); if(b) b.classList.toggle('on',x==='don');
           });
-          if(window.innerWidth<768){ openDonModal(); return; }
           (typeof BOTTOM_NAV_TABS!=='undefined'?BOTTOM_NAV_TABS:['danhmuc','tra','ngoi','keo','tbvs','son']).forEach(function(x){ var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',false); });
+          openDonModal();
           return;
         }
         return _s.apply(this,arguments);
       };
       window.swTab._qc=true;
     }
-    renderQuickCart();
   }
   if(document.readyState!=='loading') setTimeout(initCartUI,200);
   else document.addEventListener('DOMContentLoaded',function(){ setTimeout(initCartUI,200); });

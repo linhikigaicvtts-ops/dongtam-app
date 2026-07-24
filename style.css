@@ -156,33 +156,21 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   #btn-timkiem,#btn-giohang,#btn-taikhoan-menu{display:none !important}
 
   /* Banner thông tin khách hàng */
-  #thongtin-khachhang{margin-left:84px;margin-right:320px}
+  #thongtin-khachhang{margin-left:84px}
 
-  /* Tab content: margin trái cho sidebar, margin phải cho cart */
-  .tc{display:none;margin-left:84px;margin-right:320px;padding-bottom:20px}
+  /* Tab content: margin trái cho sidebar (không còn panel giỏ hàng cố định bên phải,
+     "Đơn hàng" giờ mở popup #don-modal giữa màn hình) */
+  .tc{display:none;margin-left:84px;padding-bottom:20px}
   .tc.on{display:block}
 
   /* Tab Tra giá: đẩy thêm sang phải để tránh size-sidebar cố định (84+390=474px) */
   #tab-tra{margin-left:474px !important}
 
-  /* Cart panel: luôn hiển thị bên phải */
-  #tab-don{
-    display:block !important;
-    position:fixed !important;
-    right:0 !important;top:57px !important;bottom:0 !important;
-    width:320px !important;
-    margin-left:0 !important;margin-right:0 !important;
-    border-left:1px solid var(--bd);
-    background:var(--bg1);
-    overflow-y:auto;
-    z-index:80;
-  }
+  /* Product list: 3 cột (rộng thêm nhờ bỏ panel giỏ hàng cố định) */
+  #plist{display:grid !important;grid-template-columns:repeat(3,1fr);gap:12px}
 
-  /* Product list: 2 cột */
-  #plist{display:grid !important;grid-template-columns:repeat(2,1fr);gap:12px}
-
-  /* Sale grid: 2 cột */
-  #slist.sale-grid{grid-template-columns:repeat(2,1fr) !important}
+  /* Sale grid: 3 cột */
+  #slist.sale-grid{grid-template-columns:repeat(3,1fr) !important}
 
   /* Search wrap sticky dưới topbar */
   .search-wrap{position:sticky;top:0;z-index:40;background:var(--bg)}
@@ -201,13 +189,12 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
     z-index:60;              /* dưới topbar (z:100) — không đè lên header */
     max-height:none !important;
     padding:10px !important;
-    display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;
-    scroll-behavior:smooth;
+    display:flex;flex-direction:column;gap:7px;
+    scroll-behavior:smooth;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
   }
   #size-sidebar .sz-item{
-    flex:0 0 calc(50% - 4px);
-    border:1.5px solid var(--bd);border-bottom:1.5px solid var(--bd);
-    border-left:1.5px solid var(--bd);
+    flex:0 0 auto;width:100%;
+    border:1.5px solid var(--bd);
     border-radius:10px;
     padding:11px 4px;font-size:12.5px;font-weight:600;
     display:flex;align-items:center;justify-content:center;
@@ -740,12 +727,12 @@ input::placeholder{color:var(--t3)}
 #filter-side{display:none}
 @media(min-width:1200px){
   #filter-side{
-    position:fixed;right:320px;top:57px;bottom:0;width:212px;
+    position:fixed;right:0;top:57px;bottom:0;width:212px;
     overflow-y:auto;background:var(--bg1);border-left:1px solid var(--bd);
     padding:12px 14px 20px;z-index:75;
   }
-  /* Tab Gạch chừa chỗ cho bộ lọc + giỏ hàng */
-  body.fs-on #tab-tra{margin-right:532px !important}
+  /* Tab Gạch chừa chỗ cho bộ lọc (không còn panel giỏ hàng cố định bên phải) */
+  body.fs-on #tab-tra{margin-right:212px !important}
   #filter-side .fs-hdr{font-size:12px;font-weight:700;color:var(--t2);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.3px}
   #filter-side .fs-hdr:first-child{margin-top:0}
   #filter-side label.fs-row{display:flex;gap:7px;align-items:center;font-size:12.5px;color:var(--t1);margin:6px 0;cursor:pointer}
