@@ -387,7 +387,7 @@ function swTab(t){
     });
     return;
   }
-  ['tra','sale','ngoi','keo','kinh','don'].forEach(function(x){
+  ['tra','sale','ngoi','keo','kinh','don','danhmuc'].forEach(function(x){
     var el=document.getElementById('tab-'+x); if(el) el.classList.toggle('on',x===t);
   });
   ['tra','sale','ngoi','keo','don'].forEach(function(x){
@@ -402,6 +402,44 @@ function swTab(t){
   if(t==='keo')   renderKeo();
   if(t==='kinh')  renderKinh();
   if(t==='don')   renderDon();
+}
+
+// ===== LỚP 1: Danh mục ngành hàng (grid) =====
+// Chỉ là màn hình "cửa vào" - bấm vào 1 ô sẽ nhảy sang tab ngành đó
+// (dùng lại swTab có sẵn), không tự render danh sách sản phẩm ở đây.
+function moDanhMuc(){
+  renderDanhMucGrid();
+  swTab('danhmuc');
+}
+function renderDanhMucGrid(){
+  var el = document.getElementById('danhmuc-grid');
+  if(!el) return;
+  el.innerHTML = '';
+  var soGach = (typeof DATA!=='undefined' ? DATA.length : 0);
+  var soNgoi = (typeof NGOI!=='undefined' ? NGOI.length : 0);
+  var soKeo  = (typeof KEO!=='undefined' ? KEO.length : 0);
+  var soSale = (typeof CT1_DATA!=='undefined' ? CT1_DATA.length : 0) + (typeof CT2_DATA!=='undefined' ? CT2_DATA.length : 0);
+  var items = [
+    {icon:'🔲', ten:'Gạch', sub:soGach+' mã', tab:'tra', mau:'#C0232A'},
+    {icon:'🏠', ten:'Ngói', sub:soNgoi+' mã', tab:'ngoi', mau:'#8B5A2B'},
+    {icon:'🧱', ten:'Keo & bột chà ron', sub:soKeo+' mã', tab:'keo', mau:'#4A7C59'},
+    {icon:'🔥', ten:'Đang Sale', sub:soSale+' mã', tab:'sale', mau:'#E65100'},
+    {icon:'🚿', ten:'Thiết bị vệ sinh', sub:'Sắp ra mắt', tab:null, mau:'#888'},
+    {icon:'🎨', ten:'Sơn nước', sub:'Sắp ra mắt', tab:null, mau:'#888'}
+  ];
+  items.forEach(function(it){
+    var card = document.createElement('div');
+    var coDuLieu = !!it.tab;
+    card.style.cssText = 'background:var(--bg1);border:1.5px solid var(--bd);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center'
+      + (coDuLieu ? ';cursor:pointer' : ';opacity:.55');
+    card.innerHTML = '<div style="font-size:30px">'+it.icon+'</div>'
+      + '<div style="font-size:13.5px;font-weight:700;color:var(--t1)">'+it.ten+'</div>'
+      + '<div style="font-size:11.5px;font-weight:600;color:'+(coDuLieu?it.mau:'var(--t2)')+'">'+it.sub+'</div>';
+    if(coDuLieu){
+      card.addEventListener('click', function(){ swTab(it.tab); });
+    }
+    el.appendChild(card);
+  });
 }
 
 // --- TAB 1 ---
