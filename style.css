@@ -146,15 +146,19 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   }
   #don-badge{position:static !important;top:auto !important;right:auto !important}
 
-  /* Banner thông tin khách hàng */
-  #thongtin-khachhang{margin-left:0;margin-right:320px}
+  /* Sidebar điều hướng thay cho bottom-nav ngang */
+  nav.bottom-nav{display:none !important}
+  .side-nav{display:flex !important}
 
-  /* Tab content: margin phải cho cart, padding bottom cho nav */
-  .tc{display:none;margin-left:0;margin-right:320px;padding-bottom:64px}
+  /* Banner thông tin khách hàng */
+  #thongtin-khachhang{margin-left:84px;margin-right:320px}
+
+  /* Tab content: margin trái cho sidebar, margin phải cho cart */
+  .tc{display:none;margin-left:84px;margin-right:320px;padding-bottom:20px}
   .tc.on{display:block}
 
-  /* Tab Tra giá: đẩy thêm sang phải để tránh size-sidebar cố định (320+70=390px) */
-  #tab-tra{margin-left:390px !important}
+  /* Tab Tra giá: đẩy thêm sang phải để tránh size-sidebar cố định (84+390=474px) */
+  #tab-tra{margin-left:474px !important}
 
   /* Cart panel: luôn hiển thị bên phải */
   #tab-don{
@@ -181,10 +185,10 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Padding top cho tab content (vì không còn bottom-nav ăn space) */
   #app-content{padding-bottom:0}
 
-  /* Size sidebar: cố định bên trái, rộng 230px, lưới 2 cột cho dễ bấm */
+  /* Size sidebar: cố định bên trái (chừa 84px cho side-nav), rộng 230px, lưới 2 cột cho dễ bấm */
   #size-sidebar{
     position:fixed !important;
-    left:0 !important;top:57px !important;bottom:56px !important;
+    left:84px !important;top:57px !important;bottom:0 !important;
     width:230px !important;
     overflow-y:auto !important;
     background:var(--bg1) !important;
@@ -208,12 +212,12 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   #size-sidebar .sz-item.on{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 3px 10px rgba(192,35,42,.3)}
   #size-sidebar>#loc-sidebar{flex-basis:100%}
   /* Popup chi tiết là modal giữa màn hình — sidebar đứng yên, không dịch chuyển */
-  body.dp-open #size-sidebar{left:0 !important}
+  body.dp-open #size-sidebar{left:84px !important}
 
-  /* Tab Tra giá: chừa 230px cho size-sidebar */
-  #tab-tra{margin-left:230px !important}
-  body.dp-open #tab-tra{margin-left:230px !important}
-  body.dp-open #tab-sale{margin-left:0 !important}
+  /* Tab Tra giá: chừa 84px (side-nav) + 230px (size-sidebar) */
+  #tab-tra{margin-left:314px !important}
+  body.dp-open #tab-tra{margin-left:314px !important}
+  body.dp-open #tab-sale{margin-left:84px !important}
 
   /* Product grid: KHÔNG cần margin-left vì tab-tra đã có margin-left */
   #size-sidebar + div{margin-left:0 !important}
@@ -352,6 +356,26 @@ input::placeholder{color:var(--t3)}
 }
 .bn.on{color:var(--red)}
 .bn-icon{font-size:20px;line-height:1}
+
+/* Sidebar điều hướng desktop — ẩn trên mobile, hiện thay bottom-nav ở >=768px */
+.side-nav{
+  display:none;
+  flex-direction:column;
+  position:fixed;left:0;top:57px;bottom:0;width:84px;
+  background:var(--bg1);border-right:1px solid var(--bd);
+  padding:10px 6px;gap:2px;overflow-y:auto;z-index:95;
+}
+.sn-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:10px 2px;border:none;border-radius:10px;
+  background:transparent;color:var(--t2);cursor:pointer;
+  font-family:var(--f);font-size:10px;font-weight:600;text-align:center;
+  transition:background .12s,color .12s;
+}
+.sn-item:hover{background:var(--bg2)}
+.sn-item.on{color:var(--red);background:rgba(192,35,42,.08)}
+.sn-icon{font-size:20px;line-height:1}
+.sn-soon{opacity:.55}
 .bn-center{
   flex:1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;border:none;background:none;cursor:pointer;

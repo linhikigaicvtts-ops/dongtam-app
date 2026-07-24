@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="DT Sales"/>
 <meta name="theme-color" content="#C0232A"/>
 <title>Đồng Tâm – Sales Tool</title>
-<link rel="stylesheet" href="style.css?v=nav2">
+<link rel="stylesheet" href="style.css?v=nav3">
 </head>
 <body>
 
@@ -84,6 +84,21 @@
   <button class="bn" id="bn-keo" onclick="swTab('keo')"><span class="bn-icon">🧱</span><span>Keo</span></button>
   <button class="bn" id="bn-tbvs" onclick="swTab('tbvs')"><span class="bn-icon">🚿</span><span>TBVS</span></button>
   <button class="bn" id="bn-son" onclick="swTab('son')"><span class="bn-icon">🎨</span><span>Sơn nước</span></button>
+</nav>
+
+<!-- Sidebar điều hướng desktop (>=768px) — thay cho bottom-nav ngang.
+     Chỉ 4 mục có tính năng thật (Tìm kiếm/Danh mục/Đơn hàng/Tài khoản),
+     các mục còn lại hiện theo mockup nhưng đang "Sắp ra mắt". -->
+<nav class="side-nav">
+  <button type="button" class="sn-item" id="sn-timkiem" onclick="moTimKiem()"><span class="sn-icon">🔍</span><span>Tìm kiếm</span></button>
+  <button type="button" class="sn-item" id="sn-danhmuc" onclick="moDanhMuc()"><span class="sn-icon">▦</span><span>Danh mục</span></button>
+  <button type="button" class="sn-item" id="sn-don" onclick="swTab('don')"><span class="sn-icon">🛒</span><span>Đơn hàng</span></button>
+  <button type="button" class="sn-item sn-soon" onclick="showToast('🔜 Zalo nhanh — sắp ra mắt')"><span class="sn-icon">💬</span><span>Zalo nhanh</span></button>
+  <button type="button" class="sn-item sn-soon" onclick="showToast('🔜 Sale — sắp ra mắt')"><span class="sn-icon">🔥</span><span>Sale</span></button>
+  <button type="button" class="sn-item sn-soon" onclick="showToast('🔜 Video — sắp ra mắt')"><span class="sn-icon">🎬</span><span>Video</span></button>
+  <button type="button" class="sn-item sn-soon" onclick="showToast('🔜 Tồn kho — sắp ra mắt')"><span class="sn-icon">📦</span><span>Tồn kho</span></button>
+  <button type="button" class="sn-item sn-soon" onclick="showToast('🔜 AI tư vấn — sắp ra mắt')"><span class="sn-icon">🤖</span><span>AI tư vấn</span></button>
+  <button type="button" class="sn-item" onclick="toggleMenuTaiKhoan()"><span class="sn-icon">👤</span><span>Tài khoản</span></button>
 </nav>
 
 <!-- Tìm kiếm toàn bộ ngành hàng (Gạch/Ngói/Keo — TBVS/Sơn chưa có dữ liệu) -->
@@ -658,6 +673,6 @@
 
 
 
-<script src="script.js?v=nav3" defer></script>
+<script src="script.js?v=nav4" defer></script>
 </body>
 </html>

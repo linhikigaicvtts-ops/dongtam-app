@@ -423,6 +423,9 @@ function swTab(t){
   BOTTOM_NAV_TABS.forEach(function(x){
     var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',x===t);
   });
+  ['timkiem','danhmuc','don'].forEach(function(x){
+    var b=document.getElementById('sn-'+x); if(b) b.classList.toggle('on',x===t);
+  });
   document.querySelectorAll('.tb').forEach(function(b,i){
     b.classList.toggle('on',['tra','sale','ngoi','keo','kinh','don'][i]===t);
   });
