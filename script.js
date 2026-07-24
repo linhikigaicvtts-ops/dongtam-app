@@ -104,19 +104,30 @@ function applyGiaGach(res){
 // thuộc tính SP, CT1, CT2) khi mở app - mỗi lần gọi Apps Script rời rạc có
 // phí khởi động ~2-5s không đổi được dù code nhanh hay chậm, gộp lại giúp
 // chỉ tốn phí đó 1 lần. Nếu API gộp lỗi, tự động rơi về gọi riêng lẻ như cũ.
+// Giãn cách các lệnh gọi Apps Script thay vì bắn đồng thời - Google chặn
+// bớt (503) khi có quá nhiều request cùng lúc tới cùng 1 URL deploy, dù
+// script chạy xong bình thường phía server (thấy rõ qua "Nhật ký thực thi"
+// vẫn "Đã hoàn thành" trong khi trình duyệt nhận 503).
+function goiTuanTu(fns, khoangCach){
+  fns.forEach(function(fn, i){ setTimeout(fn, i*(khoangCach||280)); });
+}
+
 function fetchAllFromSheet(){
   var APPS_URL='https://script.google.com/macros/s/AKfycbyrO8symCYOkWsGG0nRWPF7gpndC3mzEVUk15UvWrA0O81ZUumW-kX_gEOZhtCJ34bMVQ/exec';
   var old=document.getElementById('_all_script');
   if(old) old.remove();
-  // getAll (GAS) chỉ gộp gạch/ảnh/thuộc tính SP/CT1/CT2 - Ngói/Keo/Kính
-  // vẫn phải gọi riêng qua fetchGiaFromSheet (không nằm trong getAll).
-  fetchGiaFromSheet(['ngoi','keo','kinh']);
   window._onGetAll = function(res){
     var s=document.getElementById('_all_script');
     if(s) s.remove();
     if(!res || res.status!=='ok'){
       console.log('⚠️ getAll lỗi, rơi về gọi riêng lẻ:', res && res.msg);
-      fetchGiaFromSheet(['gach']); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+      goiTuanTu([
+        function(){ fetchGiaFromSheet(['gach']); },
+        function(){ fetchImagesFromSheet(); },
+        function(){ fetchThuocTinhSP(); },
+        function(){ fetchCT('ct1'); },
+        function(){ fetchCT('ct2'); }
+      ]);
       return;
     }
     try{ applyGiaGach(res.gach); }catch(e){ console.log('Lỗi áp giá gạch (getAll):', e); }
@@ -132,9 +143,19 @@ function fetchAllFromSheet(){
   s.onerror=function(){
     console.log('⚠️ Không tải được dữ liệu gộp — rơi về gọi riêng lẻ');
     s.remove();
-    fetchGiaFromSheet(['gach']); fetchImagesFromSheet(); fetchThuocTinhSP(); fetchCT('ct1'); fetchCT('ct2');
+    goiTuanTu([
+      function(){ fetchGiaFromSheet(['gach']); },
+      function(){ fetchImagesFromSheet(); },
+      function(){ fetchThuocTinhSP(); },
+      function(){ fetchCT('ct1'); },
+      function(){ fetchCT('ct2'); }
+    ]);
   };
   document.head.appendChild(s);
+  // getAll (GAS) chỉ gộp gạch/ảnh/thuộc tính SP/CT1/CT2 - Ngói/Keo/Kính
+  // vẫn phải gọi riêng qua fetchGiaFromSheet (không nằm trong getAll).
+  // Giãn cách với getAll ở trên để không bắn đồng thời.
+  setTimeout(function(){ fetchGiaFromSheet(['ngoi','keo','kinh']); }, 280);
 }
 
 function fetchGiaFromSheet(loaisOverride){
@@ -142,7 +163,7 @@ function fetchGiaFromSheet(loaisOverride){
   var loais = loaisOverride || ['gach','ngoi','keo','kinh'];
   var loaded = 0;
 
-  loais.forEach(function(loai){
+  loais.forEach(function(loai, _idx){
     window['_onGia_'+loai] = function(res){
       try{
         if(!res||!res.data||!res.data.length) return;
@@ -287,16 +308,20 @@ function fetchGiaFromSheet(loaisOverride){
     
     var old=document.getElementById('_gia_script_'+loai);
     if(old) old.remove();
-    var s=document.createElement('script');
-    s.id='_gia_script_'+loai;
-    // g=1: khách lẻ (không token) → server chỉ trả giá lẻ, giấu giá ĐL/sale
-    var _tok=authTok();
-    s.src=APPS_URL+'?action=getGia&loai='+loai+'&k='+encodeURIComponent(APP_KEY)+'&t='+encodeURIComponent(_tok)+(_tok?'':'&g=1')+'&callback=_onGia_'+loai;
-    s.onerror=function(){
-      console.log('⚠️ Không tải được giá '+loai+' từ Sheet — dùng giá trong app');
-      s.remove();
-    };
-    document.head.appendChild(s);
+    // Giãn cách khi loais có nhiều phần tử (vd ['ngoi','keo','kinh']) để
+    // không bắn nhiều request cùng lúc tới cùng 1 URL (xem goiTuanTu ở trên).
+    setTimeout(function(){
+      var s=document.createElement('script');
+      s.id='_gia_script_'+loai;
+      // g=1: khách lẻ (không token) → server chỉ trả giá lẻ, giấu giá ĐL/sale
+      var _tok=authTok();
+      s.src=APPS_URL+'?action=getGia&loai='+loai+'&k='+encodeURIComponent(APP_KEY)+'&t='+encodeURIComponent(_tok)+(_tok?'':'&g=1')+'&callback=_onGia_'+loai;
+      s.onerror=function(){
+        console.log('⚠️ Không tải được giá '+loai+' từ Sheet — dùng giá trong app');
+        s.remove();
+      };
+      document.head.appendChild(s);
+    }, _idx*280);
   });
 }
 
