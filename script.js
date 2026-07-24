@@ -3089,6 +3089,8 @@ function updateDonBadge(){
   var badge=document.getElementById('don-badge');
   var total=donItems.reduce(function(s,x){return s+x.qty;},0);
   if(badge){badge.textContent=total;badge.style.display=total>0?'inline':'none';}
+  var snBadge=document.getElementById('sn-don-badge');
+  if(snBadge){snBadge.textContent=total;snBadge.style.display=total>0?'block':'none';}
   saveDonItemsToStorage();
 }
 
