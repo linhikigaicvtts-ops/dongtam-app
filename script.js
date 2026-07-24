@@ -415,28 +415,60 @@ function renderDanhMucGrid(){
   var el = document.getElementById('danhmuc-grid');
   if(!el) return;
   el.innerHTML = '';
+  el.classList.add('nmuc-grid');
+  // Chỉ đếm mã bằng bien du lieu that trong app - khong bia so.
   var soGach = (typeof DATA!=='undefined' ? DATA.length : 0);
   var soNgoi = (typeof NGOI!=='undefined' ? NGOI.length : 0);
   var soKeo  = (typeof KEO!=='undefined' ? KEO.length : 0);
   var soSale = (typeof CT1_DATA!=='undefined' ? CT1_DATA.length : 0) + (typeof CT2_DATA!=='undefined' ? CT2_DATA.length : 0);
   var items = [
-    {icon:'🔲', ten:'Gạch', sub:soGach+' mã', tab:'tra', mau:'#C0232A'},
-    {icon:'🏠', ten:'Ngói', sub:soNgoi+' mã', tab:'ngoi', mau:'#8B5A2B'},
-    {icon:'🧱', ten:'Keo & bột chà ron', sub:soKeo+' mã', tab:'keo', mau:'#4A7C59'},
-    {icon:'🔥', ten:'Đang Sale', sub:soSale+' mã', tab:'sale', mau:'#E65100'},
-    {icon:'🚿', ten:'Thiết bị vệ sinh', sub:'Sắp ra mắt', tab:null, mau:'#888'},
-    {icon:'🎨', ten:'Sơn nước', sub:'Sắp ra mắt', tab:null, mau:'#888'}
+    {icon:'🔲', ten:'Gạch',              count:soGach+' mã', tab:'tra',  mau:'#C0232A', bg:'rgba(192,35,42,.10)'},
+    {icon:'🏠', ten:'Ngói',              count:soNgoi+' mã', tab:'ngoi', mau:'#8B5A2B', bg:'rgba(139,90,43,.10)'},
+    {icon:'🧱', ten:'Keo & bột chà ron', count:soKeo+' mã',  tab:'keo',  mau:'#4A7C59', bg:'rgba(74,124,89,.10)'},
+    {icon:'🔥', ten:'Đang Sale',         count:soSale+' mã', tab:'sale', mau:'#E65100', bg:'rgba(230,81,0,.10)', sale:true},
+    {icon:'🚿', ten:'Thiết bị vệ sinh',  count:null,         tab:null,   mau:'#888',    bg:'var(--bg2)', soon:true},
+    {icon:'🎨', ten:'Sơn nước',          count:null,         tab:null,   mau:'#888',    bg:'var(--bg2)', soon:true}
   ];
   items.forEach(function(it){
-    var card = document.createElement('div');
     var coDuLieu = !!it.tab;
-    card.style.cssText = 'background:var(--bg1);border:1.5px solid var(--bd);border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center'
-      + (coDuLieu ? ';cursor:pointer' : ';opacity:.55');
-    card.innerHTML = '<div style="font-size:30px">'+it.icon+'</div>'
-      + '<div style="font-size:13.5px;font-weight:700;color:var(--t1)">'+it.ten+'</div>'
-      + '<div style="font-size:11.5px;font-weight:600;color:'+(coDuLieu?it.mau:'var(--t2)')+'">'+it.sub+'</div>';
+
+    var card = document.createElement('div');
+    card.className = 'nmuc-card' + (it.sale?' nmuc-sale':'') + (coDuLieu?'':' nmuc-disabled');
+
+    var icon = document.createElement('div');
+    icon.className = 'nmuc-icon';
+    icon.style.background = it.bg;
+    icon.textContent = it.icon;
+    card.appendChild(icon);
+
+    var name = document.createElement('div');
+    name.className = 'nmuc-name';
+    name.textContent = it.ten;
+    card.appendChild(name);
+
+    if(it.count){
+      var count = document.createElement('div');
+      count.className = 'nmuc-count';
+      count.style.color = it.mau;
+      count.textContent = it.count;
+      card.appendChild(count);
+    }
+
+    if(it.sale){
+      var badge = document.createElement('div');
+      badge.className = 'nmuc-badge nmuc-badge-sale';
+      badge.textContent = 'Đang giảm giá';
+      card.appendChild(badge);
+    }
+    if(it.soon){
+      var badgeSoon = document.createElement('div');
+      badgeSoon.className = 'nmuc-badge nmuc-badge-soon';
+      badgeSoon.textContent = 'Sắp ra mắt';
+      card.appendChild(badgeSoon);
+    }
+
     if(coDuLieu){
-      card.addEventListener('click', function(){ swTab(it.tab); });
+      card.addEventListener('click', function(){ swTab(it.tab); }); // GIỮ NGUYÊN điều hướng cũ
     }
     el.appendChild(card);
   });
