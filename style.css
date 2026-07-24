@@ -339,9 +339,12 @@ input::placeholder{color:var(--t3)}
   background:var(--bg1);border-top:1px solid var(--bd);
   display:flex;z-index:100;
   padding-bottom:env(safe-area-inset-bottom);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;-ms-overflow-style:none;
 }
+.bottom-nav::-webkit-scrollbar{display:none}
 .bn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
+  flex:0 0 auto;min-width:68px;display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:8px 4px;border:none;
   background:none;cursor:pointer;color:var(--t3);
   font-size:9px;font-weight:600;font-family:var(--f);
@@ -822,8 +825,8 @@ input::placeholder{color:var(--t3)}
 }
 .nmuc-card:active{transform:scale(.96)}
 .nmuc-card:hover{box-shadow:0 8px 20px rgba(17,17,17,.09); border-color:var(--bd2)}
-.nmuc-card.nmuc-disabled{cursor:default; box-shadow:none; border-style:dashed}
-.nmuc-card.nmuc-disabled:active,.nmuc-card.nmuc-disabled:hover{transform:none;box-shadow:none;border-color:var(--bd)}
+.nmuc-card.nmuc-disabled{box-shadow:none; border-style:dashed}
+.nmuc-card.nmuc-disabled:hover{box-shadow:none;border-color:var(--bd)}
 .nmuc-card.nmuc-disabled .nmuc-icon,.nmuc-card.nmuc-disabled .nmuc-name{opacity:.5}
 .nmuc-icon{
   font-size:28px;

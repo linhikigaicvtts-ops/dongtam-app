@@ -378,19 +378,24 @@ function swSubKeo(sub){
   }
 }
 
+// Danh sách nut bottom-nav hien tai (6 nut): danhmuc/tra/ngoi/keo/tbvs/son.
+// Sale, Kinh, Don khong con nam trong bottom-nav (Sale = chip trong tab Gach,
+// Don = icon gio hang tren topbar) nhung tab-content cua chung van ton tai,
+// van dieu huong toi duoc qua swTab() nhu cu.
+var BOTTOM_NAV_TABS = ['danhmuc','tra','ngoi','keo','tbvs','son'];
 function swTab(t){
   // Desktop: cart là panel cố định bên phải, không cần chuyển tab
   if(t==='don' && window.innerWidth>=768){
     renderDon();
-    ['tra','sale','ngoi','keo','don'].forEach(function(x){
-      var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',x==='don');
+    BOTTOM_NAV_TABS.forEach(function(x){
+      var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',false);
     });
     return;
   }
-  ['tra','sale','ngoi','keo','kinh','don','danhmuc'].forEach(function(x){
+  ['tra','sale','ngoi','keo','kinh','don','danhmuc','tbvs','son','timkiem'].forEach(function(x){
     var el=document.getElementById('tab-'+x); if(el) el.classList.toggle('on',x===t);
   });
-  ['tra','sale','ngoi','keo','don'].forEach(function(x){
+  BOTTOM_NAV_TABS.forEach(function(x){
     var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',x===t);
   });
   document.querySelectorAll('.tb').forEach(function(b,i){
@@ -438,14 +443,14 @@ function renderDanhMucGrid(){
     {icon:'🏠', ten:'Ngói',              count:soNgoi+' mã', tab:'ngoi', grad:'linear-gradient(160deg,#F2E3D5,#E3C7A8)'},
     {icon:'🧱', ten:'Keo & bột chà ron', count:soKeo+' mã',  tab:'keo',  grad:'linear-gradient(160deg,#E1F0E4,#BFE0C6)'},
     {icon:'🔥', ten:'Đang Sale',         count:soSale+' mã', tab:'sale', grad:'linear-gradient(160deg,#FFE3CC,#FFC299)', sale:true},
-    {icon:'🚿', ten:'Thiết bị vệ sinh',  count:null,         tab:null,   grad:'var(--bg2)', soon:true},
-    {icon:'🎨', ten:'Sơn nước',          count:null,         tab:null,   grad:'var(--bg2)', soon:true}
+    {icon:'🚿', ten:'Thiết bị vệ sinh',  count:null,         tab:'tbvs', grad:'var(--bg2)', soon:true},
+    {icon:'🎨', ten:'Sơn nước',          count:null,         tab:'son',  grad:'var(--bg2)', soon:true}
   ];
   items.forEach(function(it){
     var coDuLieu = !!it.tab;
 
     var card = document.createElement('div');
-    card.className = 'nmuc-card' + (it.sale?' nmuc-sale':'') + (coDuLieu?'':' nmuc-disabled');
+    card.className = 'nmuc-card' + (it.sale?' nmuc-sale':'') + (it.soon?' nmuc-disabled':'');
 
     if(it.soon){
       var lock = document.createElement('div');
@@ -489,6 +494,85 @@ function renderDanhMucGrid(){
       card.addEventListener('click', function(){ swTab(it.tab); }); // GIỮ NGUYÊN điều hướng cũ
     }
     el.appendChild(card);
+  });
+}
+
+// ===== TÌM KIẾM TOÀN BỘ NGÀNH HÀNG =====
+// Gộp ket qua tu Gach (DATA) + Ngoi (NGOI) + Keo (KEO). TBVS/Son chua co
+// du lieu that nen khong tim - khong bia du lieu gia.
+function moTimKiem(){
+  swTab('timkiem');
+  var inp = document.getElementById('tk-input');
+  if(inp){ inp.value=''; setTimeout(function(){ inp.focus(); },50); }
+  renderTimKiemResults();
+}
+function renderTimKiemResults(){
+  var resultsEl = document.getElementById('tk-results');
+  var hint = document.getElementById('tk-hint');
+  var q = (document.getElementById('tk-input').value||'').trim().toUpperCase();
+  if(!resultsEl) return;
+  resultsEl.innerHTML = '';
+  if(!q){
+    if(hint) hint.style.display='block';
+    return;
+  }
+  if(hint) hint.style.display='none';
+
+  function khop(p){
+    return (p.ma||'').toUpperCase().indexOf(q)>=0 || (p.ten||'').toUpperCase().indexOf(q)>=0 || (p.kc||'').toUpperCase().indexOf(q)>=0;
+  }
+  var ketQua = [];
+  (typeof DATA!=='undefined'?DATA:[]).forEach(function(p){ if(khop(p)) ketQua.push({p:p, nganh:'gach', icon:'🔲', ten:'Gạch'}); });
+  (typeof NGOI!=='undefined'?NGOI:[]).forEach(function(p){ if(khop(p)) ketQua.push({p:p, nganh:'ngoi', icon:'🏠', ten:'Ngói'}); });
+  (typeof KEO!=='undefined'?KEO:[]).forEach(function(p){ if(khop(p)) ketQua.push({p:p, nganh:'keo', icon:'🧱', ten:'Keo'}); });
+
+  if(!ketQua.length){
+    var empty = document.createElement('div');
+    empty.style.cssText = 'padding:40px 10px;text-align:center;color:var(--t2);font-size:13px';
+    empty.textContent = 'Không tìm thấy mã nào khớp "'+ (document.getElementById('tk-input').value||'') +'"';
+    resultsEl.appendChild(empty);
+    return;
+  }
+
+  var dem = document.createElement('div');
+  dem.style.cssText = 'font-size:12px;color:var(--t2);margin-bottom:8px';
+  dem.textContent = ketQua.length+' kết quả';
+  resultsEl.appendChild(dem);
+
+  ketQua.slice(0,60).forEach(function(r){
+    var p = r.p;
+    var row = document.createElement('div');
+    row.className = 'tk-row';
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:11px 10px;background:var(--bg1);border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;cursor:pointer';
+
+    var badge = document.createElement('div');
+    badge.style.cssText = 'flex-shrink:0;width:36px;height:36px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:17px';
+    badge.textContent = r.icon;
+    row.appendChild(badge);
+
+    var mid = document.createElement('div');
+    mid.style.cssText = 'flex:1;min-width:0';
+    var ten = document.createElement('div');
+    ten.style.cssText = 'font-size:13.5px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+    ten.textContent = p.ma||'';
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-size:11.5px;color:var(--t2);margin-top:2px';
+    sub.textContent = r.ten + (p.kc?(' · '+p.kc):'');
+    mid.appendChild(ten); mid.appendChild(sub);
+    row.appendChild(mid);
+
+    var gia = document.createElement('div');
+    gia.style.cssText = 'flex-shrink:0;font-size:13px;font-weight:800;color:var(--red)';
+    gia.textContent = (p.le>0) ? fmt(p.le) : '';
+    row.appendChild(gia);
+
+    row.addEventListener('click', function(){
+      if(r.nganh==='gach'){ swTab('tra'); showDP(p.ma); }
+      else if(r.nganh==='ngoi'){ swTab('ngoi'); showNgoi(p.ma); }
+      else if(r.nganh==='keo'){ swTab('keo'); showKeo(p.ma); }
+    });
+
+    resultsEl.appendChild(row);
   });
 }
 
@@ -4959,7 +5043,7 @@ function ct3BadgeHtml(ma){
           if(typeof renderDon==='function') renderDon();
           renderQuickCart();
           if(window.innerWidth<768){ openDonModal(); return; }
-          ['tra','sale','ngoi','keo','don'].forEach(function(x){ var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',x==='don'); });
+          (typeof BOTTOM_NAV_TABS!=='undefined'?BOTTOM_NAV_TABS:['danhmuc','tra','ngoi','keo','tbvs','son']).forEach(function(x){ var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',false); });
           return;
         }
         return _s.apply(this,arguments);

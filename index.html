@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="DT Sales"/>
 <meta name="theme-color" content="#C0232A"/>
 <title>Đồng Tâm – Sales Tool</title>
-<link rel="stylesheet" href="style.css?v=nmuc2">
+<link rel="stylesheet" href="style.css?v=nav2">
 </head>
 <body>
 
@@ -49,7 +49,11 @@
     </div>
   </div>
   <div class="topbar-right">
-    <button type="button" id="btn-danhmuc" onclick="moDanhMuc()" title="Danh mục ngành hàng" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0">▦</button>
+    <button type="button" id="btn-timkiem" onclick="moTimKiem()" title="Tìm kiếm tất cả ngành hàng" style="background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0">🔍</button>
+    <button type="button" id="btn-giohang" onclick="swTab('don')" title="Giỏ hàng" style="position:relative;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;flex-shrink:0">
+      🛒
+      <span id="don-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#FF9500;color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:9px;font-weight:800;align-items:center;justify-content:center;padding:0 3px"></span>
+    </button>
     <span id="gia-source-badge" onclick="fetchGiaFromSheet()">⏳</span>
     <div id="acct-wrap" style="position:relative;flex-shrink:0">
       <button type="button" id="btn-taikhoan-menu" onclick="toggleMenuTaiKhoan()" class="acct-pill">
@@ -74,15 +78,32 @@
 <!-- Bộ lọc dọc desktop (tab Gạch) — nằm giữa lưới SP và giỏ hàng -->
 <div id="filter-side"></div>
 <nav class="bottom-nav">
+  <button class="bn" id="bn-danhmuc" onclick="moDanhMuc()"><span class="bn-icon">▦</span><span>Danh mục</span></button>
   <button class="bn on" id="bn-tra" onclick="swTab('tra')"><span class="bn-icon">🔲</span><span>Gạch</span></button>
   <button class="bn" id="bn-ngoi" onclick="swTab('ngoi')"><span class="bn-icon">🏠</span><span>Ngói</span></button>
-  <button class="bn-center" id="bn-don" onclick="swTab('don')" style="position:relative">
-    <div class="bn-center-circle"><span style="font-size:24px">🛒</span><span id="don-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#FF9500;color:#fff;border-radius:10px;min-width:18px;height:18px;font-size:10px;font-weight:800;align-items:center;justify-content:center;padding:0 4px"></span></div>
-    <span style="font-size:9px;font-weight:600;color:var(--t2);margin-top:4px;font-family:var(--f)">Đơn</span>
-  </button>
   <button class="bn" id="bn-keo" onclick="swTab('keo')"><span class="bn-icon">🧱</span><span>Keo</span></button>
-  <button class="bn" id="bn-sale" onclick="swTab('sale')"><span class="bn-icon">🔥</span><span>Sale</span></button>
+  <button class="bn" id="bn-tbvs" onclick="swTab('tbvs')"><span class="bn-icon">🚿</span><span>TBVS</span></button>
+  <button class="bn" id="bn-son" onclick="swTab('son')"><span class="bn-icon">🎨</span><span>Sơn nước</span></button>
 </nav>
+
+<!-- Tìm kiếm toàn bộ ngành hàng (Gạch/Ngói/Keo — TBVS/Sơn chưa có dữ liệu) -->
+<div id="tab-timkiem" class="tc" style="padding:14px">
+  <input type="text" id="tk-input" placeholder="Tìm mã, tên sản phẩm ở mọi ngành hàng..." oninput="renderTimKiemResults()" style="margin-bottom:10px"/>
+  <div id="tk-hint" style="font-size:12px;color:var(--t2);padding:6px 2px 10px">Gõ để tìm trong Gạch, Ngói, Keo & bột chà ron.</div>
+  <div id="tk-results"></div>
+</div>
+
+<!-- Ngành hàng chưa có dữ liệu — chờ Sheet thật -->
+<div id="tab-tbvs" class="tc" style="padding:40px 20px;text-align:center">
+  <div style="font-size:44px;margin-bottom:10px">🚿</div>
+  <div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:6px">Thiết bị vệ sinh</div>
+  <div style="font-size:13px;color:var(--t2);line-height:1.6">Ngành hàng đang được cập nhật dữ liệu.<br/>Quay lại sau nhé!</div>
+</div>
+<div id="tab-son" class="tc" style="padding:40px 20px;text-align:center">
+  <div style="font-size:44px;margin-bottom:10px">🎨</div>
+  <div style="font-size:16px;font-weight:800;color:var(--t1);margin-bottom:6px">Sơn nước</div>
+  <div style="font-size:13px;color:var(--t2);line-height:1.6">Ngành hàng đang được cập nhật dữ liệu.<br/>Quay lại sau nhé!</div>
+</div>
 
 <!-- LỚP 1: Danh mục ngành hàng — grid ngành, không hiện chi tiết SP ở đây -->
 <div id="tab-danhmuc" class="tc" style="padding:16px 14px">
@@ -102,6 +123,7 @@
     <button class="fb"    id="f-porcelain" onclick="setF('porcelain')">Porcelain</button>
     <button class="fb"    id="f-ceramic"   onclick="setF('ceramic')">Ceramic</button>
     <button class="fb"    id="f-kinh"      onclick="setF('kinh')">💎 Gạch kính</button>
+    <button class="fb"    id="f-sale"      onclick="swTab('sale')">🔥 Sale</button>
   </div>
   <div style="display:flex;gap:0;margin:8px -10px 0;width:calc(100% + 20px)">
     <div id="size-sidebar" style="width:85px;flex-shrink:0;background:var(--bg1);border-right:0.5px solid var(--bd);overflow-y:auto;max-height:70vh">
@@ -636,6 +658,6 @@
 
 
 
-<script src="script.js?v=nmuc2" defer></script>
+<script src="script.js?v=nav2" defer></script>
 </body>
 </html>
