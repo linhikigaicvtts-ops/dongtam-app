@@ -3763,10 +3763,11 @@ document.addEventListener('click',function(e){
   var wrap=document.getElementById('acct-wrap');
   var m=document.getElementById('menu-taikhoan');
   if(!wrap||!m||!m.classList.contains('open')) return;
-  if(!wrap.contains(e.target)){
-    m.classList.remove('open');
-    wrap.classList.remove('open');
-  }
+  if(m.contains(e.target)) return;
+  if(wrap.contains(e.target)) return;
+  if(e.target.closest && e.target.closest('.side-nav .sn-item[onclick*="toggleMenuTaiKhoan"]')) return;
+  m.classList.remove('open');
+  wrap.classList.remove('open');
 });
 // Chữ cái đầu tên → avatar tròn trên header (kiểu Gmail/Notion)
 function capNhatAcctAvatar(text){
@@ -5070,6 +5071,9 @@ function ct3BadgeHtml(ma){
         if(t==='don'){
           if(typeof renderDon==='function') renderDon();
           renderQuickCart();
+          ['timkiem','danhmuc','don','sale'].forEach(function(x){
+            var b=document.getElementById('sn-'+x); if(b) b.classList.toggle('on',x==='don');
+          });
           if(window.innerWidth<768){ openDonModal(); return; }
           (typeof BOTTOM_NAV_TABS!=='undefined'?BOTTOM_NAV_TABS:['danhmuc','tra','ngoi','keo','tbvs','son']).forEach(function(x){ var b=document.getElementById('bn-'+x); if(b) b.classList.toggle('on',false); });
           return;
