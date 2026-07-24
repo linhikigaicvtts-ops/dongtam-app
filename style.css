@@ -150,6 +150,9 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   nav.bottom-nav{display:none !important}
   .side-nav{display:flex !important}
 
+  /* Tránh trùng lặp với side-nav: ẩn Tìm kiếm/Giỏ hàng/Tài khoản trên topbar */
+  #btn-timkiem,#btn-giohang,#acct-wrap{display:none !important}
+
   /* Banner thông tin khách hàng */
   #thongtin-khachhang{margin-left:84px;margin-right:320px}
 
