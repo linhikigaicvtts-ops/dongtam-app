@@ -681,6 +681,11 @@ input::placeholder{color:var(--t3)}
 #tab-tra #pagination{position:sticky;top:var(--headBottom,150px);z-index:40;background:var(--bg)}
 #sale-head{position:sticky;top:var(--tbH,56px);z-index:41;background:var(--bg)}
 #sale-size-sidebar{position:sticky;top:var(--saleHeadBottom,150px);align-self:flex-start;max-height:calc(100vh - var(--saleHeadBottom,150px) - 62px);overflow-y:auto}
+@media(min-width:768px){
+  /* Cột kích thước tab Sale: hẹp bề ngang, mỗi mục cao thoải mái hơn cho dễ bấm */
+  #sale-size-sidebar{width:46px !important}
+  #sale-size-sidebar .sz-item{padding:12px 2px;font-size:9.5px;line-height:1.2;word-break:break-word}
+}
 @media(max-width:767px){
   #tab-tra #size-sidebar{position:sticky !important;top:var(--headBottom,150px) !important;align-self:flex-start;max-height:calc(100vh - var(--headBottom,150px) - 62px) !important}
 }
