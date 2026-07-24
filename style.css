@@ -209,7 +209,7 @@ body{font-family:var(--f);font-size:14px;color:var(--t1);background:var(--bg);pa
   /* Tab Tra giá: chừa 84px (side-nav) + 230px (size-sidebar) */
   #tab-tra{margin-left:314px !important}
   body.dp-open #tab-tra{margin-left:314px !important}
-  body.dp-open #tab-sale{margin-left:84px !important}
+  body.dp-open #tab-sale{margin-left:314px !important}
 
   /* Product grid: KHÔNG cần margin-left vì tab-tra đã có margin-left */
   #size-sidebar + div{margin-left:0 !important}
@@ -689,9 +689,33 @@ input::placeholder{color:var(--t3)}
 #sale-head{position:sticky;top:var(--tbH,56px);z-index:41;background:var(--bg)}
 #sale-size-sidebar{position:sticky;top:var(--saleHeadBottom,150px);align-self:flex-start;max-height:calc(100vh - var(--saleHeadBottom,150px) - 62px);overflow-y:auto}
 @media(min-width:768px){
-  /* Cột kích thước tab Sale: hẹp bề ngang, mỗi mục cao thoải mái hơn cho dễ bấm */
-  #sale-size-sidebar{width:46px !important}
-  #sale-size-sidebar .sz-item{padding:12px 2px;font-size:9.5px;line-height:1.2;word-break:break-word}
+  /* Cột kích thước tab Sale: giống hệt size-sidebar bên Gạch (cố định trái, 230px, cột dọc) */
+  #sale-size-sidebar{
+    position:fixed !important;
+    left:84px !important;top:57px !important;bottom:0 !important;
+    width:230px !important;
+    overflow-y:auto !important;
+    background:var(--bg1) !important;
+    border-right:1px solid var(--bd) !important;
+    z-index:60;
+    max-height:none !important;
+    padding:10px !important;
+    display:flex;flex-direction:column;gap:7px;
+    scroll-behavior:smooth;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  }
+  #sale-size-sidebar .sz-item{
+    flex:0 0 auto;width:100%;
+    border:1.5px solid var(--bd);
+    border-radius:10px;
+    padding:11px 4px;font-size:12.5px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .18s ease;
+  }
+  #sale-size-sidebar .sz-item:hover{border-color:var(--red);color:var(--red);background:#FFF5F5;transform:translateY(-1px)}
+  #sale-size-sidebar .sz-item.on{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 3px 10px rgba(192,35,42,.3)}
+  /* Nhường chỗ cho size-sidebar cố định */
+  #tab-sale{margin-left:314px !important}
+  #sale-size-sidebar + div{margin-left:0 !important}
 }
 @media(max-width:767px){
   #tab-tra #size-sidebar{position:sticky !important;top:var(--headBottom,150px) !important;align-self:flex-start;max-height:calc(100vh - var(--headBottom,150px) - 62px) !important}
