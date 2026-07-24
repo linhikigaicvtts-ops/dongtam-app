@@ -412,8 +412,20 @@ function moDanhMuc(){
   swTab('danhmuc');
 }
 function renderDanhMucGrid(){
+  var wrap = document.getElementById('tab-danhmuc');
   var el = document.getElementById('danhmuc-grid');
   if(!el) return;
+
+  // Phụ đề hướng dẫn — chỉ tạo 1 lần, không lặp lại mỗi lần render.
+  if(wrap && !document.getElementById('nmuc-sub')){
+    var sub = document.createElement('div');
+    sub.id = 'nmuc-sub';
+    sub.className = 'nmuc-sub';
+    sub.textContent = 'Chọn ngành hàng để xem bảng giá và sản phẩm';
+    var head = wrap.querySelector('div'); // dòng tiêu đề "Danh mục ngành hàng" có sẵn
+    if(head){ head.classList.add('nmuc-title'); head.parentNode.insertBefore(sub, head.nextSibling); }
+  }
+
   el.innerHTML = '';
   el.classList.add('nmuc-grid');
   // Chỉ đếm mã bằng bien du lieu that trong app - khong bia so.
@@ -422,12 +434,12 @@ function renderDanhMucGrid(){
   var soKeo  = (typeof KEO!=='undefined' ? KEO.length : 0);
   var soSale = (typeof CT1_DATA!=='undefined' ? CT1_DATA.length : 0) + (typeof CT2_DATA!=='undefined' ? CT2_DATA.length : 0);
   var items = [
-    {icon:'🔲', ten:'Gạch',              count:soGach+' mã', tab:'tra',  mau:'#C0232A', bg:'rgba(192,35,42,.10)'},
-    {icon:'🏠', ten:'Ngói',              count:soNgoi+' mã', tab:'ngoi', mau:'#8B5A2B', bg:'rgba(139,90,43,.10)'},
-    {icon:'🧱', ten:'Keo & bột chà ron', count:soKeo+' mã',  tab:'keo',  mau:'#4A7C59', bg:'rgba(74,124,89,.10)'},
-    {icon:'🔥', ten:'Đang Sale',         count:soSale+' mã', tab:'sale', mau:'#E65100', bg:'rgba(230,81,0,.10)', sale:true},
-    {icon:'🚿', ten:'Thiết bị vệ sinh',  count:null,         tab:null,   mau:'#888',    bg:'var(--bg2)', soon:true},
-    {icon:'🎨', ten:'Sơn nước',          count:null,         tab:null,   mau:'#888',    bg:'var(--bg2)', soon:true}
+    {icon:'🔲', ten:'Gạch',              count:soGach+' mã', tab:'tra',  grad:'linear-gradient(160deg,#FDE4E4,#F8C6C8)'},
+    {icon:'🏠', ten:'Ngói',              count:soNgoi+' mã', tab:'ngoi', grad:'linear-gradient(160deg,#F2E3D5,#E3C7A8)'},
+    {icon:'🧱', ten:'Keo & bột chà ron', count:soKeo+' mã',  tab:'keo',  grad:'linear-gradient(160deg,#E1F0E4,#BFE0C6)'},
+    {icon:'🔥', ten:'Đang Sale',         count:soSale+' mã', tab:'sale', grad:'linear-gradient(160deg,#FFE3CC,#FFC299)', sale:true},
+    {icon:'🚿', ten:'Thiết bị vệ sinh',  count:null,         tab:null,   grad:'var(--bg2)', soon:true},
+    {icon:'🎨', ten:'Sơn nước',          count:null,         tab:null,   grad:'var(--bg2)', soon:true}
   ];
   items.forEach(function(it){
     var coDuLieu = !!it.tab;
@@ -435,9 +447,16 @@ function renderDanhMucGrid(){
     var card = document.createElement('div');
     card.className = 'nmuc-card' + (it.sale?' nmuc-sale':'') + (coDuLieu?'':' nmuc-disabled');
 
+    if(it.soon){
+      var lock = document.createElement('div');
+      lock.className = 'nmuc-lock';
+      lock.textContent = '🔒';
+      card.appendChild(lock);
+    }
+
     var icon = document.createElement('div');
     icon.className = 'nmuc-icon';
-    icon.style.background = it.bg;
+    icon.style.background = it.grad;
     icon.textContent = it.icon;
     card.appendChild(icon);
 
@@ -449,7 +468,6 @@ function renderDanhMucGrid(){
     if(it.count){
       var count = document.createElement('div');
       count.className = 'nmuc-count';
-      count.style.color = it.mau;
       count.textContent = it.count;
       card.appendChild(count);
     }
